@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.vm.box_url = "http://cloud.terry.im/vagrant/oraclelinux-7-x86_64.box"
   #config.vm.network :forwarded_port, guest: 80, host: 8080
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", 2048] # RAM allocated to each VM
+    vb.customize ["modifyvm", :id, "--memory", 4096] # RAM allocated to each VM
   end
 
   config.vm.define :repo do |repo|
@@ -35,12 +35,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     hdp.vm.hostname = "hdp.bigdata.wh.com"
     hdp.vm.network :private_network, ip: "192.168.70.100"
 	  hdp.vm.provision :shell, :path => "initialize.sh"
-  end
-
-  config.vm.define :test do |test|
-    test.vm.hostname = "test.bigdata.wh.com"
-    test.vm.network :private_network, ip: "192.168.70.101"
-    test.vm.provision :shell, :path => "initialize.sh"
   end
 
   config.vm.define :host1 do |host1|
