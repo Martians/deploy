@@ -1,0 +1,257 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+## 设置locale
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+MESSAGE = "message macro"
+
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  # config 中设置的相当于默认值，可以被后续覆盖
+  config.vm.box = "centos7"
+  
+  ## ENV["LC_ALL"] = "en_US.UTF-8" 的设置，有时无效，所有需要执行此脚本
+  config.vm.provision "shell", inline: <<-SHELL
+      sudo localectl set-locale LANG=en_US.utf8
+      sudo timedatectl set-timezone Asia/Shanghai
+  SHELL
+
+  ## 1）行写法
+  config.vm.provision "shell", inline: "echo hello1"
+
+  ## 2）block写法
+  ## config.vm.provision "shell" do |s|
+  ## 3）block并起名，起名后可以被覆盖
+  config.vm.provision "bootstrap2", type: "shell" do |s|
+    s.inline = "echo hello2"
+  end
+  config.vm.provision "bootstrap3", type: "shell" do |s|
+    s.inline = "echo hello3"
+  end
+
+  # config.vm.define，定义一个新的guest：test，覆盖config中的其他配置
+  #   do 后定了|s|，表明后续使用s作为变量名字
+  config.vm.define "test" do |s|
+    
+    ## virtualbox 配置
+    s.vm.provider "virtualbox" do |v|
+      v.name = "test_vm"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    # config.vm.box = "mytest"      # 可使用其他配置覆盖
+
+    # 这个key 是告诉vagrant用来登陆到guest时用的，并不能设置guest中的用户
+    # config.ssh.username
+
+    ## 这里会输出 hello1、hello3、hello、test hello (覆盖了上一级中同名的bootstrap2设置)
+    ##    每次启动都执行，其他provision都只执行一次
+    s.vm.provision "shell", inline: "echo hello", run: "always"   
+    s.vm.provision "bootstrap2", type: "shell",
+      inline: "echo test hello"
+
+    s.vm.post_up_message = "welcome to test guest! --------------------" + MESSAGE
+
+    s.vm.network "private_network", ip: "192.168.200.100"
+  end
+
+  # shell 相关测试
+  config.vm.define "shell" do |config|
+    config.vm.box = "ubuntu"
+    ## 1) inline模式，直接写出要执行的命令
+    config.vm.provision "shell", inline: "echo inline shell example"
+
+    ## 1.2 直接执行guest中的脚本
+    config.vm.provision "shell", inline: "/bin/sh /vagrant/script/inner.sh"
+
+    ## 1.3 使用变量，结尾必须在最开头
+    $script = <<SCRIPT
+    echo I am provisioning...
+    date
+SCRIPT
+    config.vm.provision "shell", inline: $script
+
+    ## 2) 指定path, 可以使用vagrantfile的相对路径; 可以使用类似 https://example.com/provisioner.sh
+    config.vm.provision "shell", path: "script/do_work.sh"
+
+    ## 3) 使用参数；这里使用了数组形式
+    config.vm.provision "shell" do |s|
+      s.inline = "echo $1"
+      s.args   = ["hello, world!"]
+    end
+
+    config.vm.network "private_network", ip: "192.168.200.101"
+  end
+
+   # file 相关测试
+  config.vm.define "file" do |config|
+    config.vm.provision "shell", inline: "/bin/sh /vagrant/script/inner.sh"
+
+    ## 1）复制文件
+    ## 1.1 复制目录
+    config.vm.provision "file", source: "script", destination: "copy_script"
+    config.vm.provision "file", source: "script/.", destination: "file_script"    # 只复制目录下所有文件
+
+    ## 1.2 以/结尾，复制目录作为dest的子目录
+    config.vm.provision "file", source: "script", destination: "parent_dir/"
+
+    ## 2）同步目录，这是通过mount的方式挂载的
+    config.vm.synced_folder "script", "/home/vagrant/sync1", owner: "root", group: "root"
+    config.vm.synced_folder "script", "/home/vagrant/sync2", owner: "vagrant", group: "vagrant", mount_options: ["uid=1234", "gid=1234"]
+
+    config.vm.network "private_network", ip: "192.168.200.102"
+  end
+
+  # network 相关测试
+  # https://www.vagrantup.com/docs/networking/public_network.html
+  config.vm.define "network" do |config|
+
+    config.vm.hostname = "host1.bigdata.com"
+
+    ## 1）端口映射
+    ## 1.1 vagrant本来就会把本地127的一个端口映射到guest的一个端口上, 这里相当于又映射了一个
+    ## 似乎默认只是将 adapter 1
+    config.vm.network "forwarded_port", guest: 22, host: 5555, auto_correct: "true"
+
+    # config.vm.network "forwarded_port", guest: 22, host: 5556, host_ip: "192.168.36.9"
+
+    # 2）内网配置，每个配置都会增加一个网卡
+    config.vm.network "private_network", ip: "192.168.200.103"
+    # config.vm.network "private_network", type: "dhcp"
+
+    ## 外网访问
+    config.vm.network "public_network", ip: "192.168.36.189"
+    #config.vm.network "public_network"    # DHCP
+  end
+
+  # network 相关测试（导致外网不能成功的，可能是本地可以成功）
+  # https://www.vagrantup.com/docs/networking/public_network.html
+  config.vm.define "public" do |config|
+    ## 每次配置一个内网ip，确保一致可以访问
+    config.vm.network "private_network", ip: "192.168.200.104"
+    # config.vm.network "forwarded_port", guest: 22, host: 2345, auto_correct: "true"
+
+    ## 1）dhcp，似乎不一定能通过外网来访问；本机内是可以访问的
+    # config.vm.network "public_network"
+
+    ## 2）指定Ip，不能生效，并且guest上没有这个ip设置成功
+    ##    经测试，只要guest上执行了 sudo route add default gw 192.168.37.254 dev enp0s9，这个外网ip就可以访问
+    config.vm.network "public_network", ip: "192.168.36.185"    
+    ## 使用dhcp分配的默认路由不变 use_dhcp_assigned_default_route: true，有何作用？
+  end
+
+  config.vm.define "public_1" do |config|
+    ## 每次配置一个内网ip，确保一致可以访问
+    config.vm.network "private_network", ip: "192.168.200.105"
+    # config.vm.network "forwarded_port", guest: 22, host: 2345, auto_correct: "true"
+
+    ## 1）dhcp，似乎不一定能通过外网来访问；本机可以访问
+    # config.vm.network "public_network"
+
+    ## 2）指定Ip，并且进行配置，有时似乎不能成功
+    config.vm.network "public_network", ip: "192.168.36.182"
+    config.vm.provision "shell", run: "always", inline: <<-SHELL
+      eth=enp0s9
+      sudo route add default gw 192.168.37.254 dev $eth
+  SHELL
+    ## 使用dhcp分配的默认路由不变 use_dhcp_assigned_default_route: true，有何作用？
+  end
+
+  config.vm.define "public_2" do |config|
+    config.vm.network "private_network", ip: "192.168.200.106"
+
+    ## 3） 手动配置，通过shell来设置网卡配置，这时不会生成/etc/sysconfig/network-scripts/ifcfg-enpS9
+    ## 添加路由等：inline: "route add default gw 192.168.0.1"
+    config.vm.network "public_network", auto_config: false
+    config.vm.provision "shell", run: "always", inline: <<-SHELL
+      eth=enp0s9
+      sudo ifconfig $eth 192.168.36.187 netmask 255.255.254.0 up
+      sudo route add default gw 192.168.37.254 dev $eth
+  SHELL
+
+    ## 端口转发似乎无法在这里设置生效
+    # config.vm.network "forwarded_port", guest: 22, host: 7777, auto_correct: "true", host_ip: "192.168.36.189"
+
+    ## 4）guest中进行网卡配置
+    # config.vm.network "public_network"
+    # IPADDR=192.168.36.11
+    # NETMASK=255.255.254.0
+    # GATEWAY=192.168.37.254
+    # DNS1=192.168.30.1
+  end
+
+  ## 5）这个是最简单的方式
+  config.vm.define "public_3" do |config|
+    config.vm.network "private_network", ip: "192.168.200.107"
+
+    ## 必须重启才能生效
+    config.vm.network "public_network", ip: "192.168.36.188", netmask: "255.255.254.0", gateway: "192.168.37.254"
+    config.vm.provision "shell", inline: "sudo /etc/init.d/network restart"
+  end
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
+end
