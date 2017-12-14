@@ -1,11 +1,5 @@
+#!/bin/sh
 
-#!/usr/bin/env bash
-cd /vagrant/script
+source /vagrant/script/vagrant.sh
+source /vagrant/script/system.sh
 
-source config.sh
-
-source vagrant.sh
-
-# source system.sh
-
-# source ambari_host.sh

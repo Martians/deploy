@@ -1,77 +1,146 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # Every Vagrant virtual environment requires a box to build off of.
+DOMAIN  = "data.com"
+NETMASK = "255.255.254.0"
+GATEWAY = "192.168.37.254"
+
+REPO_HOST  = "192.168.37.198"
+PROXY_HOST = "192.168.37.199"
+
+TEST_HOST   = "192.168.37.200"
+MAIN_HOST   = "192.168.37.191"
+
+HOST1_HOST  = "192.168.37.191"
+HOST2_HOST  = "192.168.37.192"
+HOST3_HOST  = "192.168.37.193"
+
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  
+  config.vm.provider "virtualbox" do |v|
+      v.memory = 4096
+      v.cpus = 1
+  end
   config.vm.box = "centos7"
 
-  # Fixes changes from https://github.com/mitchellh/vagrant/pull/4707
-  config.ssh.insert_key = false
+  config.vm.define "test" do |config|
 
-  # The url from where the 'config.vm.box' box will be fetched if it
-  # doesn't already exist on the user's system.
+    config.vm.provider "virtualbox" do |v|
+      v.name = "test"
+      v.memory = 1024
+      v.cpus = 1
+    end
 
-  # CentOS 7.0 x86_64
-  #config.vm.box_url = "http://cloud.terry.im/vagrant/oraclelinux-7-x86_64.box"
-  #config.vm.network :forwarded_port, guest: 80, host: 8080
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", 4096] # RAM allocated to each VM
+    config.vm.hostname = "test" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/initialize.sh"
+    # repo.vm.provision :shell, :path => "server/repo.sh"
+    config.vm.network :public_network, ip: TEST_HOST, netmask: NETMASK, gateway: GATEWAY
   end
 
-  config.vm.define :repo do |repo|
-    # uncomment the line below to set up the ambari dev environment
-    # c7001.vm.provision :shell, :path => "dev-bootstrap.sh"
-    repo.vm.hostname = "repo.bigdata.wh.com"
-    repo.vm.network :private_network, ip: "192.168.70.200"
-    repo.vm.network :forwarded_port, guest: 80, host: 8080
-	repo.vm.provision :shell, :path => "bootstrap.sh"
+  ########################################################################################
+  config.vm.define "repo" do |config|
+    config.vm.provider "virtualbox" do |v|
+      v.name = "repo"
+      v.memory = 512
+      v.cpus = 1
+    end
+
+    config.vm.hostname = "repo" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/initialize.sh"
+    config.vm.provision :shell, :path => "server/repo.sh"
+    config.vm.network :public_network, ip: REPO_HOST, netmask: NETMASK, gateway: GATEWAY
   end
 
-  config.vm.define :hdp do |hdp|
-    hdp.vm.hostname = "hdp.bigdata.wh.com"
-    hdp.vm.network :private_network, ip: "192.168.70.100"
-	  hdp.vm.provision :shell, :path => "initialize.sh"
+  config.vm.define "proxy" do |config|
+
+    config.vm.provider "virtualbox" do |v|
+      v.name = "proxy"
+      v.memory = 512
+      v.cpus = 1
+    end
+    config.vm.box = "ubuntu"
+
+    config.vm.hostname = "proxy" + "." + DOMAIN
+    config.vm.provision :shell, :path => "server/proxy.sh"
+
+    config.vm.network "private_network", ip: "192.168.200.100"
+
+    #config.vm.network :public_network, ip: PROXY_HOST, netmask: NETMASK, gateway: GATEWAY
+    config.vm.network :public_network, ip: PROXY_HOST, netmask: NETMASK
+    # sudo sed -i "/iface eth2/a\      gateway 192.168.37.254" /etc/network/interfaces
+    config.vm.provision "shell", run: "always", inline: <<-SHELL
+      sudo route add default gw 192.168.37.254 dev eth2
+    SHELL
+
   end
 
-  config.vm.define :host1 do |host1|
-    host1.vm.hostname = "host1.bigdata.wh.com"
-    host1.vm.network :private_network, ip: "192.168.70.101"
-	  host1.vm.provision :shell, :path => "initialize.sh"
+  ########################################################################################
+
+  config.vm.define "host1" do |config|
+    config.vm.provider "virtualbox" do |v|
+      v.name = "host1"
+    end
+
+    config.vm.hostname = "host1" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/ambari_host.sh"
+    config.vm.network :public_network, ip: HOST1_HOST, netmask: NETMASK, gateway: GATEWAY
   end
 
-  config.vm.define :host2 do |host2|
-    host2.vm.hostname = "host2.bigdata.wh.com"
-    host2.vm.network :private_network, ip: "192.168.70.102"
-	host2.vm.provision :shell, :path => "initialize.sh"
+  config.vm.define "host2" do |config|
+    config.vm.provider "virtualbox" do |v|
+      v.name = "host2"
+    end
+
+    config.vm.hostname = "host2" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/ambari_host.sh"
+    config.vm.network :public_network, ip: HOST2_HOST, netmask: NETMASK, gateway: GATEWAY
   end
 
-  config.vm.define :host3 do |host3|
-    host3.vm.hostname = "host3.bigdata.wh.com"
-    host3.vm.network :private_network, ip: "192.168.70.103"
-	  host3.vm.provision :shell, :path => "initialize.sh"
+  config.vm.define "host3" do |config|
+    config.vm.provider "virtualbox" do |v|
+      v.name = "host3"
+    end
+
+    config.vm.hostname = "host3" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/ambari_host.sh"
+    config.vm.network :public_network, ip: HOST3_HOST, netmask: NETMASK, gateway: GATEWAY
   end
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  #config.vm.network :forwarded_port, guest: 80, host: 8080
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network :private_network, ip: "192.168.33.10"
+  # config.vm.network "private_network", ip: "192.168.33.10"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
-  # config.vm.network :public_network
-
-  # If true, then any SSH connections made will enable agent forwarding.
-  # Default value: false
-  # config.ssh.forward_agent = true
+  # config.vm.network "public_network"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -83,75 +152,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider :virtualbox do |vb|
-  #   # Don't boot with headless mode
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #
-  #   # Use VBoxManage to customize the VM. For example to change memory:
-  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
   # end
   #
-  # View the documentation for the provider you're using for more
+  # View the documentation for the provider you are using for more
   # information on available options.
 
-  # Enable provisioning with Puppet stand alone.  Puppet manifests
-  # are contained in a directory path relative to this Vagrantfile.
-  # You will need to create the manifests directory and a manifest in
-  # the file precise32.pp in the manifests_path directory.
-  #
-  # An example Puppet manifest to provision the message of the day:
-  #
-  # # group { "puppet":
-  # #   ensure => "present",
-  # # }
-  # #
-  # # File { owner => 0, group => 0, mode => 0644 }
-  # #
-  # # file { '/etc/motd':
-  # #   content => "Welcome to your Vagrant-built virtual machine!
-  # #               Managed by Puppet.\n"
-  # # }
-  #
-  # config.vm.provision :puppet do |puppet|
-  #   puppet.manifests_path = "manifests"
-  #   puppet.manifest_file  = "init.pp"
-  # end
-
-  # Enable provisioning with chef solo, specifying a cookbooks path, roles
-  # path, and data_bags path (all relative to this Vagrantfile), and adding
-  # some recipes and/or roles.
-  #
-  # config.vm.provision :chef_solo do |chef|
-  #   chef.cookbooks_path = "../my-recipes/cookbooks"
-  #   chef.roles_path = "../my-recipes/roles"
-  #   chef.data_bags_path = "../my-recipes/data_bags"
-  #   chef.add_recipe "mysql"
-  #   chef.add_role "web"
-  #
-  #   # You may also specify custom JSON attributes:
-  #   chef.json = { :mysql_password => "foo" }
-  # end
-
-  # Enable provisioning with chef server, specifying the chef server URL,
-  # and the path to the validation key (relative to this Vagrantfile).
-  #
-  # The Opscode Platform uses HTTPS. Substitute your organization for
-  # ORGNAME in the URL and validation key.
-  #
-  # If you have your own Chef Server, use the appropriate URL, which may be
-  # HTTP instead of HTTPS depending on your configuration. Also change the
-  # validation key to validation.pem.
-  #
-  # config.vm.provision :chef_client do |chef|
-  #   chef.chef_server_url = "https://api.opscode.com/organizations/ORGNAME"
-  #   chef.validation_key_path = "ORGNAME-validator.pem"
-  # end
-  #
-  # If you're using the Opscode platform, your validator client is
-  # ORGNAME-validator, replacing ORGNAME with your organization name.
-  #
-  # If you have your own Chef Server, the default validation client name is
-  # chef-validator, unless you changed the configuration.
-  #
-  #   chef.validation_client_name = "ORGNAME-validator"
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
 end
