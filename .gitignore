@@ -51,6 +51,7 @@ output
 
 *_tmp
 .vagrant
+*.dump
 
 
 # firt level ignore
