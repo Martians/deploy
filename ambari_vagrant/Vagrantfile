@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
   end
   config.vm.box = "centos7"
 
-  config.vm.define "test" do |config|
+  config.vm.define "test", autostart: false do |config|
 
     config.vm.provider "virtualbox" do |v|
       v.name = "test"
@@ -57,6 +57,8 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.hostname = "repo" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/repo/local_files.sh"
+    # config.vm.provision :shell, :path => "script/repo/local_proxy.sh"
     config.vm.provision :shell, :path => "script/initialize.sh"
     config.vm.provision :shell, :path => "server/repo.sh"
     config.vm.network :public_network, ip: REPO_HOST, netmask: NETMASK, gateway: GATEWAY
@@ -76,7 +78,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.network "private_network", ip: "192.168.200.100"
 
-    #config.vm.network :public_network, ip: PROXY_HOST, netmask: NETMASK, gateway: GATEWAY
+    #config.vm.network :public_network, ip: PROXY_HOST, netmask: NETMASK, gateway: GATEWAY # sometimes, not successful
     config.vm.network :public_network, ip: PROXY_HOST, netmask: NETMASK
     # sudo sed -i "/iface eth2/a\      gateway 192.168.37.254" /etc/network/interfaces
     config.vm.provision "shell", run: "always", inline: <<-SHELL
@@ -93,6 +95,8 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.hostname = "host1" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/initialize.sh"
+    config.vm.provision :shell, :path => "script/repo/local_network.sh"
     config.vm.provision :shell, :path => "script/ambari_host.sh"
     config.vm.network :public_network, ip: HOST1_HOST, netmask: NETMASK, gateway: GATEWAY
   end
@@ -103,6 +107,8 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.hostname = "host2" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/initialize.sh"
+    config.vm.provision :shell, :path => "script/repo/local_network.sh"
     config.vm.provision :shell, :path => "script/ambari_host.sh"
     config.vm.network :public_network, ip: HOST2_HOST, netmask: NETMASK, gateway: GATEWAY
   end
@@ -113,6 +119,8 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.hostname = "host3" + "." + DOMAIN
+    config.vm.provision :shell, :path => "script/initialize.sh"
+    config.vm.provision :shell, :path => "script/repo/local_network.sh"
     config.vm.provision :shell, :path => "script/ambari_host.sh"
     config.vm.network :public_network, ip: HOST3_HOST, netmask: NETMASK, gateway: GATEWAY
   end

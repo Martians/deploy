@@ -1,28 +1,26 @@
 #!/bin/sh
 
 source /vagrant/config/config.sh
-source /vagrant/script/vagrant.sh
 
-echo "set yum proxy address" 
-sudo sed -i "/cachedir/a\proxy=http://$PROXY_HOST:3142" /etc/yum.conf
-
-source /vagrant/script/system.sh
-
+source /vagrant/script/repo/local_proxy.sh
+source /vagrant/script/repo/install.sh
 
 ##############################################################################################
 #dns config
 echo 'modify dns config'
 sudo sed -i "/plugins/a\dns=none" /etc/NetworkManager/NetworkManager.conf 
-sudo sed -i "/nameserver/d" /etc/resolv.conf
+sudo systemctl restart NetworkManager.service
 
-sudo sh -c "echo '
+sudo sed -i "/nameserver/d" /etc/resolv.conf
+echo 'modify resolv.conf'
+cat << EOF | sudo tee -a /etc/resolv.conf
 search $DOMAIN
 nameserver $REPO_HOST
 nameserver $PUBLIC_DNS
-'>> /etc/resolv.conf"
-sudo systemctl restart NetworkManager.service
+EOF
+cat /etc/resolv.conf
 
-dig repo.$DOMAIN
+ping repo.$DOMAIN -c 1
 
 
 

@@ -1,6 +1,8 @@
 #!/bin/sh
 source /vagrant/config/config.sh
 
+source /vagrant/script/repo/install.sh
+
 #<<'COMMENT'
 #COMMENT
 
@@ -73,6 +75,9 @@ ns      IN   A   $REPO_HOST
 
 repo    IN   A   $REPO_HOST
 proxy   IN   A   $PROXY_HOST
+host1   IN   A   $HOST1_HOST
+host2   IN   A   $HOST2_HOST
+host3   IN   A   $HOST3_HOST
 EOF
 sudo cat /var/named/$DOMAIN
 
@@ -92,6 +97,9 @@ ns      IN    A   $REPO_HOST
 
 $REPO_HOST_LAST    IN   PTR  repo.$DOMAIN.
 $PROXY_HOST_LAST   IN   PTR  proxy.$DOMAIN.
+HOST1_HOST    IN   PTR  host1.$DOMAIN.
+HOST2_HOST    IN   PTR  host2.$DOMAIN.
+HOST3_HOST    IN   PTR  host3.$DOMAIN.
 EOF
 sudo cat /var/named/$DOMAIN.arpa
 
