@@ -2,9 +2,6 @@
 
 source /vagrant/config/config.sh
 
-source /vagrant/script/repo/local_proxy.sh
-source /vagrant/script/repo/install.sh
-
 ##############################################################################################
 #dns config
 echo 'modify dns config'
@@ -22,6 +19,11 @@ cat /etc/resolv.conf
 
 ping repo.$DOMAIN -c 1
 
+
+##############################################################################################
+## do install after dns complete
+source /vagrant/script/repo/local_proxy.sh
+source /vagrant/script/repo/install.sh
 
 
 ##############################################################################################
