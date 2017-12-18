@@ -17,6 +17,9 @@ nameserver $PUBLIC_DNS
 EOF
 cat /etc/resolv.conf
 
+echo "cancel hostname in /etc/hosts"
+sudo sed -i "/127.0.0.1.*$DOMAIN.*/d" /etc/hosts
+
 ping repo.$DOMAIN -c 1
 
 

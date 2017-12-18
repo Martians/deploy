@@ -13,5 +13,7 @@ scp root@repo.$DOMAIN:/vagrant/repo/resource/postgresql-jdbc.jar /root/
 echo "ambari setup"
 ambari-server setup --jdbc-db=postgres --jdbc-driver=/root/postgresql-jdbc.jar
 ambari-server setup
+
+echo "ambari start"
 ambari-server start
 
