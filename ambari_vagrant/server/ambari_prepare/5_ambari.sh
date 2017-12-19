@@ -15,6 +15,14 @@ ALTER SCHEMA ambari OWNER TO ambari;
 ALTER ROLE ambari SET search_path to 'ambari', 'public';
 \q
 
+echo 'INIT AMBARI DATABASE SHCEMA'
+psql -U ambari -d ambari
+\i /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
+\d
+\q
+\q
+
+###########################################################################################
 echo 'CREATE HIVE DATABASE'
 sudo -u postgres psql
 CREATE DATABASE hive;
@@ -37,10 +45,3 @@ ALTER SCHEMA ranger OWNER TO ranger;
 ALTER ROLE ranger SET search_path to 'ranger', 'public';
 \q
 
-###########################################################################################
-echo 'INIT AMBARI DATABASE SHCEMA'
-psql -U ambari -d ambari
-\i /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
-\d
-\q
-\q
