@@ -7,7 +7,7 @@ read
 echo 'CREATE AMBARI DATABASE'
 sudo -u postgres psql
 CREATE DATABASE ambari;
-CREATE USER ambari WITH PASSWORD '1';
+CREATE USER ambari WITH PASSWORD 'bigdata';
 GRANT ALL PRIVILEGES ON DATABASE ambari TO ambari;
 \c ambari
 CREATE SCHEMA ambari AUTHORIZATION ambari;
@@ -18,7 +18,7 @@ ALTER ROLE ambari SET search_path to 'ambari', 'public';
 echo 'CREATE HIVE DATABASE'
 sudo -u postgres psql
 CREATE DATABASE hive;
-CREATE USER hive WITH PASSWORD '1';
+CREATE USER hive WITH PASSWORD 'bigdata';
 GRANT ALL PRIVILEGES ON DATABASE hive TO hive;
 \c hive
 CREATE SCHEMA hive AUTHORIZATION hive;
@@ -29,7 +29,7 @@ ALTER ROLE hive SET search_path to 'hive', 'public';
 echo 'CREATE RANGER DATABASE'
 sudo -u postgres psql
 CREATE DATABASE ranger;
-CREATE USER ranger WITH PASSWORD '1';
+CREATE USER ranger WITH PASSWORD 'bigdata';
 GRANT ALL PRIVILEGES ON DATABASE ranger TO ranger;
 \c ranger
 CREATE SCHEMA ranger AUTHORIZATION ranger;
