@@ -1,0 +1,14 @@
+
+From ubuntu
+
+## 指定容器的默认启动命令；可以在docker run时用其他命令覆盖
+##     CMD只能写一次，最后一个生效
+CMD echo "test_message" > /message
+CMD ["sh", "-c", "echo test_message > /message_2"]
+
+## 必须有一个默认执行命令
+CMD ["/bin/bash"]
+
+# docker build -t cmd_image -f 2_cmd . && docker history cmd_image
+# docker rm -f cmd
+# docker run -it --name cmd cmd_image

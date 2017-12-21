@@ -1,0 +1,40 @@
+From ubuntu
+
+## 环境变量
+
+	## 1）运行容器中仍然有效
+	ENV HOST=192.168.37.100
+
+	## 2）仅在当前脚本有效
+	##    命令行中，可使用--build-arg <参数名>=<值>覆盖
+	ARG NAME="work" 
+	ARG DOMAIN=data.com
+
+	RUN echo $HOST && echo $DOMAIN && echo $NAME
+
+## 文件复制
+	## 目标目录会自动创建出来
+	COPY script/inner.sh /test/
+	COPY ["script/*.sh", "data", "/test/all/"]
+
+	## 只用于解压文件
+	ADD data/test.tar.gz /test/work
+
+## 工作目录
+	WORKDIR /etc
+	RUN echo "tt" > bb
+
+	RUN groupadd -r test && useradd -r -g test test
+	## 切换用户
+	USER test
+	USER root
+
+# docker build -t base_image -f 1_base . && docker history base_image
+# docker rm -f base
+# docker run -it --name base base_image
+
+
+## 在build时，更改arg
+# docker build -t base_image_2 -f 1_base --build-arg NAME=work22222. && docker history base_image_2
+# docker rm -f base_2
+# docker run -it --name base_2 base_image_1

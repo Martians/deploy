@@ -1,0 +1,21 @@
+
+From ubuntu
+
+RUN echo 0 > /etc/stop
+CMD ["/bin/bash"]
+
+HEALTHCHECK --interval=5s --timeout=3s --retries=2 \
+	CMD echo `more /etc/stop` || exit 1
+
+# docker build -t check_image -f 0_check . && docker history check_image
+# docker rm -f check
+# docker run -itd --name check check_image
+# docker ps
+
+## 执行关闭
+# docker exec check echo 1 
+# docker ps
+
+## inpect状态
+# docker inspect --format '{{json .State.Health}}' check
+# docker inspect --format '{{json .State.Health}}' check | python -m json.tool

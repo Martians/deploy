@@ -1,0 +1,12 @@
+
+From ubuntu
+
+# 使用匿名卷
+volume /data
+
+## docker run -d -v mydata:/data xxxx
+
+
+# docker build -t volume_image -f 4_volume . && docker history volume_image
+# docker rm -f volume
+# docker run -it --name volume volume_image

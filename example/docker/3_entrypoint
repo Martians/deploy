@@ -1,0 +1,15 @@
+
+From ubuntu
+
+RUN apt-get update && apt-get install curl -y
+
+## 类似CMD，会将CMD的内容当做参数（即CMD不再当做命令来执行），传入到后边的命令中
+##     如果docker run的后续参数覆盖了CMD，将会被传入进来 docker run -it  -i
+ENTRYPOINT ["curl", "-s", "http://ip.cn"]
+CMD ["-v"]
+
+
+# docker build -t entry_image -f 3_entrypoint . && docker history entry_image
+# docker rm -f entry
+# docker run -it --rm --name entry entry_image
+# docker run -it --rm --name entry entry_image -i
