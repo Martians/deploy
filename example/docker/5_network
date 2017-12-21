@@ -1,12 +1,13 @@
 
 From ubuntu
 
-# 使用匿名卷
-volume /data
-
-## docker run -d -v mydata:/data xxxx
+## 使用随机端口时，默认使用的内部端口
+EXPOSE 
 
 
-# docker build -t volume_image -f 4_volume . && docker history volume_image
-# docker rm -f volume
-# docker run -it --name volume volume_image
+# docker run -it --name work1 ubuntu cat /etc/resolv.conf
+# docker run -it --name work2 -h hostabc --dns=192.168.30.1 --dns-search=data.com ubuntu 
+
+## 修改容器中的网络配置
+# docker run -it --name work3 training/webapp sed -i "/nameserver/d" /etc/resolv.conf
+# docker exec -it work3 mount

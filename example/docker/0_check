@@ -19,3 +19,4 @@ HEALTHCHECK --interval=5s --timeout=3s --retries=2 \
 ## inpect状态
 # docker inspect --format '{{json .State.Health}}' check
 # docker inspect --format '{{json .State.Health}}' check | python -m json.tool
+

@@ -6,3 +6,6 @@ CMD ["/bin/bash"]
 
 HEALTHCHECK --interval=5s --timeout=3s --retries=2 \
 	echo `more /etc/stop` || exit 1
+
+
+docker exec test mount   
