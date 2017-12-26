@@ -1,0 +1,17 @@
+
+# https://hub.docker.com/_/ubuntu/
+# https://github.com/tianon/docker-brew-ubuntu-core/blob/1637ff264a1654f77807ce53522eff7f6a57b773/xenial/Dockerfile
+# 16.04, xenial-20171201, xenial, latest (xenial/Dockerfile)
+
+From ubuntu:xenial
+MAINTAINER long@126.com
+
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
+	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; \
+	apt-get update; \
+	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute;
+
+CMD ["/bin/bash"]
+
+# docker build -t ubuntu_local -f 0_ubuntu . && docker history ubuntu_local && echo; docker images ubuntu*
+# docker run -it --name ubuntu ubuntu_local
