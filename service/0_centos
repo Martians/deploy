@@ -16,7 +16,8 @@ EXPOSE $LISTEN
 COPY . $BASE
 
 # RUN $BASE/script/initialize.sh \
-RUN $BASE/script/server/$SERVICE.sh \
+RUN $BASE/script/common.sh \
+	&& $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \
 	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh
 
