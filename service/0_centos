@@ -10,8 +10,11 @@ MAINTAINER long@126.com
 
 ARG BASE=/docker
 ARG SERVICE="nothing"
+ARG LISTEN=10000
 
+EXPOSE $LISTEN
 COPY . $BASE
+
 # RUN $BASE/script/initialize.sh \
 RUN $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \

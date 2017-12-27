@@ -1,6 +1,6 @@
 #!/bin/sh
-cd $(cd "$(dirname "$0")"; pwd)
-cd ..
+BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
+cd $BASE
 
 #####################################################################################
 <<'COMMENT'
@@ -17,17 +17,18 @@ if [ ! `docker images ubuntu_local -q` ]; then
 	docker history ubuntu_local
 	docker tag ubuntu_local ubuntu
 fi
-COMMENT
-
-if [ ! `docker images centos_local -q` ]; then
-	docker build -t centos_local -f 0_centos .
-	docker history centos_local
-	docker tag centos_local centos
-fi
 
 if [ `docker images ubuntu_local -q` ]; then
 	docker images *_local
 fi
+COMMENT
+
+if [ ! `docker images centos_local -q` ]; then
+	docker build -t centos_local -f 0_base .
+	docker history centos_local
+	docker tag centos_local centos
+fi
+
 
 #####################################################################################
 BRIDGE=eth0m                        # 新增网桥

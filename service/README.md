@@ -1,4 +1,12 @@
 
+##########################################################
+# Template
+## 0_base: centos_local
+## 0_centos: centos template
+## 0_ubuntu: ubuntu template 
+## Dockerfile: nothing
+
+##########################################################
 # Enviroment Command
 ## create macro in ~/.bashrc
 command/prepare.sh  
@@ -6,12 +14,11 @@ command/prepare.sh
 ## create images and network, if not exist
 command/create.sh  
 
-## create host
-command/start.sh  
+##########################################################
+# start server
 
-# Server
-## config host
-config/config.sh
+## sshd:   server/sshd.sh  
 
-## start server
-server/dns.sh
+## docker: server/host.sh  
+
+## dns:    server/dns.sh

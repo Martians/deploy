@@ -1,17 +1,20 @@
 
-# https://hub.docker.com/_/ubuntu/
-# https://github.com/tianon/docker-brew-ubuntu-core/blob/1637ff264a1654f77807ce53522eff7f6a57b773/xenial/Dockerfile
-# 16.04, xenial-20171201, xenial, latest (xenial/Dockerfile)
+# https://hub.docker.com/_/centos/
+# https://github.com/CentOS/sig-cloud-instance-images/blob/bc561dfdd671d612dbb9f92e7e17dd8009befc44/docker/Dockerfile
+# centos7.1.1503, 7.1.1503
 
-From ubuntu:xenial
+From centos:7.1.1503
 MAINTAINER long@126.com
 
-RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
-	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; \
-	apt-get update; \
-	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute;
+ARG BASE=/docker
+
+EXPOSE 22
+COPY . $BASE
+
+RUN $BASE/script/initialize.sh \
+	$BASE/script/server/$SERVICE.sh \
+	&& $BASE/script/clean.sh \
+	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh
 
 CMD ["/bin/bash"]
-
-# docker build -t ubuntu_local -f 0_ubuntu . && docker history ubuntu_local && echo; docker images ubuntu*
-# docker run -it --name ubuntu ubuntu_local
+CMD ["/start.sh"]

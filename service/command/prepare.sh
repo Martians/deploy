@@ -1,11 +1,11 @@
 #!/bin/sh
 
-BASE=/mnt/disk
-LOCAL=$(cd "$(dirname "$0")"; pwd)
+WORK=/mnt/disk
+BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
 
-echo local path: $LOCAL
-echo "export PATH=\$PATH:$LOCAL" >> ~/.bashrc
+#echo local path: $LOCAL
+#echo "export PATH=\$PATH:$LOCAL" >> ~/.bashrc
 
-echo "$LOCAL/create.sh" > $BASE/create.sh
-echo "$LOCAL/start.sh"  > $BASE/start.sh
+echo "$BASE/server/sshd.sh"  > $WORK/sshd.sh
+echo "$BASE/server/host.sh"  > $WORK/host.sh
 

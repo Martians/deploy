@@ -1,0 +1,23 @@
+
+# https://hub.docker.com/_/centos/
+# https://github.com/CentOS/sig-cloud-instance-images/blob/bc561dfdd671d612dbb9f92e7e17dd8009befc44/docker/Dockerfile
+# centos7.1.1503, 7.1.1503
+
+From centos:7.1.1503
+MAINTAINER long@126.com
+
+RUN cd /etc/yum.repos.d/; mkdir -p save; mv *.repo save; \
+	curl -O http://mirrors.163.com/.help/CentOS7-Base-163.repo; \
+	yum makecache; \
+	yum install -y sudo vim net-tools telnet traceroute tree ; \
+	yum clean all; \
+	rm -rf /var/log/*; \ 
+	rm -rf /var/cache/yum/*
+
+
+CMD ["/bin/bash"]
+
+# docker build -t centos_local -f 0_centos . && docker history centos_local && echo; docker images centos*
+# docker run -it --name centos centos_local
+
+
