@@ -1,7 +1,7 @@
 
 ##########################################################
 # Template
-## 0_base: centos_local
+## 0_base: centos:base, not clean cache, only for service setup
 ## 0_centos: centos template
 ## 0_ubuntu: ubuntu template 
 ## Dockerfile: nothing

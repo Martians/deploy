@@ -15,7 +15,7 @@ cd $BASE
 
 source $BASE/command/create.sh
 source $BASE/script/config.sh
-IMAGE=centos_local
+IMAGE=centos:base
 
 <<'COMMENT'
 docker rmi -f $IMAGE

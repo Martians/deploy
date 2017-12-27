@@ -4,7 +4,7 @@
 # centos7.1.1503, 7.1.1503
 
 #From centos:7.1.1503
-From centos_local
+From centos:base
 
 MAINTAINER long@126.com
 

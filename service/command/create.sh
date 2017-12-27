@@ -23,10 +23,10 @@ if [ `docker images ubuntu_local -q` ]; then
 fi
 COMMENT
 
-if [ ! `docker images centos_local -q` ]; then
-	docker build -t centos_local -f 0_base .
-	docker history centos_local
-	docker tag centos_local centos
+if [ ! `docker images centos:base -q` ]; then
+	docker build -t centos:base -f 0_base .
+	docker history centos:base
+	docker tag centos:base centos
 fi
 
 
