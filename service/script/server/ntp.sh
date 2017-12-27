@@ -35,8 +35,8 @@ docker run -itd --name host2 -h host2 $IMAGE
 echo
 ###############################################################
 echo "set  host address:"
-sudo pipework ens33 host1 $HOST1/$SUB@$GATEWAY
-sudo pipework ens33 host2 $HOST2/$SUB@$GATEWAY
+sudo pipework $DEVICE host1 $HOST1/$SUBNET@$GATEWAY
+sudo pipework $DEVICE host2 $HOST2/$SUBNET@$GATEWAY
 
 echo "clean cache:
     rm ~/.ssh/known_hosts -f

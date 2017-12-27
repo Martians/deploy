@@ -2,7 +2,7 @@
 
 NAME=http
 PORT="80"
-REPO=/home/long
+REPO=/var/log
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -39,10 +39,10 @@ fi
 
 #echo "prepare network"
 #HOST=192.168.36.27
-#sudo pipework ens33 $NAME $HOST/$SUB@$GATEWAY
+#sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
 
 #echo "test dns"
 sudo netstat -antp | grep :$PORT[\t\ ] --color
 echo "brower:
-    http://192.168.36.10
+    http://$LOCAL
 "

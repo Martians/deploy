@@ -37,7 +37,7 @@ fi
 
 #echo "prepare network"
 #HOST=192.168.36.27
-#sudo pipework ens33 $NAME $HOST/$SUB@$GATEWAY
+#sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
 
 #echo "test dns"
 sudo netstat -antp | grep 53

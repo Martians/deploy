@@ -30,8 +30,8 @@ docker run -itd --name h2 -h h2 $IMAGE
 echo
 ###############################################################
 echo "set  host address:"
-sudo pipework ens33 h1 $HOST1/$SUB@$GATEWAY
-sudo pipework ens33 h2 $HOST2/$SUB@$GATEWAY
+sudo pipework $DEVICE h1 $HOST1/$SUBNET@$GATEWAY
+sudo pipework $DEVICE h2 $HOST2/$SUBNET@$GATEWAY
 COMMENT
 
 echo "show host address:"
