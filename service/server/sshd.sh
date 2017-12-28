@@ -6,8 +6,9 @@
 
 NAME=sshd
 PORT=22
-# REPO="public local"
-REPO=""
+
+REPO="public local proxy"
+#REPO=""
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -18,11 +19,16 @@ source $BASE/script/config.sh
 IMAGE=centos:$NAME
 
 <<'COMMENT'
+docker rm -f $NAME
 docker rmi -f $IMAGE
 COMMENT
 
 echo "always clear exist sshd host"
 docker rm -f host1 host2 
+
+if [[ "$#" > 0 ]]; then
+    docker rmi -f $IMAGE
+fi
 
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then

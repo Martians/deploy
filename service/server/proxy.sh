@@ -13,7 +13,8 @@ source $BASE/command/create.sh
 source $BASE/script/config.sh
 IMAGE=ubuntu:$NAME
 
-if [ "$PROXY_SRC" -a ! -d $PROXY_SRC ]; then
+
+if [ ! -n "$PROXY_SRC" -o ! -d "$PROXY_SRC" ]; then
     PROXY_SRC=~/proxy
 fi
 PROXY_DST=/var/cache/apt-cacher-ng
@@ -22,6 +23,11 @@ PROXY_DST=/var/cache/apt-cacher-ng
 docker rmi -f $IMAGE
 docker rm -f $NAME
 COMMENT
+
+if [[ "$#" > 0 ]]; then
+    docker rm -f $NAME
+    docker rmi -f $IMAGE
+fi
 
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then

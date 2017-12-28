@@ -13,7 +13,7 @@ source $BASE/script/config.sh
 IMAGE=centos:$NAME
 
 # if repo not define, or define but not exist
-if [ $REPO_SRC -a ! -d $REPO_SRC ]; then
+if [ ! -n "$REPO_SRC" -o ! -d "$REPO_SRC" ]; then
 	REPO_SRC=/var/log
 fi
 
@@ -22,6 +22,10 @@ docker rm -f $NAME
 docker rmi -f $IMAGE
 COMMENT
 
+if [[ "$#" > 0 ]]; then
+    docker rm -f $NAME
+    docker rmi -f $IMAGE
+fi
 ###############################################################
 
 if [ ! `docker images $IMAGE -q` ]; then

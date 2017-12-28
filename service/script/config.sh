@@ -37,6 +37,7 @@ elif [$TYPE = "notebook"]; then
 
 	HOST1=192.168.127.11
 	HOST2=192.168.127.12
+	
 else
 	echo "type nothing"
 	sleep 5

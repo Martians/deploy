@@ -18,9 +18,15 @@ source $BASE/script/config.sh
 IMAGE=centos:base
 
 <<'COMMENT'
+docker rm -f $NAME
 docker rmi -f $IMAGE
 COMMENT
+
 docker rm -f h1 h2 
+
+if [[ "$#" > 0 ]]; then
+    docker rmi -f $IMAGE
+fi
 
 ###############################################################
 docker run -itd --name h1 -h h1 $IMAGE 

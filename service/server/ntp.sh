@@ -17,9 +17,10 @@ docker rm -f $NAME
 docker rmi -f $IMAGE
 COMMENT
 
-docker rm -f $NAME
-docker rmi -f $IMAGE
-
+if [[ "$#" > 0 ]]; then
+    docker rm -f $NAME
+    docker rmi -f $IMAGE
+fi
 ###############################################################
 
 if [ ! `docker images $IMAGE -q` ]; then
