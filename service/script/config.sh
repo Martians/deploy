@@ -12,7 +12,6 @@ DOMAIN="data.com"
 BRIDGE=eth0m
 SUBNET=24
 
-
 #############################################################################
 if [ $TYPE = "desktop" ]; then
 	DEVICE=ens33
@@ -24,6 +23,7 @@ if [ $TYPE = "desktop" ]; then
 
 	HOST1=192.168.36.11
 	HOST2=192.168.36.12
+	TEST_HOST=192.168.36.99
 
 	REPO_SRC=/mnt/hgfs/repo
 	PROXY_SRC=/mnt/hgfs/proxy
@@ -37,7 +37,7 @@ elif [$TYPE = "notebook"]; then
 
 	HOST1=192.168.127.11
 	HOST2=192.168.127.12
-	
+	TEST_HOST=192.168.127.99
 else
 	echo "type nothing"
 	sleep 5

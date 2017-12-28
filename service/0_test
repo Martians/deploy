@@ -1,0 +1,17 @@
+
+From centos:sshd
+
+MAINTAINER long@126.com
+
+ARG BASE=/docker
+ARG LISTEN=10000
+ARG MORE=""
+
+EXPOSE $LISTEN
+COPY . $BASE
+
+# RUN $BASE/script/initialize.sh $REPO && \
+RUN	([ "$MORE" == "" ] || $BASE/$MORE) 
+
+CMD ["/bin/bash"]
+CMD ["/start.sh"]

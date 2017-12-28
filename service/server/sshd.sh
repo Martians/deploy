@@ -8,6 +8,7 @@ NAME=sshd
 PORT=22
 
 REPO="public local proxy"
+MORE=$1
 #REPO=""
 
 ###############################################################
@@ -33,7 +34,7 @@ fi
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg MORE="$MORE" \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 

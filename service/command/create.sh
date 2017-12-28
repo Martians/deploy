@@ -43,6 +43,9 @@ else
 			sudo ip link set $BRIDGE up; \
 			sudo ip addr add $NETWORK dev $BRIDGE; \
 			sudo route add default gw $GATEWAY	
+
+	echo "clear dangling images"
+	docker rmi -f $(docker images -aq -f dangling=true)
 fi
 # sudo pipework $DEVICE test3 192.168.36.19/$SUBNET@$GATEWAY
 # sudo pipework $BRIDGE test4 192.168.36.20/$SUBNET@$GATEWAY
