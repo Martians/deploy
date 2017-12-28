@@ -2,6 +2,7 @@
 
 NAME=dns
 PORT="53 53/udp"
+REPO=""
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -20,7 +21,8 @@ COMMENT
 
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg LISTEN="$PORT" .
+	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 
 # check if docker ps output end with $NAME

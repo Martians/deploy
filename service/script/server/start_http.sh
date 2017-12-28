@@ -1,6 +1,6 @@
 #!/bin/sh
 
 echo "start httpd"
-mkdir /var/log/httpd -p
+#mkdir /var/log/httpd -p
 
 httpd -DFOREGROUND

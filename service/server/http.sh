@@ -2,7 +2,7 @@
 
 NAME=http
 PORT="80"
-REPO=/var/log
+REPO=""
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -11,6 +11,11 @@ cd $BASE
 source $BASE/command/create.sh
 source $BASE/script/config.sh
 IMAGE=centos:$NAME
+
+# if repo not define, or define but not exist
+if [ $REPO_SRC -a ! -d $REPO_SRC ]; then
+	REPO_SRC=/var/log
+fi
 
 <<'COMMENT'
 docker rm -f $NAME
@@ -21,14 +26,15 @@ COMMENT
 
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg LISTEN="$PORT" .
+	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo "create docker"
-	docker run -itd --name $NAME -h $NAME -v $REPO:/html -p $PORT:$PORT $IMAGE
-	# docker run -itd --name $NAME -h $NAME -v $REPO:/html -P $IMAGE
+	docker run -itd --name $NAME -h $NAME -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE
+	# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
 	echo "start docker"

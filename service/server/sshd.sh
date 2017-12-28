@@ -6,6 +6,8 @@
 
 NAME=sshd
 PORT=22
+# REPO="public local"
+REPO=""
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -18,12 +20,15 @@ IMAGE=centos:$NAME
 <<'COMMENT'
 docker rmi -f $IMAGE
 COMMENT
+docker rmi -f $IMAGE
+echo "always clear exist sshd host"
 docker rm -f host1 host2 
 
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg LISTEN="$PORT" .
+	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 
 docker run -itd --name host1 -h host1 $IMAGE 

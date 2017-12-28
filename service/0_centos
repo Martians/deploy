@@ -11,12 +11,14 @@ MAINTAINER long@126.com
 ARG BASE=/docker
 ARG SERVICE="nothing"
 ARG LISTEN=10000
+ARG REPO=""
 
 EXPOSE $LISTEN
 COPY . $BASE
 
-# RUN $BASE/script/initialize.sh \
-RUN $BASE/script/common.sh \
+RUN $BASE/script/initialize.sh $REPO \
+	&& $BASE/script/system.sh \
+	&& $BASE/script/common.sh \
 	&& $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \
 	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh

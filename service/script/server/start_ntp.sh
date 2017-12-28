@@ -26,7 +26,8 @@ docker rm -f host1 host2
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg LISTEN="$PORT" .
+	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 
 docker run -itd --name host1 -h host1 $IMAGE 
