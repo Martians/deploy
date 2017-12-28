@@ -20,7 +20,7 @@ IMAGE=centos:$NAME
 <<'COMMENT'
 docker rmi -f $IMAGE
 COMMENT
-docker rmi -f $IMAGE
+
 echo "always clear exist sshd host"
 docker rm -f host1 host2 
 

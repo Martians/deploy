@@ -69,8 +69,9 @@ sudo yum makecache
 
 echo "yum install ..."
 # same as 0_base
-yum install -y sudo net-tools telnet traceroute tree vim \
-	bash-completion 
+yum install -y sudo net-tools telnet traceroute tree vim 
+
+#bash-completion 
 
 ##############################################################################
 echo "initialize complete ..."

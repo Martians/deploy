@@ -16,8 +16,8 @@ ARG REPO=""
 EXPOSE $LISTEN
 COPY . $BASE
 
-RUN $BASE/script/initialize.sh $REPO \
-	&& $BASE/script/system.sh \
+# RUN $BASE/script/initialize.sh $REPO && \
+RUN	$BASE/script/system.sh \
 	&& $BASE/script/common.sh \
 	&& $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \
