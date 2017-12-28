@@ -1,7 +1,7 @@
 #!/bin/sh
 
 TYPE="desktop"
-#TYPE="notebook"
+TYPE="notebook"
 
 #<<'COMMENT'
 #COMMENT
@@ -28,7 +28,7 @@ if [ $TYPE = "desktop" ]; then
 	REPO_SRC=/mnt/hgfs/repo
 	PROXY_SRC=/mnt/hgfs/proxy
 
-elif [$TYPE = "notebook"]; then
+elif [ $TYPE = "notebook" ]; then
 	DEVICE=ens38 
 
 	LOCAL=192.168.127.129
