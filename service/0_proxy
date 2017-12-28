@@ -1,0 +1,28 @@
+
+# https://hub.docker.com/_/ubuntu/
+# https://github.com/tianon/docker-brew-ubuntu-core/blob/1637ff264a1654f77807ce53522eff7f6a57b773/xenial/Dockerfile
+# 16.04, xenial-20171201, xenial, latest (xenial/Dockerfile)
+
+From ubuntu:xenial
+MAINTAINER long@126.com
+
+ARG BASE=/docker
+ARG SERVICE="nothing"
+ARG LISTEN=10000
+ARG REPO=""
+
+EXPOSE $LISTEN
+COPY . $BASE
+
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
+	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; \
+	apt-get update; \
+	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute; \
+	$BASE/script/server/proxy.sh; \
+	cp $BASE/script/server/start_proxy.sh /start.sh; \
+	apt-get autoclean autoremove clean; \
+	rm /var/lib/apt/lists/* -rf; \
+	rm /var/cache/apt/archives -rf
+
+CMD ["/bin/bash"]
+CMD ["/start.sh"]

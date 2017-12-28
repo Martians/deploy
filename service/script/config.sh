@@ -26,6 +26,7 @@ if [ $TYPE = "desktop" ]; then
 	HOST2=192.168.36.12
 
 	REPO_SRC=/mnt/hgfs/repo
+	PROXY_SRC=/mnt/hgfs/proxy
 
 elif [$TYPE = "notebook"]; then
 	DEVICE=ens38 

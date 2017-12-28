@@ -50,5 +50,5 @@ fi
 #echo "test dns"
 sudo netstat -antp | grep :$PORT[\t\ ] --color
 echo "brower:
-    http://$LOCAL
+    http://$LOCAL:$PORT
 "
