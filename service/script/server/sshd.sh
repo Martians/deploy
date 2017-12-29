@@ -1,5 +1,7 @@
 #!/bin/sh
 
+yum install bash-completion -y
+
 yum install -y passwd openssh-server openssh-clients
 echo "root:111111" | chpasswd
 

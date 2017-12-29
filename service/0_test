@@ -11,7 +11,7 @@ EXPOSE $LISTEN
 COPY . $BASE
 
 # RUN $BASE/script/initialize.sh $REPO && \
-RUN	([ "$MORE" == "" ] || $BASE/$MORE) 
+RUN	([ "$MORE" == "" ] || $BASE/$MORE || echo 1) 
 
 CMD ["/bin/bash"]
 CMD ["/start.sh"]

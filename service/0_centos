@@ -14,7 +14,6 @@ ARG LISTEN=10000
 ARG REPO=""
 ARG MORE=""
 
-EXPOSE $LISTEN
 COPY . $BASE
 
 # RUN $BASE/script/initialize.sh $REPO && \
@@ -25,6 +24,11 @@ RUN	$BASE/script/repo.sh $REPO \
 	&& $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \
 	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh
+
+#ARG VOLUME="/disk"
+#VOLUME $VOLUME
+
+EXPOSE $LISTEN
 
 CMD ["/bin/bash"]
 CMD ["/start.sh"]
