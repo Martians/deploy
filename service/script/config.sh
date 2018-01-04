@@ -1,16 +1,23 @@
 #!/bin/sh
 
 TYPE="desktop"
-#TYPE="notebook"
+TYPE="notebook"
 
 #<<'COMMENT'
 #COMMENT
+#############################################################################
+GLOBAL_MACRO="-v /home/long/source:/source -v /mnt/disk/docker:/docker"
 
 # repo setting
 #############################################################################
 DOMAIN="data.com"
 BRIDGE=eth0m
 SUBNET=24
+
+REPO_SRC=/mnt/hgfs/repo
+PROXY_SRC=/mnt/hgfs/proxy
+
+REPO_DST=/html
 
 #############################################################################
 if [ $TYPE = "desktop" ]; then
@@ -24,9 +31,6 @@ if [ $TYPE = "desktop" ]; then
 	HOST1=192.168.36.11
 	HOST2=192.168.36.12
 	TEST_HOST=192.168.36.99
-
-	REPO_SRC=/mnt/hgfs/repo
-	PROXY_SRC=/mnt/hgfs/proxy
 
 elif [ $TYPE = "notebook" ]; then
 	DEVICE=ens38 
@@ -49,8 +53,5 @@ fi
 REPO_HOST=$LOCAL
 PROXY_HOST=$LOCAL
 
-REPO_DST=/html
 
 
-#############################################################################
-GLOBAL_MACRO="-v /home/long/source:/source -v /mnt/disk/docker:/docker"
