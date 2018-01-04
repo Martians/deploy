@@ -50,3 +50,7 @@ REPO_HOST=$LOCAL
 PROXY_HOST=$LOCAL
 
 REPO_DST=/html
+
+
+#############################################################################
+GLOBAL_MACRO="-v /home/long/source:/source"

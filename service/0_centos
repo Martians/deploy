@@ -20,7 +20,7 @@ COPY . $BASE
 RUN	$BASE/script/repo.sh $REPO \
 	&& $BASE/script/system.sh  \
 	&& $BASE/script/common.sh  \
-	&& ([ "$MORE" == "" ] || $BASE/$MORE) \
+	&& ([ "$MORE" == "" -o "$MORE" == "1" -o "$MORE" == "0" ] || $BASE/$MORE) \
 	&& $BASE/script/server/$SERVICE.sh \
 	&& $BASE/script/clean.sh \
 	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh

@@ -1,13 +1,10 @@
 #!/bin/sh
-BASE=$(cd "$(dirname "$0")"; cd ..; cd ..; pwd)
-cd $BASE
 
-source $BASE/script/advance.sh
-
-WORK=/apache-hive-2.3.2-bin/
+BASE=/mnt/disk
+WORK=$BASE/apache-hive-2.3.2-bin/
 
 rm $WORK -rf
-tar zxvf ~/source/component/hive/apache-hive-2.3.2-bin.tar.gz -C /
+tar zxvf ~/source/component/hive/apache-hive-2.3.2-bin.tar.gz -C $BASE
 
 echo "export HIVE_HOME=$WORK" >> ~/.bashrc
 echo 'export PATH=$PATH:$HIVE_HOME/bin' >> ~/.bashrc

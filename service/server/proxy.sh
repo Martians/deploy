@@ -38,7 +38,7 @@ fi
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
     echo "create docker"
-    docker run -itd --name $NAME -h $NAME -v $PROXY_SRC:$PROXY_DST -p $PORT:$PORT $IMAGE
+    docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $PROXY_SRC:$PROXY_DST -p $PORT:$PORT $IMAGE
     
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
     echo "start docker"

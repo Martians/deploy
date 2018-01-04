@@ -35,7 +35,9 @@ if [ ! `docker images $IMAGE -q` ]; then
 	docker build -t $IMAGE -f 0_test --build-arg MORE="$MORE" .
 fi
 
-docker run -itd --name $NAME -h $NAME $IMAGE 
+# docker run -itd --name $NAME -h $NAME $IMAGE 
+docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker $IMAGE 
+
 
 echo
 ###############################################################

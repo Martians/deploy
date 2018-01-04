@@ -29,8 +29,8 @@ if [[ "$#" > 0 ]]; then
 fi
 
 ###############################################################
-docker run -itd --name h1 -h h1 $IMAGE 
-docker run -itd --name h2 -h h2 $IMAGE 
+docker run -itd --name h1 -h h1 $GLOBAL_MACRO $IMAGE 
+docker run -itd --name h2 -h h2 $GLOBAL_MACRO $IMAGE 
 
 <<'COMMENT'
 echo

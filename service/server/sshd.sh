@@ -38,8 +38,8 @@ if [ ! `docker images $IMAGE -q` ]; then
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
 
-docker run -itd --name host1 -h host1 $IMAGE 
-docker run -itd --name host2 -h host2 $IMAGE 
+docker run -itd --name host1 -h host1 $GLOBAL_MACRO $IMAGE 
+docker run -itd --name host2 -h host2 $GLOBAL_MACRO $IMAGE 
 
 echo
 ###############################################################

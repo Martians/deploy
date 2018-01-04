@@ -26,6 +26,9 @@ if [[ "$#" > 0 ]]; then
     docker rm -f $NAME
     docker rmi -f $IMAGE
 fi
+
+# recreate every time, for there is some bug in httpd start if last stop not clear
+docker rm -f $NAME
 ###############################################################
 
 if [ ! `docker images $IMAGE -q` ]; then
@@ -37,7 +40,7 @@ fi
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo "create docker"
-	docker run -itd --name $NAME -h $NAME -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE
+	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE
 	# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
@@ -54,5 +57,6 @@ fi
 #echo "test dns"
 sudo netstat -antp | grep :$PORT[\t\ ] --color
 echo "brower:
+    docker exec -it http /bin/bash
     http://$LOCAL:$PORT
 "
