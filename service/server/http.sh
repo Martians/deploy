@@ -2,7 +2,7 @@
 
 NAME=http
 PORT="80"
-REPO=""
+REPO="public proxy"
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -33,6 +33,8 @@ docker rm -f $NAME
 
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
+	echo "    docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+		--build-arg LISTEN=\"$PORT\" --build-arg REPO=\"$REPO\" ."
 	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 fi
@@ -40,6 +42,7 @@ fi
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo "create docker"
+	echo "    docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE"
 	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE
 	# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
 	

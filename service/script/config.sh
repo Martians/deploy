@@ -53,4 +53,4 @@ REPO_DST=/html
 
 
 #############################################################################
-GLOBAL_MACRO="-v /home/long/source:/source"
+GLOBAL_MACRO="-v /home/long/source:/source -v /mnt/disk/docker:/docker"

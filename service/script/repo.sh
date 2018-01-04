@@ -48,7 +48,7 @@ if [ $REPO_FILE -a $REPO_FILE == 1 ]; then
 	PRIORITY=1
 	sudo rm /etc/yum.repos.d/file.repo -rf
 cat << EOF | sudo tee -a /etc/yum.repos.d/file.repo
-[local file]
+[local_file]
 name=local file repository
 baseurl=file://$REPO_DST/common/centos7/
 gpgcheck=0
