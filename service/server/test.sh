@@ -38,7 +38,8 @@ fi
 
 # docker run -itd --name $NAME -h $NAME $IMAGE 
 echo "    docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker $IMAGE "
-docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker --privileged=true $IMAGE 
+docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker $IMAGE 
+# --privileged=true 
 
 
 echo
