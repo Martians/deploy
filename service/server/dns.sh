@@ -33,15 +33,15 @@ fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR} -- create docker -- ${RES}"	set -x
+	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"	set -x
 	docker run -itd --name $NAME -p 53:53/tcp -p 53:53/udp -h $NAME $IMAGE
 	set +x
 	# docker run -itd --name $NAME -P $IMAGE # not work?
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}== starting docker ... ==${RES}"
+	echo -e  "${GREEN_COLOR}-- starting docker ... --${RES}"
 	docker start $NAME
 else
-	echo -e  "${GREEN_COLOR}== already started ==${RES}"
+	echo -e  "${GREEN_COLOR}-- already started --${RES}"
 fi
 
 #echo "prepare network"

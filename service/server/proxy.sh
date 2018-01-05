@@ -39,16 +39,16 @@ fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-    echo -e  "${GREEN_COLOR} -- create docker -- ${RES}"
+    echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
     set -x
     docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $PROXY_SRC:$PROXY_DST -p $PORT:$PORT $IMAGE
     set +x
 
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
-    echo -e  "${GREEN_COLOR}== starting docker ... ==${RES}"
+    echo -e  "${GREEN_COLOR}-- starting docker ... --${RES}"
     docker start $NAME
 else
-    echo -e  "${GREEN_COLOR}== already started ==${RES}"
+    echo -e  "${GREEN_COLOR}-- already started --${RES}"
 fi
 
 sudo netstat -antp | grep :$PORT[\t\ ] --color
