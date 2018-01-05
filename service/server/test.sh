@@ -32,15 +32,16 @@ fi
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image: "
-	echo "    docker build -t $IMAGE -f 0_test --build-arg MORE=\"$MORE\""
+	set -x
 	docker build -t $IMAGE -f 0_test --build-arg MORE="$MORE" .
+	set +x
 fi
 
 # docker run -itd --name $NAME -h $NAME $IMAGE 
-echo "    docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker $IMAGE "
+set -x
 docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v /mnt/disk/docker:/docker $IMAGE 
 # --privileged=true 
-
+set +x
 
 echo
 ###############################################################

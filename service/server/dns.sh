@@ -25,20 +25,23 @@ fi
 
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
+	set -x
 	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
+	set +x
 fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo "create docker"
+	echo -e  "${GREEN_COLOR} -- create docker -- ${RES}"	set -x
 	docker run -itd --name $NAME -p 53:53/tcp -p 53:53/udp -h $NAME $IMAGE
+	set +x
 	# docker run -itd --name $NAME -P $IMAGE # not work?
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo "start docker"
+	echo -e  "${GREEN_COLOR}== starting docker ... ==${RES}"
 	docker start $NAME
 else
-	echo "start already"
+	echo -e  "${GREEN_COLOR}== already started ==${RES}"
 fi
 
 #echo "prepare network"

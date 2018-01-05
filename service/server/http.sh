@@ -28,29 +28,30 @@ if [[ "$#" > 0 ]]; then
 fi
 
 # recreate every time, for there is some bug in httpd start if last stop not clear
-docker rm -f $NAME
+#docker rm -f $NAME
 ###############################################################
 
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
-	echo "    docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
-		--build-arg LISTEN=\"$PORT\" --build-arg REPO=\"$REPO\" ."
+	set -x
 	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
+	set +x
 fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo "create docker"
-	echo "    docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE"
+	echo -e  "${GREEN_COLOR} -- create docker -- ${RES}"
+	set -x
 	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $REPO_SRC:$REPO_DST -p $PORT:$PORT $IMAGE
 	# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
+	set +x
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo "start docker"
+	echo -e  "${GREEN_COLOR}== starting docker ... ==${RES}"
 	docker start $NAME
 else
-	echo "start already"
+	echo -e  "${GREEN_COLOR}== already started ==${RES}"
 fi
 
 #echo "prepare network"

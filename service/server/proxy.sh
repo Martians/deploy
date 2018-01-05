@@ -32,19 +32,23 @@ fi
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
+    set -x
 	docker build -t $IMAGE -f 0_proxy .
+    set +x
 fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-    echo "create docker"
+    echo -e  "${GREEN_COLOR} -- create docker -- ${RES}"
+    set -x
     docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO -v $PROXY_SRC:$PROXY_DST -p $PORT:$PORT $IMAGE
-    
+    set +x
+
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
-    echo "start docker"
+    echo -e  "${GREEN_COLOR}== starting docker ... ==${RES}"
     docker start $NAME
 else
-    echo "start already"
+    echo -e  "${GREEN_COLOR}== already started ==${RES}"
 fi
 
 sudo netstat -antp | grep :$PORT[\t\ ] --color

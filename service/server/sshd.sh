@@ -34,12 +34,16 @@ fi
 ###############################################################
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
+    set -x
 	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME --build-arg MORE="$MORE" \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
+    set +x
 fi
 
+set -x
 docker run -itd --name host1 -h host1 $GLOBAL_MACRO $IMAGE 
 docker run -itd --name host2 -h host2 $GLOBAL_MACRO $IMAGE 
+set +x
 
 echo
 ###############################################################

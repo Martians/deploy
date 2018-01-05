@@ -37,7 +37,7 @@ server/sshd
 
 ##########################################################
 # Enviroment Command
-## create macro in ~/.bashrc
+## prepare proxy and http images
 command/prepare.sh  
 
 ## create images and network, if not exist

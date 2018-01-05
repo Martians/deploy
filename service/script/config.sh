@@ -54,4 +54,7 @@ REPO_HOST=$LOCAL
 PROXY_HOST=$LOCAL
 
 
+BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
+cd $BASE
 
+source $BASE/script/handle.sh
