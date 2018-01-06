@@ -1,6 +1,8 @@
 #!/bin/sh
+BASE=$(cd "$(dirname "$0")"; cd ../..; pwd)
 
-HOME=/html
+source $BASE/script/config.sh
+##############################################################################
 
 #install http file service
 echo "install http server"
@@ -15,8 +17,8 @@ sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
 sudo rm /etc/httpd/conf.d/local.conf -rf
 cat << EOF | sudo tee -a /etc/httpd/conf.d/local.conf
 <VirtualHost *:80>
-    DocumentRoot "$HOME"
-    <Directory "$HOME">
+    DocumentRoot "$REPO_DST"
+    <Directory "$REPO_DST">
         Options Indexes FollowSymLinks
         AllowOverride None
         Require all granted
@@ -24,9 +26,7 @@ cat << EOF | sudo tee -a /etc/httpd/conf.d/local.conf
 </VirtualHost>
 EOF
 
-mkdir /var/log/httpd -p 
-mkdir $HOME -p
+mkdir $REPO_DST -p
 
-ls /var/log/httpd -la
 echo "http completed!"
 echo 

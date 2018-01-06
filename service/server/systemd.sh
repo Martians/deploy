@@ -1,13 +1,13 @@
 #!/bin/sh
 # config http://blog.csdn.net/field_yang/article/details/51568861
 
-# https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
-# https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
+# http://blog.csdn.net/luckytanggu/article/details/71514798
 
-NAME=test
+NAME=systemd
 
 MORE=$1
 #REPO=""
+PORT=22
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -15,7 +15,10 @@ cd $BASE
 
 source $BASE/command/create.sh
 source $BASE/script/config.sh
-IMAGE=centos:$NAME
+IMAGE=centos:sshd
+
+SYSTMD="--privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
+Initial=/usr/sbin/init
 
 <<'COMMENT'
 docker rm -f sshd
@@ -25,20 +28,8 @@ COMMENT
 echo "always clear exist sshd host"
 docker rm -f $NAME
 
-if [[ "$#" > 0 ]]; then
-    docker rmi -f $IMAGE
-fi
-
-###############################################################
-if [ ! `docker images $IMAGE -q` ]; then
-	echo "create image: "
-	set -x
-	docker build -t $IMAGE -f 0_test --build-arg MORE="$MORE" .
-	set +x
-fi
-
 set -x
-docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $IMAGE 
+docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD $IMAGE $Initial
 set +x
 
 echo
