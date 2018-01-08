@@ -53,5 +53,7 @@ fi
 REPO_HOST=$LOCAL
 PROXY_HOST=$LOCAL
 
+SYSTMD="--privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
+INITIAL=/usr/sbin/init
 
 source $BASE/script/handle.sh

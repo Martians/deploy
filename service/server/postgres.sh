@@ -1,13 +1,14 @@
 #!/bin/sh
 # config http://blog.csdn.net/field_yang/article/details/51568861
 
-# http://blog.csdn.net/luckytanggu/article/details/71514798
+# https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
+# https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
-NAME=generate
+NAME=postgres
+HOST=192.168.36.91
 
 MORE=$1
 #REPO=""
-PORT="808"
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -22,6 +23,10 @@ docker rm -f sshd
 docker rmi -f $IMAGE
 COMMENT
 
+echo "always clear exist sshd host"
+docker rm -f $NAME
+
+###############################################################
 if [[ "$#" > 0 ]]; then
 	docker rm -f $NAME
 fi
@@ -30,7 +35,7 @@ fi
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
 	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 -p 3360:3360 $IMAGE $INITIAL
+	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD $IMAGE $INITIAL
 	set +x
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
@@ -42,15 +47,15 @@ fi
 
 ###############################################################
 echo "set  host address:"
-sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
+sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
 
 echo "show host address:"
 docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
 echo
 
 ###############################################################
-echo "@@@@@@@@ enter generate host: /docker/script/hadoop/generate.sh"
-docker exec -it $NAME /docker/script/hadoop/generate.sh
+echo "@@@@@@@@ enter generate host: /docker/script/hadoop/postgres.sh"
+docker exec -it $NAME /docker/script/hadoop/postgres.sh
 
 echo "enter host:
     docker exec -it $NAME /bin/bash

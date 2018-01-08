@@ -3,11 +3,11 @@
 
 # http://blog.csdn.net/luckytanggu/article/details/71514798
 
-NAME=generate
+NAME=hive
 
 MORE=$1
 #REPO=""
-PORT="808"
+PORT=" "
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -16,6 +16,9 @@ cd $BASE
 source $BASE/command/create.sh
 source $BASE/script/config.sh
 IMAGE=centos:sshd
+
+SYSTMD="--privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
+Initial=/usr/sbin/init
 
 <<'COMMENT'
 docker rm -f sshd
@@ -30,7 +33,7 @@ fi
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
 	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 -p 3360:3360 $IMAGE $INITIAL
+	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 -p 3360:3360 $IMAGE $Initial
 	set +x
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
