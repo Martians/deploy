@@ -13,5 +13,5 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
 
 CMD ["/bin/bash"]
 
-# docker build -t ubuntu_local -f 0_ubuntu . && docker history ubuntu_local && echo; docker images ubuntu*
-# docker run -it --name ubuntu ubuntu_local
+# docker build -t ubuntu:base -f 0_ubuntu . && docker history ubuntu:base && echo; docker images ubuntu*
+# docker run -it --name ubuntu ubuntu:base

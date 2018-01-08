@@ -1,53 +1,67 @@
 
 ##########################################################
-# Usage
+# Enviroment 
 ## config
-script/config.sh: set TYPE
-0_base: comment clean yum cache
-
-## usage 
-server/http [param], when given any param, will recreate image
-server/proxy
-server/dns
-server/sshd
-
-## 0_ubuntu, not use public centos:base, use centos:7.1.1503
-1. in 0_centos:     initialize
-
-## 0_ubuntu, use centos:base <- 0_base, use repo
-1. in 0_centos: 	repo.sh, we can use local repo and proxy
-2. start server/http.sh, server/proxy.sh
-3. config server/sshd.sh, set REPO as "public local proxy"
-4. test proxy
-   in sshd-host1, yum install git -y
-   in proxy, docker logs -f proxy
-
-## 0_ubuntu, create sshd image, do more action, in sshd
-1. exec server/sshd.sh [script/name], or server/more.sh [script/name]
-
-## 0_ubuntu, create test work based in sshd
-1. server/test.sh script/postgres.sh
+    1. script/config.sh: set current work TYPE, set macro config
+    2. macro in each server script: sshd.sh(NAME REPO PORT MORE) and so on
 
 ##########################################################
 # Template
-## 0_base: centos:base, not clean cache, only for service setup
-## 0_centos: centos template
-## 0_ubuntu: ubuntu template 
+## 0_centos: centos:base
+    1. use centos:7.4.1708, 7.1.1503 can't work with systemd
+    2. child：0_server
+    
+## 0_ubuntu: ubuntu template
+
+## 0_server: server template <- centos:base
+    1. this is a templete for other server
+    use initialize.sh if not based on 0_centos(centos:base)
+    2. use repo.sh, we can use file and local repo and proxy
+
+## 0_proxy: only for proxy <- ubuntu:xenial
+
+## 0_test: use for test
+
 ## Dockerfile: nothing
 
-##########################################################
-# Enviroment Command
-## prepare proxy and http images
-command/prepare.sh  
 
-## create images and network, if not exist
-command/create.sh  
 
 ##########################################################
-# start server
+# Server
+## comment
+example: server/http [param]
+    1. when given any param, will recreate image, and execute the script
+    2. when given 0 or 1, will just recreate, no need do any script
 
-## sshd:   server/sshd.sh  
+## config server(see 0_server template)
+    1. setup server in script/server/http.sh and so on
+    2. start server in script/server/start_http.sh and so on
 
-## docker: server/host.sh  
+## create server
+    1. proxy： yum and apt proxy
+    2. http；  http server and yum server
+    3. dns：   dns server
+    4. ntp：   ntp server
+    4. sshd:   sshd, assign public ip; sshd.sh, set REPO as "public local proxy"
+    5. more:   same as sshd
+    5. test:   base on 0_test(centos:test), do some script, assign test ip
 
-## dns:    server/dns.sh
+## advance
+    1. systemd: enable systemd, assign test ip; should do init work for docker, manually; or systemd will failed
+    2. generate: generate data, like systemd, after start docker, execute start script use docker exec
+
+##########################################################
+# Command
+    1. create.sh:   create 0_centos images and network, if not exist
+    2. clean.sh：   remove all docker and images
+    3. dangling.sh: remove danling images
+    4. prepare.sh:  proxy.sh and http.sh
+
+##########################################################
+# Usage
+## Step
+    1. prepare proxy and http images, command/prepare.sh  
+    2. start other server, sh server/sshd.sh and so on
+
+## Comment
+    1. unused: script/hadoop/*.sh: postgres.sh generate.sh

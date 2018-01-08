@@ -26,7 +26,7 @@ fi
 if [ ! `docker images $IMAGE -q` ]; then
 	echo "create image"
 	set -x
-	docker build -t $IMAGE -f 0_centos --build-arg SERVICE=$NAME \
+	docker build -t $IMAGE -f 0_server --build-arg SERVICE=$NAME \
 		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
 	set +x
 fi

@@ -17,7 +17,6 @@ sudo yum makecache
 	yum install -y yum-plugin-priorities
 
 echo "yum install ..."
-# same as 0_base
 yum install -y sudo net-tools telnet traceroute tree vim 
 
 #bash-completion 

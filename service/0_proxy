@@ -7,11 +7,12 @@ From ubuntu:xenial
 MAINTAINER long@126.com
 
 ARG BASE=/docker
-ARG SERVICE="nothing"
-ARG LISTEN=10000
-ARG REPO=""
 
-EXPOSE $LISTEN
+#ARG SERVICE="nothing"
+#ARG REPO=""
+#ARG LISTEN=10000
+#EXPOSE $LISTEN
+
 COPY . $BASE
 
 RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \

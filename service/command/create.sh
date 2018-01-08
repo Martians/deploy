@@ -25,7 +25,7 @@ fi
 COMMENT
 
 if [ ! `docker images centos:base -q` ]; then
-	docker build -t centos:base -f 0_base .
+	docker build -t centos:base -f 0_centos .
 	docker history centos:base
 	# docker tag centos:base centos
 fi

@@ -17,5 +17,5 @@ RUN cd /etc/yum.repos.d/; mkdir -p save; mv *.repo save; \
 
 CMD ["/bin/bash"]
 
-# docker build -t centos_local -f 0_centos . && docker history centos_local && echo; docker images centos*
+# docker build -t centos_local -f 0_server . && docker history centos_local && echo; docker images centos*
 # docker run -it --name centos centos_local

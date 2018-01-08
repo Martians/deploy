@@ -4,7 +4,6 @@ cd $BASE
 
 ##############################################################################
 echo "install service ..."
-# same as 0_base
 
 # yum remove fakesystemd -y
 # yum install systemd -y
