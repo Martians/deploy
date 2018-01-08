@@ -25,14 +25,15 @@ docker rm -f sshd
 docker rmi -f $IMAGE
 COMMENT
 
-echo "always clear exist sshd host"
-#docker rm -f $NAME
+if [[ "$#" > 0 ]]; then
+	docker rm -f $NAME
+fi
 
 # check if docker ps output end with $NAME
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
 	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 $IMAGE $Initial
+	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 -p 3360:3360 $IMAGE $Initial
 	set +x
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
@@ -42,6 +43,15 @@ else
 	echo -e  "${GREEN_COLOR}-- already started --${RES}"
 fi
 
+###############################################################
+echo "set  host address:"
+sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
+
+echo "show host address:"
+docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
+echo
+
+###############################################################
 echo "@@@@@@@@ enter generate host: /docker/script/hadoop/generate.sh"
 docker exec -it $NAME /docker/script/hadoop/generate.sh
 

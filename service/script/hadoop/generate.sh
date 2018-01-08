@@ -3,7 +3,11 @@
 <<'COMMENT'
 COMMENT
 
+TABLE=csv_db
+SOURCE=/source/system
 CHECK_FILE=/executed
+#######################################################################
+
 #rm /etc/httpd/conf.d/local.conf -rf
 if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
 	echo "already install, just start"
@@ -26,14 +30,14 @@ mysql_secure_installation <<EOF
 y
 $PASSWD
 $PASSWD
-y
-y
+n
+n
 y
 y
 EOF
 
 # create table
-echo "create database csv_db; \q;" | mysql -u root -p$PASSWD
+echo "create database $TABLE; show databases; \q;" | mysql -u root -p$PASSWD
 
 
 #######################################################################
@@ -44,9 +48,15 @@ sudo cp -f /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak
 sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
 
 echo "exact data"
-tar -zxvf /source/benkeen-generatedata-3.2.8-1-ga5d6fea.tar.gz -C /
+tar -zxvf $SOURCE/benkeen-generatedata-3.2.8-1-ga5d6fea.tar.gz -C /
 mv benkeen-generatedata-a5d6fea $HOME
+
+# for apache user create settings.php in such dir
+chmod 777 $HOME
 chmod 777 /$HOME/cache
+
+# keep config in settings.php; remove settings.php and will reconfigure
+#rm $HOME/settings.example.php $HOME/settings.php  
 
 cat << EOF | sudo tee -a /etc/httpd/conf.d/generate.conf
 <VirtualHost *:$PORT>
@@ -71,6 +81,8 @@ COMMENT
 echo "start httpd"
 systemctl restart httpd
 
+
+#grant select,insert,update,delete,create,drop privileges on csv_db.* to root@localhost identified by '111111';
 #######################################################################
 
 echo 1 > $CHECK_FILE
