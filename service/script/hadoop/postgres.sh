@@ -9,14 +9,27 @@ cat << EOF > /var/lib/pgsql/.pgsql_profile
 export PGDATA=/var/lib/pgsql/9.5/data
 export PATH=\$PATH:/usr/pgsql-9.5/bin
 EOF
-
-su postgres
-sudo -u 
-su postgres psql
-
-sudo -u hive psql
-
 source ~/.bash_profile
+
+
+exit
+
+
+export PATH=\$PATH:/usr/pgsql-9.5/bin
+su postgres
+psql -U postgres  <<EOF
+
+y
+$PASSWD
+$PASSWD
+n
+n
+y
+y
+EOF
+
+
+
 initdb -U postgres -W
 echo 'initialize complete, press any key ...'
 read

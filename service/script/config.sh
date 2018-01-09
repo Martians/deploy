@@ -1,7 +1,7 @@
 #!/bin/sh
 
 TYPE="desktop"
-#TYPE="notebook"
+TYPE="notebook"
 
 #<<'COMMENT'
 #COMMENT
