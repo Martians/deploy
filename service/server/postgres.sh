@@ -59,5 +59,5 @@ docker exec -it $NAME /docker/script/hadoop/postgres.sh
 
 echo "enter host:
     docker exec -it $NAME /bin/bash
-    http://$LOCAL:$PORT
-"
+    
+"ssh root@$HOST
