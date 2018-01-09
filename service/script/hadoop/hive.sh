@@ -5,16 +5,32 @@ METASTOR_HOST=localhost
 
 SOURCE=/source
 
+CHECK_FILE=/executed
+#######################################################################
+
+#rm /etc/httpd/conf.d/local.conf -rf
+if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
+  echo "already install, just start"
+  systemctl start postgresql-9.5.service
+  
+  echo "start metastore"
+  nohup $HIVE_HOME/bin/hive --service metastore &
+
+  sleep 5
+  echo "start hiveserver2"
+  nohup $HIVE_HOME/bin/hive --service hiveserver2 &
+
+  sleep 5
+  jps
+  exit
+fi
+
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; pwd)
 
 #<<'COMMENT'
 ###########################################################################################
 sh $BASE/postgres.sh
-
-echo "config hive in postgres"
-systemctl enable postgresql-9.5.service
-systemctl restart postgresql-9.5.service
 
 sudo -u postgres psql <<EOF
 CREATE DATABASE hive;
@@ -133,10 +149,10 @@ schematool --dbType postgres --initSchema
 echo "start metastore"
 nohup hive --service metastore &
 
-sleep 2
+sleep 5
 echo "start hiveserver2"
 nohup hive --service hiveserver2 &
 
 jps
 
-# !connect jdbc:hive2://localhost:10000/default
+echo 1 > $CHECK_FILE

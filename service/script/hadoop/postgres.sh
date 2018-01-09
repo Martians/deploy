@@ -41,3 +41,7 @@ pg_ctl stop
 COMMENT
 
 ###########################################################################################
+
+echo "config hive in postgres"
+systemctl enable postgresql-9.5.service
+systemctl restart postgresql-9.5.service

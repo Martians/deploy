@@ -8,7 +8,7 @@ HOST=192.168.36.92
 
 MORE=$1
 #REPO=""
-PORT=22
+PORT=""
 
 ###############################################################
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
@@ -32,7 +32,7 @@ fi
 if [ "`docker ps -a | grep $NAME$`" == "" ]; then
 	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
 	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p $PORT:$PORT $IMAGE $INITIAL
+	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD $IMAGE $INITIAL
 	set +x
 	
 elif [ "`docker ps | grep $NAME$`" == "" ]; then
@@ -58,4 +58,8 @@ echo "enter host:
     docker exec -it $NAME /bin/bash
     ssh root@$HOST
 "
+
+###############################################################
+echo "beeline: !connect jdbc:hive2://localhost:10000/default"
 docker exec -it hive /bin/bash
+
