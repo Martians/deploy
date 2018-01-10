@@ -52,12 +52,3 @@ output
 *_tmp
 .vagrant
 *.dump
-
-
-# firt level ignore
-/config
-/script
-/skill-map
-/compile
-/install
-repo/
