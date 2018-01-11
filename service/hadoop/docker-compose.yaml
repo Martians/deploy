@@ -3,35 +3,21 @@ version: '3'
 services:
   namenode:
     image: 'uhopper/hadoop-namenode'
-    container_name: namenode
-    domainname: hadoop
+    #container_name: namenode
+    #domainname: data.com
     hostname: namenode
+    env_file: config.sh
+
     ports:
       - "8020:8020"
       - '50070:50070'
-    #net: hadoop
     volumes:
-      - /mnt/docker/name:/hadoop/dfs/name
+      - $NAME_HOME:$NAME_DEST
     environment:
-      - CLUSTER_NAME=sandbox
-      - HDFS_CONF_dfs_replication=1
+      - NOTHING
 
-  datanode:
-    image: "uhopper/hadoop-datanode"
-    container_name: datanode
-    domainname: hadoop
-    hostname: datanode
-    #net: hadoop
-    volumes:
-      - /mnt/docker/data:/hadoop/dfs/data
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-      - CLUSTER_NAME=sandbox
-      - HDFS_CONF_dfs_replication=1
-    depends_on:
-      - "namenode"
 
 networks:
-    default:
-        external:
-            name: sandbox-cluster
+  default:
+    external:
+      name: "hadoop-network"
