@@ -18,8 +18,6 @@ services:
   datanode:
     env_file: ./config.sh
     image: "uhopper/hadoop-datanode"
-    #container_name: datanode
-    #domainname: data.com
     hostname: datanode
     volumes:
       - $DATA_HOME:/hadoop/dfs/data
@@ -31,7 +29,6 @@ services:
   resource:
     env_file: ./config.sh
     image: uhopper/hadoop-resourcemanager
-    #container_name: resource
     hostname: resource
     ports:
       - "8088:8088"
@@ -43,7 +40,6 @@ services:
   nodemanager:
     env_file: ./config.sh
     image: uhopper/hadoop-nodemanager
-    #container_name: nodemanager
     hostname: nodemanager    
     ports:
       - "8042:8042"
@@ -51,7 +47,16 @@ services:
       - NOTHING
     depends_on:
       - "resource"
-      
+  
+  spark:
+    image: uhopper/hadoop-spark
+    domainname: hadoop
+    environment:
+      - NOTHING
+    command: tail -f /var/log/dmesg
+    depends_on:
+      - "nodemanager"
+
 networks:
   default:
     external:
