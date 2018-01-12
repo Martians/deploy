@@ -2,22 +2,57 @@ version: '3'
 
 services:
   namenode:
+    env_file: ./config.sh
     image: 'uhopper/hadoop-namenode'
     #container_name: namenode
     #domainname: data.com
     hostname: namenode
-    env_file: config.sh
-
     ports:
       - "8020:8020"
       - '50070:50070'
     volumes:
-      - $NAME_HOME:$NAME_DEST
+      - $NAME_HOME:/hadoop/dfs/name
     environment:
       - NOTHING
 
+  datanode:
+    env_file: ./config.sh
+    image: "uhopper/hadoop-datanode"
+    #container_name: datanode
+    #domainname: data.com
+    hostname: datanode
+    volumes:
+      - $DATA_HOME:/hadoop/dfs/data
+    environment:
+      - NOTHING
+    depends_on:
+      - "namenode"
 
+  resource:
+    env_file: ./config.sh
+    image: uhopper/hadoop-resourcemanager
+    #container_name: resource
+    hostname: resource
+    ports:
+      - "8088:8088"
+    environment:
+      - NOTHING
+    depends_on:
+      - "datanode"
+
+  nodemanager:
+    env_file: ./config.sh
+    image: uhopper/hadoop-nodemanager
+    #container_name: nodemanager
+    hostname: nodemanager    
+    ports:
+      - "8042:8042"
+    environment:
+      - NOTHING
+    depends_on:
+      - "resource"
+      
 networks:
   default:
     external:
-      name: "hadoop-network"
+      name: hadoop-network

@@ -3,16 +3,12 @@
 export NAME_HOME=/mnt/docker/name
 export DATA_HOME=/mnt/docker/data
 
-export NAME_HOST=172.20.0.10
-export DATA_HOST=172.20.0.11
-
-export DOCKER_NETWORK=hadoop-network
-
-
 ######################################################
-export NAME_DEST=/data/hdfs/name
-export NAME_DEST=/data/hdfs/data
+CLUSTER_NAME=local-hadoop
+HDFS_CONF_dfs_replication=1
+CORE_CONF_fs_defaultFS=hdfs://namenode:8020
 
-export CLUSTER_NAME=local-hadoop
-export HDFS_CONF_dfs_replication=1
-export CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+
+YARN_CONF_yarn_resourcemanager_hostname=resource
+YARN_CONF_yarn_log___aggregation___enable=true
+YARN_CONF_yarn_nodemanager_remote___app___log___dir=/app-logs

@@ -5,53 +5,44 @@
 
 source ./config.sh
 
-echo "start docker"
-docker-compose config
-#docker-compose -f docker-compose.yaml -p hadoop-local up
-
-<<'COMMENT'
-  datanode:
-    env_file: ./config.sh
-    image: "uhopper/hadoop-datanode"
-    #container_name: datanode
-    #domainname: data.com
-    hostname: datanode
-    networks:
-      hadoop-network:
-        ipv4_address: $DATA_HOST
-    volumes:
-      - $DATA_HOME:$NAME_DEST
-    environment:
-      - NOTHING
-    depends_on:
-      - "namenode"
-      
-echo "prepare network"
+#docker-compose config
 NETWORK=hadoop-network
-docker network rm $NETWORK
-docker network create --subnet=172.20.0.0/16 $NETWORK
 
-CLUSTER="local-hadoop"
-NAMENODE=namenode
-DATANODE=datanode
+if [ ! `docker network ls | grep $NETWORK -q` ]; then
+  echo "prepare network"
+  #docker network rm $NETWORK
+  set -x
+  docker network create --subnet=172.20.0.0/16 $NETWORK
+  set +x
+fi
 
-docker rm -f $NAMENODE
-docker rm -f $DATANODE
+if [[ "$#" > 0 ]]; then
+    #docker rm -f namenode
+    #docker rm -f datanode
+    docker-compose down    
+fi
 
+###############################################################
+echo "start docker"
+docker-compose -f docker-compose.yaml  up -d
+    
 echo "start client"
-CONFIG='-e "CORE_CONF_fs_defaultFS=hdfs://$NAMENODE:8020" -e "CLUSTER_NAME=$CLUSTER"'
+CONFIG="-e CORE_CONF_fs_defaultFS=hdfs://namenode:8020 -e CLUSTER_NAME=$CLUSTER_NAME"
 
-echo "
-    docker exec -it $NAMENODE /bin/bash
-    docker exec -it $DATANODE /bin/bash"
+echo "  enter host:
+    docker exec -it namenode /bin/bash
+    docker exec -it datanode /bin/bash
+    docker exec -it resource /bin/bash
+    docker exec -it nodemanager /bin/bash
+    docker run -it --rm --name hdfs-shell --network $NETWORK $CONFIG uhopper/hadoop:2.7.2 /bin/bash
+"
+echo "  hdfs test:
+    hdfs dfs -ls /
+    hdfs dfs -mkdir /tmp
+    hdfs dfs -put entrypoint.sh /tmp
+    hdfs dfs -cat /tmp/entrypoint.sh
+"
 
+echo "enter client:"
 docker run -it --rm --name hdfs-shell --network $NETWORK $CONFIG uhopper/hadoop:2.7.2 \
-   /bin/bash
-
-   hdfs dfs -mkdir /tmp
-   hdfs dfs -put entrypoint.sh /tmp
-   hdfs dfs -cat /tmp/entrypoint.sh
-
-
-# -p 50070:50070 -v //c//Users//admin//hadoop//share://home//share -e "CORE_CONF_fs_defaultFS=hdfs://172.18.0.10:8082" -e "HDFS_CONF_DFS_REPLICATION=2" -e "CLUSTER_NAME=cluster0" uhopper/hadoop-namenode:latest
-COMMENT
+  /opt/hadoop-2.7.2/bin/hdfs dfs -ls /
