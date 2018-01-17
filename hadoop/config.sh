@@ -6,8 +6,8 @@ export DATA_HOME=/mnt/docker/data
 ######################################################
 CLUSTER_NAME=local-hadoop
 HDFS_CONF_dfs_replication=1
+HDFS_CONF_dfs_permissions_enabled=false
 CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-
 
 YARN_CONF_yarn_resourcemanager_hostname=resource
 YARN_CONF_yarn_log___aggregation___enable=true
