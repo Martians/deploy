@@ -51,8 +51,8 @@ docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
 echo
 
 ###############################################################
-echo "@@@@@@@@ enter generate host: /docker/script/hadoop/hive.sh"
-docker exec -it $NAME /docker/script/hadoop/hive.sh
+echo "@@@@@@@@ enter generate host: /docker/service/script/hadoop/hive.sh"
+docker exec -it $NAME /docker/service/script/hadoop/hive.sh
 
 echo "enter host:
     docker exec -it $NAME /bin/bash

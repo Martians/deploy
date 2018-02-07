@@ -4,7 +4,7 @@
 # http://blog.csdn.net/luckytanggu/article/details/71514798
 
 NAME=systemd
-HOST=192.168.36.92
+HOST=192.168.36.99
 
 MORE=$1
 PORT=""

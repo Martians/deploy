@@ -23,7 +23,7 @@ docker rm -f sshd
 docker rmi -f $IMAGE
 COMMENT
 
-echo "always clear exist sshd host"
+echo "always clear exist postgres host"
 docker rm -f $NAME
 
 ###############################################################
@@ -54,10 +54,10 @@ docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
 echo
 
 ###############################################################
-echo "@@@@@@@@ enter generate host: /docker/script/hadoop/postgres.sh"
-docker exec -it $NAME /docker/script/hadoop/postgres.sh
+echo "@@@@@@@@ enter postgres host: /docker/service/script/hadoop/postgres.sh"
+docker exec -it $NAME /docker/service/script/hadoop/postgres.sh
 
 echo "enter host:
     docker exec -it $NAME /bin/bash
-    
-"ssh root@$HOST
+"
+ssh root@$HOST

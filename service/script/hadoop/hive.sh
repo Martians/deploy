@@ -47,7 +47,7 @@ EOF
 #<<'COMMENT'
 ###########################################################################################
 #create dir on hdfs
-sh $BASE/hadoop_client.sh
+sh $BASE/hive_hadoop_client.sh
 
 echo "prepare hadoop"
 hdfs dfs -mkdir -p \

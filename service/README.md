@@ -18,7 +18,7 @@
     use initialize.sh if not based on 0_centos(centos:base)
     2. use repo.sh, we can use file and local repo and proxy
 
-## 0_proxy: only for proxy <- ubuntu:xenial
+## 0_proxy: only for proxy <- ubuntu:xenial, now
 
 ## 0_test: use for test
 
@@ -27,27 +27,29 @@
 
 
 ##########################################################
-# Server
-## comment
+# Server conifg
+## server script usage
 example: server/http [param]
-    1. when given any param, will recreate image, and execute the script
-    2. when given 0 or 1, will just recreate, no need do any script
+    1. when given any param, will recreate image and docker, will execute the given script for build
+    2. when given 0 or 1, will just recreate image and docker, no need do any script
 
-## config server(see 0_server template)
-    1. setup server in script/server/http.sh and so on
-    2. start server in script/server/start_http.sh and so on
+## config new server(see 0_server template)
+    1. setup server: script for create server, in script/server/, as http.sh, for setup image and start docker
+    2. start server: script for start server, in script/server/, as start_http.sh
 
-## create server
-    1. proxy： yum and apt proxy
-    2. http；  http server and yum server
+## common server
+    1. proxy： yum and apt repository proxy
+    2. http；  http server, also used as yum server
     3. dns：   dns server
     4. ntp：   ntp server
-    4. sshd:   sshd, assign public ip; sshd.sh, set REPO as "public local proxy"
+    4. sshd:   sshd, assign public ip; sshd.sh, set REPO as "public local proxy". Can't used for systemd
     5. more:   same as sshd
     5. test:   base on 0_test(centos:test), do some script, assign test ip
 
-## advance
-    1. systemd: enable systemd, assign test ip; should do init work for docker, manually; or systemd will failed
+## advance server
+    1. systemd: enable systemd, assign test ip; 
+        1. init scipt already used by /bin/bash/init, init work for server can only invoke manually; or systemd will failed
+        2. see service\server\postgres.sh for example, after started, invoke script/hadoop/postgres.sh to start postgres server
     2. generate: generate data, like systemd, after start docker, execute start script use docker exec
 
 ##########################################################

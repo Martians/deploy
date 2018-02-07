@@ -65,4 +65,4 @@ echo "check state:
 
 ################################################################
 ## client
-## centos: /docker/script/initialize.sh public local proxy
+## centos: /docker/service/script/initialize.sh public local proxy
