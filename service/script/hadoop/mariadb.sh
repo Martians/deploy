@@ -63,8 +63,8 @@ CREATE USER '$USER'@'%' identified by '$PASS';
 GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%';
 FLUSH PRIVILEGES;
 
-USE mysql;
-SELECT host, user, password FROM user;
+USE mysql;		-- check result
+SELECT host, user, password FROM user;  
 SHOW grants for '$USER'@'%';
 EOF
 
@@ -79,6 +79,13 @@ SHOW COLUMNS FROM runoob_tbl;
 SHOW INDEX FROM runoob_tbl;
 SHOW grants;
 #GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' IDENTIFIED BY '$PASS' WITH GRANT OPTION;
+
+echo "create database spotproject; show databases; \q;" | mysql -u root -p111111
+mysql -u root -p111111 -Dspotproject < /root/import.sql
+mysql -u root -p111111 <<EOF
+use spotproject;
+select * from t_car;
+EOF
 COMMENT
 
 #######################################################################
