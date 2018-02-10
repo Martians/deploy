@@ -31,6 +31,7 @@ if [ $TYPE = "desktop" ]; then
 	HOST1=192.168.36.11
 	HOST2=192.168.36.12
 	TEST_HOST=192.168.36.99
+	DB_HOST=192.168.36.91
 
 elif [ $TYPE = "notebook" ]; then
 	DEVICE=ens38 
@@ -42,6 +43,8 @@ elif [ $TYPE = "notebook" ]; then
 	HOST1=192.168.127.11
 	HOST2=192.168.127.12
 	TEST_HOST=192.168.127.99
+	DB_HOST=192.168.127.91
+
 else
 	echo "type nothing"
 	sleep 5

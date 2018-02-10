@@ -4,7 +4,6 @@
 # http://blog.csdn.net/luckytanggu/article/details/71514798
 
 NAME=systemd
-HOST=192.168.36.99
 
 MORE=$1
 PORT=""
@@ -46,7 +45,7 @@ fi
 echo
 ###############################################################
 echo "set  host address:"
-sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
+sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
 
 echo "show host address:"
 docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
@@ -54,7 +53,7 @@ echo
 
 echo "enter host:
     docker exec -it $NAME /bin/bash
-    ssh root@$HOST
+    ssh root@$TEST_HOST
 "
 
 echo "@@@@@@@@ enter test host @@@@@@@@@"

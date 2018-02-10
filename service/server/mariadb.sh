@@ -5,7 +5,6 @@
 # https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
 NAME=mariadb
-HOST=192.168.36.91
 
 MORE=$1
 #REPO=""
@@ -47,7 +46,7 @@ fi
 
 ###############################################################
 echo "set  host address:"
-sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
+sudo pipework $DEVICE $NAME $DB_HOST/$SUBNET@$GATEWAY
 
 echo "show host address:"
 docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
@@ -60,4 +59,4 @@ docker exec -it $NAME /docker/service/script/hadoop/mariadb.sh
 echo "enter host:
     docker exec -it $NAME /bin/bash
     
-"ssh root@$HOST
+"ssh root@$DB_HOST
