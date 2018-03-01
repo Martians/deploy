@@ -1,0 +1,37 @@
+
+# https://hub.docker.com/_/centos/
+# https://github.com/CentOS/sig-cloud-instance-images/blob/bc561dfdd671d612dbb9f92e7e17dd8009befc44/docker/Dockerfile
+# centos7.4.1708, 7.4.1708
+# centos7.3.1611, 7.3.1611
+# centos7.2.1511, 7.2.1511
+# centos7.1.1503, 7.1.1503
+
+From centos:7.4.1708
+# From centos:base
+
+MAINTAINER long@126.com
+
+ARG BASE=/docker
+ARG SERVICE="sshd"
+ARG LISTEN=10000
+ARG REPO="public"
+ARG MORE=""
+
+COPY . $BASE
+
+# RUN $BASE/script/initialize.sh $REPO && \
+RUN	$BASE/script/repo.sh $REPO \
+	&& $BASE/script/system.sh  \
+	&& $BASE/script/common.sh  \
+	&& ([ "$MORE" == "" -o "$MORE" == "1" -o "$MORE" == "0" ] || $BASE/$MORE) \
+	&& $BASE/script/server/$SERVICE.sh \
+	&& $BASE/script/clean.sh \
+	&& cp $BASE/script/server/start_$SERVICE.sh /start.sh
+
+#ARG VOLUME="/disk"
+#VOLUME $VOLUME
+
+EXPOSE $LISTEN
+
+CMD ["/bin/bash"]
+CMD ["/start.sh"]
