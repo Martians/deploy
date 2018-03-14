@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 BASE=$(cd "$(dirname "$0")"; cd ../..; pwd)
 cd $BASE
 

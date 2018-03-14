@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "clear dangling images"
 # docker stop $(docker ps -aq)

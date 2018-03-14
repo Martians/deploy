@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SOURCE=/source
 HADOOP_HOME=/hadoop-2.7.3

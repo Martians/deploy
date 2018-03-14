@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NAME=http
 PORT="80"

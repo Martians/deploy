@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 WORK=/mnt/disk
 BASE=$(cd "$(dirname "$0")"; cd ..; pwd)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DOMAIN="data.com"
 NETMASK="255.255.254.0"

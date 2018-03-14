@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NAME=proxy
 PORT=3142

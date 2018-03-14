@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NAME=dns
 PORT="53 53/udp"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # http://blog.csdn.net/pugu12/article/details/51241174
 
 echo 'install postgres'

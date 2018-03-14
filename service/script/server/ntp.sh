@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 sudo yum install -y ntp ntpdate
 
 echo "repo: config ntp server"

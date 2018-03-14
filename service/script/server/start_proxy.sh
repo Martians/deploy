@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "start proxy"
 /etc/init.d/apt-cacher-ng start

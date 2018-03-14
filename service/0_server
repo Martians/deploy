@@ -20,7 +20,8 @@ ARG MORE=""
 COPY . $BASE
 
 # RUN $BASE/script/initialize.sh $REPO && \
-RUN	$BASE/script/repo.sh $REPO \
+RUN	echo "start construct" 
+	&& $BASE/script/repo.sh $REPO \
 	&& $BASE/script/system.sh  \
 	&& $BASE/script/common.sh  \
 	&& ([ "$MORE" == "" -o "$MORE" == "1" -o "$MORE" == "0" ] || $BASE/$MORE) \
@@ -35,3 +36,4 @@ EXPOSE $LISTEN
 
 CMD ["/bin/bash"]
 CMD ["/start.sh"]
+doc

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 yum clean all
 #rm -rf /var/log/*

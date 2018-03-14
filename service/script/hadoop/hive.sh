@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 HIVE_HOME=/apache-hive-2.3.2-bin
 POSTGRES_HOST=localhost
 METASTOR_HOST=localhost

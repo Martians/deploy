@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # config http://blog.csdn.net/field_yang/article/details/51568861
 
 # https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
