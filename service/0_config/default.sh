@@ -43,6 +43,11 @@ SEGMENT=192.168.36
 #############################################################################
 #### 相对固定
 
+# 此项必须进行设置，否则会使用默认值
+#	public local(NAT source) proxy file
+REPO_MASK="public local proxy"
+
+
 BRIDGE=eth0m
 DOMAIN="data.com"
 #############################################################################
@@ -53,3 +58,15 @@ REPO_DST=/html
 ## Directory
 REPO_SRC=/mnt/repo
 PROXY_SRC=/mnt/proxy
+
+
+#############################################################################
+## 无需覆盖的配置
+
+# 使用 origin（原生），或者base（经过改进的基础班）
+#	影响 0_Server 模板，和Initializer脚本
+USING_BASE=1
+IMAGE_PATH=template
+
+BASE_IMAGE_PATH=/0_server
+BASE_IMAGE_NAME=centos:base

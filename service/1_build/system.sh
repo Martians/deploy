@@ -3,4 +3,4 @@
 <<'COMMENT'
 COMMENT
 
-echo "common complete ..."
+echo "System complete ..."
