@@ -108,10 +108,10 @@ create_docker() {
 	if [[ $IMAGE == "" ]]; then
 		IMAGE=centos:$NAME
 	fi
-	echo "name: " $NAME
-	echo "port: " $PORT
-	echo "type: " $TYPE
-	echo "args: " $ARGS
+	# echo "name: " $NAME
+	# echo "port: " $PORT
+	# echo "type: " $TYPE
+	# echo "args: " $ARGS
 	# exit 1
 	# echo "image: "$IMAGE
 	# exit 1
@@ -146,10 +146,11 @@ create_docker() {
  
 display_state() {
 	sudo netstat -antp | grep :$PORT[\t\ ] --color
-	echo "brower:
-	    docker exec -it $NAME /bin/bash
-	    http://$LOCAL:$PORT
-	"
+	
+echo "brower:
+    docker exec -it $NAME /bin/bash
+    http://$LOCAL:$PORT
+"
 }
 
 ########################################################################################

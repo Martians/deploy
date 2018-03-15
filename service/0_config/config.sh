@@ -13,14 +13,21 @@ echo "config.sh: base path - $BASE_PATH"
 . $BASE_PATH/0_config/macro.sh
 
 # 如果找到本地配置，就更新部分配置项
-#CONFIG_PATH=~/.docker_config
-CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
+CONFIG_PATH=~/.docker_config
+#CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
 #CONFIG_PATH=$BASE_PATH/0_config/example/config_notebook.sh
 if [ -f "$CONFIG_PATH" ]; then
 	# echo "new path"
 	. $CONFIG_PATH
+
+# 不是docker image在执行 initialize脚本时，就显示
+elif [[ $0 =~ "initialize" ]]; then
+	echo "exec config.sh in docker image bulding"
+	
 else
+	echo $0
 	color_output "You should define you own config: $CONFIG_PATH"
+	echo "cp $BASE_PATH/0_config/example/config_desktop.sh ~/.docker_config"
 	exit 1
 fi
 
@@ -53,25 +60,3 @@ fi
 
 # echo "macro: "
 # echo "	global: $GLOBAL_MACRO"
-server/ 
-    ├── base                             
-    │   ├── dns.sh
-    │   ├── host.sh
-    │   ├── http.sh
-    │   ├── ntp.sh
-    │   ├── proxy.sh
-    │   ├── sshd.sh
-    │   └── systemd.sh
-    ├── command
-    │   ├── clean.sh
-    │   ├── create.sh
-    │   ├── dangling.sh
-    │   ├── prepare.sh
-    │   └── README.md
-    ├── database
-    │   ├── hive.sh
-    │   ├── mariadb.sh
-    │   └── postgres.sh
-    ├── generate.sh
-    ├── more.sh
-    └── test.sh
