@@ -22,5 +22,6 @@ success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 # 创建容器
 ARGS="-p 123:123/udp"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
+
 ###############################################################
-display_state
+display_brower

@@ -201,7 +201,6 @@ create_prepare() {
 
 	################################################################
 	for var in $*; do
-		echo "11 $var"
 		# 如果其依赖的docker不存在(base docker)，就创建出来
 		if [[ `docker ps | grep "$var$"` == "" ]]; then
 			color_output "prepare: $var"
@@ -250,8 +249,8 @@ alloc_network() {
 }
 
 ########################################################################################
-display_state() {
-	sudo netstat -antp | grep :$PORT[\t\ ] --color
+display_brower() {
+sudo netstat -antp | grep :$PORT[\t\ ] --color
 	
 echo "brower:
     docker exec -it $NAME /bin/bash
@@ -259,23 +258,22 @@ echo "brower:
 "
 }
 
-display_sshd() {
+display_host() {
+if [[ $1 != "" ]]; then
 	color_output "ssh clean cache [client side]:"
 	echo "    rm ~/.ssh/known_hosts -f
 or,
     echo "StrictHostKeyChecking=no" > ~/.ssh/config
     echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
 "
-
 	# docker 内部，网卡名称是 eth1
 	echo "show host address:"
 	docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 	echo
+fi
 
-	echo "enter host:
-	    docker exec -it $NAME /bin/bash
-	    ssh root@$HOST
-	"
-	echo "@@@@@@@@ enter test host @@@@@@@@@"
-	docker exec -it $NAME /bin/bash
+echo "enter host:
+    docker exec -it $NAME /bin/bash
+    ssh root@$HOST
+"
 }

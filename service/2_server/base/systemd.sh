@@ -26,4 +26,8 @@ success create_docker -n $NAME -p $PORT -i centos:sshd \
 HOST=$(alloc_host $HOST)
 alloc_network $HOST
 
-display_sshd
+###############################################################
+display_host
+
+echo "@@@@@@@@ enter host @@@@@@@@@"
+docker exec -it $NAME /bin/bash

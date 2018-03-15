@@ -15,6 +15,7 @@ if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
 	systemctl start httpd
 	exit
 fi
+
 #######################################################################
 yum -y install mariadb mariadb-server
 yum -y install httpd php php-mysql

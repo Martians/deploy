@@ -23,7 +23,7 @@ ARGS="-p 53:53/tcp -p 53:53/udp"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################
-display_state
+display_brower
 
 echo "
     dig +short host1.data.com @127.0.0.1

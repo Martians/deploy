@@ -24,4 +24,4 @@ ARGS="-v $HOST_PATH_REPO:$DOCK_PATH_REPO"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################
-display_state
+display_brower

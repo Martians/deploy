@@ -73,3 +73,4 @@ BUILD_PATH=1_build
 IMAGE_PATH=template
 BASE_SERVE_PATH=2_server/base
 
+DOCK_BASE_PATH=/docker/service

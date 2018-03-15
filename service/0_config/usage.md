@@ -6,6 +6,7 @@
     2. 分配的IP：新建的容器，将被分配的IP信息，预制了 enum 类型的几种常用Host
     3. 目录位置，Http、Proxy的Host宿主机上配置
 2. Volume基本都没怎么配置
+3. database的用户名密码没有专门配置
 
 # Image
 ## 是否使用BaseImage
@@ -25,6 +26,10 @@
 ## 执行命令
     1. 全部清理：server/command/clean 1, 清理所有image、docker、network、volume
     2. 创建基础：server/command/common， 创建 sshd、systemd
+
+## 执行依赖
+    1. systemd依赖于sshd，启动时没有会优先创建
+    2. database中的hive、generate依赖于source目录中，放置安装程序包
 
 #################################################################################################
 ##时 目录结构

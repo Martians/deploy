@@ -25,12 +25,15 @@ if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
   exit
 fi
 
-###############################################################
-BASE=$(cd "$(dirname "$0")"; pwd)
+###########################################################################################
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
+
+. 0_config/config.sh
 
 #<<'COMMENT'
 ###########################################################################################
-sh $BASE/postgres.sh
+sh $BASE_PATH/1_build/database/postgres.sh
 
 sudo -u postgres psql <<EOF
 CREATE DATABASE hive;
@@ -47,7 +50,7 @@ EOF
 #<<'COMMENT'
 ###########################################################################################
 #create dir on hdfs
-sh $BASE/hive_hadoop_client.sh
+sh $BASE_PATH/1_build/database/hive_hadoop_client.sh
 
 echo "prepare hadoop"
 hdfs dfs -mkdir -p \

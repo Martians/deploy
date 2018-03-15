@@ -23,7 +23,7 @@ ARGS="-v $HOST_PATH_PROXY:$DOCK_PATH_PROXY"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################
-display_state
+display_brower
 
 echo "check state:
     docker exec proxy du -ch --max-depth=1 /var/cache/apt-cacher-ng

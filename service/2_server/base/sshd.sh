@@ -31,4 +31,5 @@ success create_docker -n $NAME -p $PORT -t $1
 HOST=$(alloc_host $HOST)
 alloc_network $HOST
 
-display_sshd
+###############################################################
+display_host 1

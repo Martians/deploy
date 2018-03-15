@@ -1,62 +1,39 @@
 #!/bin/bash
 # config http://blog.csdn.net/field_yang/article/details/51568861
 
-# https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
-# https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
+# http://blog.csdn.net/luckytanggu/article/details/71514798
 
 NAME=mariadb
-
-MORE=$1
-#REPO=""
-
-###############################################################
-BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
-cd $BASE
-
-source $BASE/command/create.sh
-source $BASE/script/config.sh
-IMAGE=centos:sshd
-
-<<'COMMENT'
-docker rm -f sshd
-docker rmi -f $IMAGE
-COMMENT
-
-# echo "always clear exist sshd host"
-# docker rm -f $NAME
+REPO="public local proxy"
+PORT="0"
+HOST=DB
 
 ###############################################################
-if [[ "$#" > 0 ]]; then
-	docker rm -f $NAME
-fi
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
 
-# check if docker ps output end with $NAME
-if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
-	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD $IMAGE $INITIAL
-	set +x
-	
-elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- starting docker ... --${RES}"
-	docker start $NAME
-else
-	echo -e  "${GREEN_COLOR}-- already started --${RES}"
-fi
+. 0_config/config.sh
 
 ###############################################################
-echo "set  host address:"
-sudo pipework $DEVICE $NAME $DB_HOST/$SUBNET@$GATEWAY
 
-echo "show host address:"
-docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color
-echo
+# 确保必须的镜像已经安装好
+create_prepare sshd
+
+# 创建容器
+success create_docker -n $NAME -p $PORT -i centos:sshd \
+	-a $(encode $SYSTMD) -e $INITIAL -t $1 
 
 ###############################################################
-echo "@@@@@@@@ enter mariadb host: /docker/service/script/hadoop/mariadb.sh"
-docker exec -it $NAME /docker/service/script/hadoop/mariadb.sh
+HOST=$(alloc_host $HOST)
+alloc_network $HOST
 
-echo "enter host:
-    docker exec -it $NAME /bin/bash
-    
-"ssh root@$DB_HOST
+###############################################################
+script=$DOCK_BASE_PATH/$BUILD_PATH/database/mariadb.sh
+echo "@@@@@@@@ exec $NAME host: $script"
+docker exec -it $NAME $script
+
+###############################################################
+display_host
+
+echo "@@@@@@@@ enter host @@@@@@@@@"
+docker exec -it $NAME /bin/bash

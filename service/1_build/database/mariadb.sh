@@ -1,7 +1,6 @@
 #!/bin/bash
 # http://blog.csdn.net/pugu12/article/details/51241174
 
-#!/bin/bash
 ROOT_PASS=111111
 USER=long 
 PASS=111111
