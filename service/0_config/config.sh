@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 调用config.sh的脚本，已经设置好了 BASE_PATH
+# 那些主动调用config.sh的脚本，已经设置好了 BASE_PATH，此处可以直接使用
 echo "config.sh: base path - $BASE_PATH"
 
 # 工具函数
@@ -19,6 +19,9 @@ CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
 if [ -f "$CONFIG_PATH" ]; then
 	# echo "new path"
 	. $CONFIG_PATH
+else
+	color_output "You should define you own config: $CONFIG_PATH"
+	exit 1
 fi
 
 MACRO_PATH=~/.docker_macro
@@ -45,14 +48,30 @@ fi
 # echo " 	DB: $(alloc_host DB)"
 
 # echo "server: "
-# echo "	http:  $REPO_HOST, dir: $REPO_SRC, dst: $REPO_DST"
-# echo "	proxy: $REPO_HOST, dir: $PROXY_SRC"
+# echo "	http:  $REPO_HOST, dir: $HOST_PATH_REPO, dst: $DOCK_PATH_REPO"
+# echo "	proxy: $REPO_HOST, dir: $HOST_PATH_PROXY"
 
 # echo "macro: "
 # echo "	global: $GLOBAL_MACRO"
-
-###########################################
-# 调用堆栈
-
-# 是否使用BAseImage
-# 使用哪几种仓库
+server/ 
+    ├── base                             
+    │   ├── dns.sh
+    │   ├── host.sh
+    │   ├── http.sh
+    │   ├── ntp.sh
+    │   ├── proxy.sh
+    │   ├── sshd.sh
+    │   └── systemd.sh
+    ├── command
+    │   ├── clean.sh
+    │   ├── create.sh
+    │   ├── dangling.sh
+    │   ├── prepare.sh
+    │   └── README.md
+    ├── database
+    │   ├── hive.sh
+    │   ├── mariadb.sh
+    │   └── postgres.sh
+    ├── generate.sh
+    ├── more.sh
+    └── test.sh

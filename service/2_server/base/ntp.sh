@@ -1,48 +1,26 @@
 #!/bin/bash
 
 NAME=ntp
-PORT="123/udp"
-REPO=""
+PORT="0"
+REPO="public"
+HOST=
 
 ###############################################################
-BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
-cd $BASE
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
 
-source $BASE/command/create.sh
-source $BASE/script/config.sh
-IMAGE=centos:$NAME
+. 0_config/config.sh
 
-<<'COMMENT'
-docker rm -f $NAME
-docker rmi -f $IMAGE
-COMMENT
-
-if [[ "$#" > 0 ]]; then
-    docker rm -f $NAME
-    docker rmi -f $IMAGE
-fi
 ###############################################################
 
-if [ ! `docker images $IMAGE -q` ]; then
-	echo "create image"
-	set -x
-	docker build -t $IMAGE -f 0_server --build-arg SERVICE=$NAME \
-		--build-arg LISTEN="$PORT" --build-arg REPO="$REPO" .
-	set +x
-fi
+# 确保必须的镜像已经安装好
+create_prepare
 
-# check if docker ps output end with $NAME
-if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
-	set -x
-	docker run -itd --name $NAME -p 123:$PORT -h $NAME $IMAGE
-	set +x
-	# docker run -itd --name $NAME -P $IMAGE # not work?
-elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- starting docker ... --${RES}"
-	docker start $NAME
-else
-	echo -e  "${GREEN_COLOR}-- already started --${RES}"
-fi
+# 创建镜像
+success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 
-sudo netstat -antp | grep :$PORT[\t\ ] --color
+# 创建容器
+ARGS="-p 123:123/udp"
+success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
+###############################################################
+display_state

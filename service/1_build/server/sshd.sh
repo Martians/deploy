@@ -1,8 +1,5 @@
 #!/bin/bash
 
-BASE=$(cd "$(dirname "$0")"; cd ..; cd ..; pwd)
-cd $BASE
-
 source $BASE/script/advance.sh
 
 yum install -y passwd openssh-server openssh-clients

@@ -11,15 +11,15 @@ cd $BASE_PATH
 
 . 0_config/config.sh
 
-# if [ ! -n "$PROXY_SRC" -o ! -d "$PROXY_SRC" ]; then
-#     PROXY_SRC=~/proxy
+# if [ ! -n "$HOST_PATH_PROXY" -o ! -d "$HOST_PATH_PROXY" ]; then
+#     HOST_PATH_PROXY=~/proxy
 # fi
 
 ###############################################################
 # 创建 proxy镜像
 create_proxy -t $1
 
-ARGS="-v $PROXY_SRC:$PROXY_DST"
+ARGS="-v $HOST_PATH_PROXY:$DOCK_PATH_PROXY"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################

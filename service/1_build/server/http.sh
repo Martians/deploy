@@ -13,8 +13,8 @@ sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
 sudo rm /etc/httpd/conf.d/local.conf -rf
 cat << EOF | sudo tee -a /etc/httpd/conf.d/local.conf
 <VirtualHost *:80>
-    DocumentRoot "$REPO_DST"
-    <Directory "$REPO_DST">
+    DocumentRoot "$DOCK_PATH_REPO"
+    <Directory "$DOCK_PATH_REPO">
         Options Indexes FollowSymLinks
         AllowOverride None
         Require all granted
@@ -22,7 +22,7 @@ cat << EOF | sudo tee -a /etc/httpd/conf.d/local.conf
 </VirtualHost>
 EOF
 
-mkdir $REPO_DST -p
+mkdir $DOCK_PATH_REPO -p
 
 work_output "http completed!"
 echo  

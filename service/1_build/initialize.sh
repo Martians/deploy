@@ -38,6 +38,9 @@ parse_param $@
 ##############################################################################
 ## Repo
 if [ "$REPO" ]; then
+	if [[ $REPO == "" ]]; then
+		REPO="public"
+	fi
 	scripts source 1_build/repo.sh $REPO
 	cd $BASE_PATH
 fi

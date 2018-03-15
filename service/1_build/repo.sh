@@ -70,7 +70,7 @@ if [[ $REPO_FILE == 1 ]]; then
 cat << EOF | sudo tee -a /etc/yum.repos.d/file.repo
 [local_file]
 name=local file repository
-baseurl=file://$REPO_DST/common/centos7/
+baseurl=file://$DOCK_PATH_REPO/common/centos7/
 gpgcheck=0
 enabled=1
 priority=1

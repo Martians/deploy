@@ -20,7 +20,8 @@ create_prepare
 success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 
 # 创建容器
-ARGS="-v $REPO_SRC:$REPO_DST"
+ARGS="-v $HOST_PATH_REPO:$DOCK_PATH_REPO"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
+
 ###############################################################
 display_state

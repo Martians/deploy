@@ -52,13 +52,13 @@ BRIDGE=eth0m
 DOMAIN="data.com"
 #############################################################################
 # HTTP docker 里边，对应的数据目录
-REPO_DST=/html
-PROXY_DST=/var/cache/apt-cacher-ng
+DOCK_PATH_REPO=/html
+DOCK_PATH_PROXY=/var/cache/apt-cacher-ng
 
 #############################################################################
 ## Directory
-REPO_SRC=/mnt/repo
-PROXY_SRC=/mnt/proxy
+HOST_PATH_REPO=/mnt/repo
+HOST_PATH_PROXY=/mnt/proxy
 
 
 #############################################################################
@@ -68,6 +68,7 @@ PROXY_SRC=/mnt/proxy
 #	影响 0_Server 模板，和Initializer脚本
 USING_BASE=1
 
+BUILD_PATH=1_build
 IMAGE_PATH=template
 BASE_SERVE_PATH=2_server/base
 

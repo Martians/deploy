@@ -3,27 +3,6 @@
 <<'COMMENT'
 COMMENT
 
-########################################################################################
-file_output() {
-	echo 
-	echo "======================================"
-	echo "[file:  $@]"
-}
-
-step_output() {
-	#echo 
-	echo "  ==== " $@
-}
-
-work_output() {
-	#echo 
-	echo "  ---- " $@
-}
-
-color_output() {
-	echo -e  "${GREEN_COLOR}-- $@ -- ${RES}"
-}
-
 
 export -f file_output step_output work_output color_output
 
@@ -153,7 +132,7 @@ create_docker() {
 			$PORT	\
 			$GLOBAL_MACRO $ARGS \
 			$IMAGE
-		# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
+		# docker run -itd --name $NAME -h $NAME -v $HOST_PATH_REPO:/html -P $IMAGE
 		set +x
 
 	elif [[ `docker ps | grep "$NAME$"` == "" ]]; then

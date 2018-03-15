@@ -14,10 +14,10 @@ DOMAIN="data.com"
 BRIDGE=eth0m
 SUBNET=24
 
-REPO_SRC=/mnt/hgfs/repo
-PROXY_SRC=/mnt/hgfs/proxy
+HOST_PATH_REPO=/mnt/hgfs/repo
+HOST_PATH_PROXY=/mnt/hgfs/proxy
 
-REPO_DST=/html
+DOCK_PATH_REPO=/html
 
 #############################################################################
 if [ $TYPE = "desktop" ]; then

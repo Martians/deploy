@@ -23,8 +23,8 @@ HOST_DB=91
 ## Directory
 REPO_MASK="public local proxy"
 
-REPO_SRC=/mnt/hgfs/repo
-PROXY_SRC=/mnt/hgfs/proxy
+HOST_PATH_REPO=/mnt/hgfs/repo
+HOST_PATH_PROXY=/mnt/hgfs/proxy
 
 
 
