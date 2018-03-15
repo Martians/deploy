@@ -4,8 +4,8 @@ DOMAIN="data.com"
 NETMASK="255.255.254.0"
 GATEWAY="192.168.37.254"
 
-REPO_HOST="192.168.37.198"
-PROXY_HOST="192.168.37.199"
+HOST_REPO="192.168.37.198"
+HOST_PROXY="192.168.37.199"
 
 TEST_HOST="192.168.37.200"
 
@@ -15,8 +15,8 @@ HOST3_HOST="192.168.37.193"
 
 
 DNS_ARPA=168.192
-REPO_HOST_LAST=198.37
-PROXY_HOST_LAST=199.37
+HOST_REPO_LAST=198.37
+HOST_PROXY_LAST=199.37
 PUBLIC_DNS=192.168.30.1
 
 echo "repo: install dns server"
@@ -55,10 +55,10 @@ cat << EOF | sudo tee -a /var/named/$DOMAIN
         3H)     ; Negative Cache TTL
 ;
         IN   NS  ns.$DOMAIN.
-ns      IN   A   $REPO_HOST
+ns      IN   A   $HOST_REPO
 
-repo    IN   A   $REPO_HOST
-proxy   IN   A   $PROXY_HOST
+repo    IN   A   $HOST_REPO
+proxy   IN   A   $HOST_PROXY
 host1   IN   A   $HOST1_HOST
 host2   IN   A   $HOST2_HOST
 host3   IN   A   $HOST3_HOST
@@ -77,10 +77,10 @@ cat << EOF | sudo tee -a /var/named/$DOMAIN.arpa
         3H)     ; Negative Cache TTL
 
 @       IN    NS  ns.$DOMAIN.
-ns      IN    A   $REPO_HOST
+ns      IN    A   $HOST_REPO
 
-$REPO_HOST_LAST    IN   PTR  repo.$DOMAIN.
-$PROXY_HOST_LAST   IN   PTR  proxy.$DOMAIN.
+$HOST_REPO_LAST    IN   PTR  repo.$DOMAIN.
+$HOST_PROXY_LAST   IN   PTR  proxy.$DOMAIN.
 HOST1_HOST    IN   PTR  host1.$DOMAIN.
 HOST2_HOST    IN   PTR  host2.$DOMAIN.
 HOST3_HOST    IN   PTR  host3.$DOMAIN.
@@ -92,13 +92,13 @@ sudo systemctl restart named.service
 sudo systemctl enable named.service
 
 echo "repo: dns query - repo.$DOMAIN:"
-dig +short @$REPO_HOST repo.$DOMAIN 
+dig +short @$HOST_REPO repo.$DOMAIN 
 
-echo "repo: dns ptr - $REPO_HOST:"
-dig +short @$REPO_HOST -x $REPO_HOST 
+echo "repo: dns ptr - $HOST_REPO:"
+dig +short @$HOST_REPO -x $HOST_REPO 
 
 echo "repo: dns soa - repo.$DOMAIN:"
-dig @$REPO_HOST soa repo.$DOMAIN 
+dig @$HOST_REPO soa repo.$DOMAIN 
 
 echo "repo: dns completed"
 echo 

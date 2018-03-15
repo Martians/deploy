@@ -126,7 +126,7 @@ work_output() {
 color_output() {
 	echo -e  "${GREEN_COLOR}-- $@ -- ${RES}"
 }
-
+export -f file_output step_output work_output color_output
 
 #################################################################################################
 # 参数传递时进行的特殊字符转换：空格

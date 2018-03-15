@@ -13,7 +13,7 @@ parse_param() {
 	set -- $var 
 	#echo $*
 
-	while getopts :r:s:m opt
+	while getopts :r:s:m: opt
 	do
 		case "$opt" in
 			r) 	REPO=$(decode "$OPTARG");;
@@ -27,8 +27,7 @@ parse_param() {
 	# echo "SERVER: " $SERVER
 	# exit 1
 }
-parse_param $@
-
+parse_param $*
 
 ##############################################################################
 ## 执行说明

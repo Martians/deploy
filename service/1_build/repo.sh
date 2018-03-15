@@ -45,7 +45,7 @@ if [[ $REPO_LOCAL == 1 ]]; then
 cat << EOF | sudo tee -a /etc/yum.repos.d/local.repo
 [local_network]
 name=local network common repo
-baseurl=http://$REPO_HOST/common/centos7/
+baseurl=http://$HOST_REPO/common/centos7/
 gpgcheck=0
 enabled=1
 priority=1
@@ -58,7 +58,7 @@ fi
 ## Proxy：local netowrk proxy
 if [[ $REPO_PROXY == 1 ]]; then
 	work_output "set repo: proxy" 
-	sudo sed -i "/cachedir/a\proxy=http://$PROXY_HOST:3142" /etc/yum.conf
+	sudo sed -i "/cachedir/a\proxy=http://$HOST_PROXY:3142" /etc/yum.conf
 fi
 
 #################################################################

@@ -9,6 +9,7 @@ PORT=22
 REPO="public local proxy"
 # 1_HOST
 HOST=1
+
 ###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
 cd $BASE_PATH
@@ -26,10 +27,8 @@ success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 # 创建容器
 success create_docker -n $NAME -p $PORT -t $1 
 
-echo
 ###############################################################
-echo "set  host address:"
-sudo pipework $DEVICE host1 $HOST1/$SUBNET@$GATEWAY
+alloc_network $HOST
 
 echo "clean cache:
     rm ~/.ssh/known_hosts -f
@@ -38,14 +37,12 @@ or,
     echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
 "
 
+# docker 内部，网卡名称是 eth1
 echo "show host address:"
-docker exec host1 ip addr show eth1 | grep inet | grep [0-9.]*/ --color
+docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
 echo
 
 echo "enter host:
-    docker exec -it host1 /bin/bash
-    ssh root@$HOST2
+    docker exec -it $NAME /bin/bash
+    ssh root@$HOST
 "
-
-###############################################################
-display_state

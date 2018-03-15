@@ -1,6 +1,5 @@
 #!/bin/bash
 
 #############################################################################
-REPO_HOST=$LOCAL
-PROXY_HOST=$LOCAL
-
+HOST_REPO=$LOCAL
+HOST_PROXY=$LOCAL

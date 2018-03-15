@@ -19,16 +19,12 @@ CONFIG_PATH=~/.docker_config
 if [ -f "$CONFIG_PATH" ]; then
 	# echo "new path"
 	. $CONFIG_PATH
-
-# 不是docker image在执行 initialize脚本时，就显示
-elif [[ $0 =~ "initialize" ]]; then
-	echo "exec config.sh in docker image bulding"
-	
-else
-	echo $0
-	color_output "You should define you own config: $CONFIG_PATH"
-	echo "cp $BASE_PATH/0_config/example/config_desktop.sh ~/.docker_config"
-	exit 1
+#else
+	# 不能进行这个判断，在docker image执行过程中，会调用到这里
+	#	此时构建docker的用户并非是当前用户，而是 root
+	#color_output "You should define you own config: $CONFIG_PATH"
+	#echo "cp $BASE_PATH/0_config/example/config_desktop.sh ~/.docker_config"
+	#exit 1
 fi
 
 MACRO_PATH=~/.docker_macro
@@ -42,7 +38,6 @@ fi
 
 . $BASE_PATH/1_build/handle.sh
 
-
 ## 测试
 # echo "local: "
 # echo "	Host: $LOCAL, device: $DEVICE"
@@ -55,8 +50,8 @@ fi
 # echo " 	DB: $(alloc_host DB)"
 
 # echo "server: "
-# echo "	http:  $REPO_HOST, dir: $HOST_PATH_REPO, dst: $DOCK_PATH_REPO"
-# echo "	proxy: $REPO_HOST, dir: $HOST_PATH_PROXY"
+# echo "	http:  $HOST_REPO, dir: $HOST_PATH_REPO, dst: $DOCK_PATH_REPO"
+# echo "	proxy: $HOST_REPO, dir: $HOST_PATH_PROXY"
 
 # echo "macro: "
 # echo "	global: $GLOBAL_MACRO"

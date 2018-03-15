@@ -3,9 +3,7 @@
 <<'COMMENT'
 COMMENT
 
-
-export -f file_output step_output work_output color_output
-
+########################################################################################
 # 创建依赖的BASE image
 create_base() {
 
@@ -39,7 +37,6 @@ create_base() {
 	fi
 }
 
-########################################################################################
 create_image() {
 	success create_base
 	local PORT TYPE REPO NAME
@@ -112,7 +109,6 @@ create_docker() {
 	# echo "port: " $PORT
 	# echo "type: " $TYPE
 	# echo "args: " $ARGS
-	# exit 1
 	# echo "image: "$IMAGE
 	# exit 1
 
@@ -143,43 +139,6 @@ create_docker() {
 		color_output "already started"
 	fi
 }
- 
-display_state() {
-	sudo netstat -antp | grep :$PORT[\t\ ] --color
-	
-echo "brower:
-    docker exec -it $NAME /bin/bash
-    http://$LOCAL:$PORT
-"
-}
-
-########################################################################################
-# docker_sshd() {
-
-# }
-
-# docker_network() {
-# 	NETWORK=$LOCAL/$SUBNET 	          
-
-# 	if ifconfig | grep $BRIDGE > /dev/null; then
-# 		echo "network exist"
-# 	else
-# 		echo "create network"
-# 		sudo ip addr del $NETWORK dev $DEVICE; \
-# 				sudo ip link add link $DEVICE dev $BRIDGE type macvlan mode bridge; \
-# 				sudo ip link set $BRIDGE up; \
-# 				sudo ip addr add $NETWORK dev $BRIDGE; \
-# 				sudo route add default gw $GATEWAY	
-
-# 		echo "clear dangling images"
-# 		docker rmi -f $(docker images -aq -f dangling=true)
-# 	fi
-# }
-
-# alloc_network() {
-
-# }
-
 
 create_proxy() {
 	BASE_TMPLT=0_proxy
@@ -212,6 +171,7 @@ create_proxy() {
 # 在创建其他的容器之前，检查是否要先创建依赖容器
 create_prepare() {
 
+	################################################################
 	if [[ "$REPO" =~ "proxy" && "$REPO_MASK" =~ "proxy" ]]; then
 
 		if [[ `docker ps | grep "proxy$"` == "" ]]; then
@@ -226,9 +186,47 @@ create_prepare() {
 			sh $BASE_SERVE_PATH/http.sh
 		fi
 	fi
+}
 
-	# 必须清理掉，在安装其他服务的时候，触发了 create_proxy 时，其他服务也要重建 BASE_IMAGE
-	# BASE_TMPLT=
-	# BASE_IMAGE=
-	# IMAGE=
+########################################################################################
+create_network() {
+
+	NETWORK=$LOCAL/$SUBNET 	          
+
+	if [[ `ip address show | grep $BRIDGE` ]]; then
+		echo "network exist"
+	
+	else
+		color_output "create network"
+		sudo ip addr del $NETWORK dev $DEVICE; \
+				sudo ip link add link $DEVICE dev $BRIDGE type macvlan mode bridge; \
+				sudo ip link set $BRIDGE up; \
+				sudo ip addr add $NETWORK dev $BRIDGE; \
+				sudo route add default gw $GATEWAY	
+
+		color_output "clear dangling images"
+		docker rmi -f $(docker images -aq -f dangling=true)
+	fi
+}
+
+alloc_network() {
+	local HOST=$1
+	if [[ "$HOST" ]]; then
+		create_network
+	fi
+
+	echo "set  host address:"
+	set -x
+	sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
+	set +x
+}
+
+########################################################################################
+display_state() {
+	sudo netstat -antp | grep :$PORT[\t\ ] --color
+	
+echo "brower:
+    docker exec -it $NAME /bin/bash
+    http://$LOCAL:$PORT
+"
 }
