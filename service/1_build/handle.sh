@@ -63,6 +63,7 @@ create_base() {
 ########################################################################################
 create_image() {
 	success create_base
+	local PORT TYPE REPO NAME
 
 	local OPTIND
 	var=$*
@@ -79,10 +80,10 @@ create_image() {
 		*) 	echo "Unknown option: $OPT";;
 		esac
 	done
-	echo "repo: " $REPO
-	echo "name: " $NAME
-	echo "port: " $PORT
-	echo "type: " $TYPE
+	# echo "repo: " $REPO
+	# echo "name: " $NAME
+	# echo "port: " $PORT
+	# echo "type: " $TYPE
 	# exit 1
 
 	if [[ $IMAGE == "" ]]; then
@@ -92,7 +93,9 @@ create_image() {
 	# type == 1, remove image
 	if [[ $TYPE == 1 ]]; then
 		step_output "clean image: $NAME"
+		docker rm  -f $NAME
 		docker rmi -f $IMAGE
+		#sleep 1
 	fi
 
 	if [ ! `docker images $IMAGE -q` ]; then
@@ -108,6 +111,8 @@ create_image() {
 }
 
 create_docker() {
+	local PORT TYPE NAME ARGS
+
 	local OPTIND
 	var=$*
 	set -- $var 
@@ -115,7 +120,7 @@ create_docker() {
 	while getopts :n:p:t:a: opt; do
 		case "$opt" in
 			n) 	NAME=$OPTARG;;
-			p)	PORT=$(decode "$OPTARG");;
+			p)	PORT=$OPTARG;;
 			t)	TYPE=$OPTARG;;
 			a) 	ARGS=$(decode "$OPTARG");;
 			*) 	echo "Unknown option: $OPT";;
@@ -128,6 +133,7 @@ create_docker() {
 	echo "port: " $PORT
 	echo "type: " $TYPE
 	echo "args: " $ARGS
+	# exit 1
 	# echo "image: "$IMAGE
 	# exit 1
 
@@ -140,10 +146,11 @@ create_docker() {
 	# check if docker ps output end with $NAME
 	if [[ `docker ps -a | grep "$NAME$"` == "" ]]; then
 		color_output "create docker"
+		PORT=$(exist $PORT -p $PORT:$PORT)
 
 		set -x
 		docker run -itd --name $NAME -h $NAME \
-			-p $PORT:$PORT 		\
+			$PORT	\
 			$GLOBAL_MACRO $ARGS \
 			$IMAGE
 		# docker run -itd --name $NAME -h $NAME -v $REPO_SRC:/html -P $IMAGE
@@ -161,7 +168,7 @@ create_docker() {
 display_state() {
 	sudo netstat -antp | grep :$PORT[\t\ ] --color
 	echo "brower:
-	    docker exec -it http /bin/bash
+	    docker exec -it $NAME /bin/bash
 	    http://$LOCAL:$PORT
 	"
 }
@@ -193,29 +200,6 @@ display_state() {
 
 # }
 
-# 在创建其他的容器之前，检查是否要先创建依赖容器
-create_prepare() {
-
-	if [[ "$REPO" =~ "proxy" && "$REPO_MASK" =~ "proxy" ]]; then
-
-		if [[ `docker ps | grep "proxy$"` == "" ]]; then
-			echo "create prepare: proxy"
-			sh $BASE_SERVE_PATH/proxy.sh $*
-		fi
-	fi
-
-	if [[ "$REPO" =~ "local" && "$REPO_MASK" =~ "local" ]]; then
-		if [[ `docker ps | grep "http$"` == "" ]]; then
-			echo "create prepare: http"
-			sh $BASE_SERVE_PATH/http.sh
-		fi
-	fi
-
-	# 必须清理掉，在安装其他服务的时候，触发了 create_proxy 时，其他服务也要重建 BASE_IMAGE
-	# BASE_TMPLT=
-	# BASE_IMAGE=
-	# IMAGE=
-}
 
 create_proxy() {
 	BASE_TMPLT=0_proxy
@@ -243,4 +227,28 @@ create_proxy() {
 	fi
 
 	success create_base
+}
+
+# 在创建其他的容器之前，检查是否要先创建依赖容器
+create_prepare() {
+
+	if [[ "$REPO" =~ "proxy" && "$REPO_MASK" =~ "proxy" ]]; then
+
+		if [[ `docker ps | grep "proxy$"` == "" ]]; then
+			color_output "create prepare: proxy"
+			sh $BASE_SERVE_PATH/proxy.sh $*
+		fi
+	fi
+
+	if [[ "$REPO" =~ "local" && "$REPO_MASK" =~ "local" ]]; then
+		if [[ `docker ps | grep "http$"` == "" ]]; then
+			color_output "create prepare: http"
+			sh $BASE_SERVE_PATH/http.sh
+		fi
+	fi
+
+	# 必须清理掉，在安装其他服务的时候，触发了 create_proxy 时，其他服务也要重建 BASE_IMAGE
+	# BASE_TMPLT=
+	# BASE_IMAGE=
+	# IMAGE=
 }

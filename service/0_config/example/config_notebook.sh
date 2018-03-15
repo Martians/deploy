@@ -21,7 +21,7 @@ SEGMENT=192.168.127
 
 #############################################################################
 ## Directory
-REPO_MASK="public proxy"
+REPO_MASK="public local proxy"
 
 REPO_SRC=/mnt/hgfs/repo
 PROXY_SRC=/mnt/hgfs/proxy
