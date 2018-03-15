@@ -5,7 +5,7 @@
 # https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
 NAME=sshd
-PORT=22
+PORT=2222
 REPO="public local proxy"
 # 1_HOST
 HOST=1
@@ -28,21 +28,7 @@ success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 success create_docker -n $NAME -p $PORT -t $1 
 
 ###############################################################
+HOST=$(alloc_host $HOST)
 alloc_network $HOST
 
-echo "clean cache:
-    rm ~/.ssh/known_hosts -f
-or,
-    echo "StrictHostKeyChecking=no" > ~/.ssh/config
-    echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
-"
-
-# docker 内部，网卡名称是 eth1
-echo "show host address:"
-docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
-echo
-
-echo "enter host:
-    docker exec -it $NAME /bin/bash
-    ssh root@$HOST
-"
+display_sshd

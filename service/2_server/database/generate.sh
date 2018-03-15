@@ -49,7 +49,7 @@ echo "set  host address:"
 sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
 
 echo "show host address:"
-docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
+docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 echo
 COMMENT
 
@@ -59,5 +59,5 @@ docker exec -it $NAME /docker/service/script/hadoop/generate.sh
 
 echo "enter host:
     docker exec -it $NAME /bin/bash
-    http://$LOCAL:$PORT
+    http://$HOST_LOCAL:$PORT
 "

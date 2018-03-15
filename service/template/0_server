@@ -20,7 +20,6 @@ COPY . $BASE
 
 RUN $BASE/1_build/initialize.sh	\
 		-r $REPO 	\
-		-m $MORE 	\
 		-s $SERVICE
 
 #ARG VOLUME="/disk"

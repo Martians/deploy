@@ -28,7 +28,7 @@ COMMENT
 
 
 #####################################################################################
-NETWORK=$LOCAL/$SUBNET 	          
+NETWORK=$HOST_LOCAL/$SUBNET 	          
 
 if ifconfig | grep $BRIDGE > /dev/null; then
 	echo "network exist"

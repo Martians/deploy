@@ -41,8 +41,8 @@ sudo pipework $DEVICE h2 $HOST2/$SUBNET@$GATEWAY
 COMMENT
 
 echo "show host address:"
-docker exec h1 ip addr show eth0 | grep inet | grep [0-9.]*/ --color
-docker exec h2 ip addr show eth0 | grep inet | grep [0-9.]*/ --color
+docker exec h1 ip addr show eth0 | grep inet | grep [0-9.].*/ --color
+docker exec h2 ip addr show eth0 | grep inet | grep [0-9.].*/ --color
 echo
 
 echo "enter host:

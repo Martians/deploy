@@ -1,60 +1,29 @@
 #!/bin/bash
 # config http://blog.csdn.net/field_yang/article/details/51568861
-
 # http://blog.csdn.net/luckytanggu/article/details/71514798
 
 NAME=systemd
-
-MORE=$1
-PORT=""
-
-###############################################################
-BASE=$(cd "$(dirname "$0")"; cd ..; pwd)
-cd $BASE
-
-source $BASE/command/create.sh
-source $BASE/script/config.sh
-IMAGE=centos:sshd
-
-<<'COMMENT'
-docker rm -f sshd
-docker rmi -f $IMAGE
-COMMENT
-
-if [[ "$#" > 0 ]]; then
-	docker rm -f $NAME
-fi
+PORT="0"
+REPO="public local proxy"
+HOST=TEST
 
 ###############################################################
-# check if docker ps output end with $NAME
-if [ "`docker ps -a | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- create docker -- ${RES}"
-	set -x
-	docker run -itd --name $NAME -h $NAME $GLOBAL_MACRO $SYSTMD -p 808:808 $IMAGE $INITIAL
-	set +x
-	# -p 3360:3360 
-	
-elif [ "`docker ps | grep $NAME$`" == "" ]; then
-	echo -e  "${GREEN_COLOR}-- starting docker ... --${RES}"
-	docker start $NAME
-else
-	echo -e  "${GREEN_COLOR}-- already started --${RES}"
-fi
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
 
+. 0_config/config.sh
 
-echo
 ###############################################################
-echo "set  host address:"
-sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
 
-echo "show host address:"
-docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
-echo
+# 确保必须的镜像已经安装好
+create_prepare sshd
 
-echo "enter host:
-    docker exec -it $NAME /bin/bash
-    ssh root@$TEST_HOST
-"
+# 创建容器
+success create_docker -n $NAME -p $PORT -i centos:sshd \
+	-a $(encode $SYSTMD) -e $INITIAL -t $1 
 
-echo "@@@@@@@@ enter test host @@@@@@@@@"
-docker exec -it $NAME /bin/bash
+###############################################################
+HOST=$(alloc_host $HOST)
+alloc_network $HOST
+
+display_sshd

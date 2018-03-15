@@ -4,7 +4,7 @@
 ## Local Network
 DEVICE=ens33
 
-LOCAL=192.168.36.10
+HOST_LOCAL=192.168.36.10
 NETMASK=255.255.254.0
 GATEWAY=192.168.37.254
 SUBNET=23
@@ -31,6 +31,7 @@ SEGMENT=192.168.36
 	#	大小写匹配
 	alloc_host () {
 		data=`dyn_var HOST_$1`
+
 		# 判断是否包含 .
 		if [[ $data =~ "." ]]; then
 			echo "$data"

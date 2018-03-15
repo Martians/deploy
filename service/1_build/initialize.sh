@@ -46,8 +46,8 @@ fi
 
 ##############################################################################
 ## System
-scripts 1_build/system.sh
-scripts 1_build/common.sh
+scripts $BASE_PATH/1_build/system.sh
+scripts $BASE_PATH/1_build/common.sh
 
 ##############################################################################
 ## More Script
@@ -58,17 +58,13 @@ scripts 1_build/common.sh
 
 ##############################################################################
 ## Install service
-scripts source 1_build/server/$SERVER.sh
-cp 1_build/server/start_$SERVER.sh /start.sh
+scripts source $BASE_PATH/1_build/server/$SERVER.sh
 
-##############################################################################
-## Start srcipt
-
-
+cp $BASE_PATH/1_build/server/start_$SERVER.sh /start.sh
 
 ##############################################################################
 ## Clean
-scripts source 1_build/clean.sh
+scripts source $BASE_PATH/1_build/clean.sh
 
 ##############################################################################
 echo "initialize complete ..."

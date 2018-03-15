@@ -14,6 +14,7 @@ echo "config.sh: base path - $BASE_PATH"
 
 # 如果找到本地配置，就更新部分配置项
 CONFIG_PATH=~/.docker_config
+CONFIG_PATH_2=$BASE_PATH/0_config/example/config_temp.sh
 #CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
 #CONFIG_PATH=$BASE_PATH/0_config/example/config_notebook.sh
 if [ -f "$CONFIG_PATH" ]; then
@@ -25,6 +26,12 @@ if [ -f "$CONFIG_PATH" ]; then
 	#color_output "You should define you own config: $CONFIG_PATH"
 	#echo "cp $BASE_PATH/0_config/example/config_desktop.sh ~/.docker_config"
 	#exit 1
+
+# 在 Docker Image执行过程中，通过此处获取配置
+#	此时构建docker的用户并非是当前用户，而是 root
+#	这里是在构建时新复制出来的一份
+elif [ -f "$CONFIG_PATH_2" ]; then
+	. $CONFIG_PATH_2
 fi
 
 MACRO_PATH=~/.docker_macro
@@ -40,7 +47,7 @@ fi
 
 ## 测试
 # echo "local: "
-# echo "	Host: $LOCAL, device: $DEVICE"
+# echo "	Host: $HOST_LOCAL, device: $DEVICE"
 # echo "	subnet: $NETMASK, gateway: $GATEWAY, mask: $SUBNET"
 # echo "	domain: $DOMAIN"
 

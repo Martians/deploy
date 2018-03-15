@@ -68,21 +68,23 @@ create_image() {
 
 	# type == 1, remove image
 	if [[ $TYPE == 1 ]]; then
-		step_output "clean image: $NAME"
+		step_output "clean image: $IMAGE"
 		docker rm  -f $NAME
 		docker rmi -f $IMAGE
 		#sleep 1
 	fi
 
 	if [ ! `docker images $IMAGE -q` ]; then
-		step_output "create image for $NAME"
+		step_output "create image for $IMAGE"
 
+		sudo \cp $CONFIG_PATH $CONFIG_PATH_2
 		set -x
 		docker build -t $IMAGE -f $IMAGE_PATH/0_server \
 			--build-arg REPO=$(encode $REPO)	\
 			--build-arg SERVICE=$NAME 	\
 			--build-arg LISTEN="$PORT" .
 		set +x
+		sudo rm $CONFIG_PATH_2 -rf
 	fi
 }
 
@@ -93,11 +95,13 @@ create_docker() {
 	var=$*
 	set -- $var 
 	#echo "get $*"
-	while getopts :n:p:t:a: opt; do
+	while getopts :n:p:t:a:i:e: opt; do
 		case "$opt" in
 			n) 	NAME=$OPTARG;;
 			p)	PORT=$OPTARG;;
 			t)	TYPE=$OPTARG;;
+			e)	EXEC=$OPTARG;;
+			i)	IMAGE=$OPTARG;;
 			a) 	ARGS=$(decode "$OPTARG");;
 			*) 	echo "Unknown option: $OPT";;
 		esac
@@ -109,6 +113,7 @@ create_docker() {
 	# echo "port: " $PORT
 	# echo "type: " $TYPE
 	# echo "args: " $ARGS
+	# echo "exec: " $EXEC
 	# echo "image: "$IMAGE
 	# exit 1
 
@@ -118,21 +123,26 @@ create_docker() {
 		docker rm -f $NAME
 	fi
 
+	if [ ! `docker images $IMAGE -q` ]; then
+		color_output "docker $IMAGE not exist!"
+		exit 1
+	fi
+
 	# check if docker ps output end with $NAME
 	if [[ `docker ps -a | grep "$NAME$"` == "" ]]; then
-		color_output "create docker"
-		PORT=$(exist $PORT -p $PORT:$PORT)
+		color_output "create docker $NAME"
+		PORT_PARAM=$(exist $PORT -p $PORT:$PORT)
 
 		set -x
 		docker run -itd --name $NAME -h $NAME \
-			$PORT	\
+			$PORT_PARAM			\
 			$GLOBAL_MACRO $ARGS \
-			$IMAGE
+			$IMAGE $EXEC
 		# docker run -itd --name $NAME -h $NAME -v $HOST_PATH_REPO:/html -P $IMAGE
 		set +x
 
 	elif [[ `docker ps | grep "$NAME$"` == "" ]]; then
-		color_output "starting docker ..."
+		color_output "starting docker $NAME ..."
 		docker start $NAME
 
 	else
@@ -175,23 +185,41 @@ create_prepare() {
 	if [[ "$REPO" =~ "proxy" && "$REPO_MASK" =~ "proxy" ]]; then
 
 		if [[ `docker ps | grep "proxy$"` == "" ]]; then
-			color_output "create prepare: proxy"
+			color_output "prepare: proxy"
 			sh $BASE_SERVE_PATH/proxy.sh $*
+			done=1
 		fi
 	fi
 
 	if [[ "$REPO" =~ "local" && "$REPO_MASK" =~ "local" ]]; then
 		if [[ `docker ps | grep "http$"` == "" ]]; then
-			color_output "create prepare: http"
+			color_output "prepare: http"
 			sh $BASE_SERVE_PATH/http.sh
+			done=1
 		fi
+	fi
+
+	################################################################
+	for var in $*; do
+		echo "11 $var"
+		# 如果其依赖的docker不存在(base docker)，就创建出来
+		if [[ `docker ps | grep "$var$"` == "" ]]; then
+			color_output "prepare: $var"
+			sh $BASE_SERVE_PATH/$var.sh
+			done=1
+		fi
+	done
+
+	if [[ $done == 1 ]]; then
+		color_output "create prepre completed, wait to continue ... "
+		read -t 3 done
 	fi
 }
 
 ########################################################################################
 create_network() {
 
-	NETWORK=$LOCAL/$SUBNET 	          
+	NETWORK=$HOST_LOCAL/$SUBNET 	          
 
 	if [[ `ip address show | grep $BRIDGE` ]]; then
 		echo "network exist"
@@ -215,7 +243,7 @@ alloc_network() {
 		create_network
 	fi
 
-	echo "set  host address:"
+	echo "set host address: $HOST"
 	set -x
 	sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
 	set +x
@@ -227,6 +255,27 @@ display_state() {
 	
 echo "brower:
     docker exec -it $NAME /bin/bash
-    http://$LOCAL:$PORT
+    http://$HOST_LOCAL:$PORT
 "
+}
+
+display_sshd() {
+	color_output "ssh clean cache [client side]:"
+	echo "    rm ~/.ssh/known_hosts -f
+or,
+    echo "StrictHostKeyChecking=no" > ~/.ssh/config
+    echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+"
+
+	# docker 内部，网卡名称是 eth1
+	echo "show host address:"
+	docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color
+	echo
+
+	echo "enter host:
+	    docker exec -it $NAME /bin/bash
+	    ssh root@$HOST
+	"
+	echo "@@@@@@@@ enter test host @@@@@@@@@"
+	docker exec -it $NAME /bin/bash
 }

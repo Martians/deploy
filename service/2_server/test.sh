@@ -47,7 +47,7 @@ echo "set  host address:"
 sudo pipework $DEVICE $NAME $TEST_HOST/$SUBNET@$GATEWAY
 
 echo "show host address:"
-docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.]*/ --color
+docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 echo
 
 echo "enter host:

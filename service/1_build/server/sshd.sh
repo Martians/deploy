@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $BASE/script/advance.sh
+source $BASE_PATH/1_build/advance.sh
 
 yum install -y passwd openssh-server openssh-clients
 echo "root:111111" | chpasswd
