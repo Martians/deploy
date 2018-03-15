@@ -19,8 +19,8 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
 	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; \
 	apt-get update; \
 	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute; \
-	$BASE/script/server/proxy.sh; \
-	cp $BASE/script/server/start_proxy.sh /start.sh; \
+	$BASE/1_build/server/proxy.sh; \
+	cp $BASE/1_build/server/start_proxy.sh /start.sh; \
 	apt-get autoclean autoremove clean; \
 	rm /var/lib/apt/lists/* -rf; \
 	rm /var/cache/apt/archives -rf

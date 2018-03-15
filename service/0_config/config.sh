@@ -14,8 +14,8 @@ echo "config.sh: base path - $BASE_PATH"
 
 # 如果找到本地配置，就更新部分配置项
 #CONFIG_PATH=~/.docker_config
-#CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
-CONFIG_PATH=$BASE_PATH/0_config/example/config_notebook.sh
+CONFIG_PATH=$BASE_PATH/0_config/example/config_desktop.sh
+#CONFIG_PATH=$BASE_PATH/0_config/example/config_notebook.sh
 if [ -f "$CONFIG_PATH" ]; then
 	# echo "new path"
 	. $CONFIG_PATH
@@ -50,3 +50,9 @@ fi
 
 # echo "macro: "
 # echo "	global: $GLOBAL_MACRO"
+
+###########################################
+# 调用堆栈
+
+# 是否使用BAseImage
+# 使用哪几种仓库

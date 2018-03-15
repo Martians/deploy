@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #################################################################
-echo "repo mask:  $REPO_MASK"
-echo "repo param: $@"
+file_output "repo.sh"
+work_output "repo mask:  $REPO_MASK"
+work_output "repo param: $@"
 
 for repo in $@; do
 	check=0
@@ -24,21 +25,21 @@ for repo in $@; do
 done
 
 #################################################################
-echo "save old repo"
+work_output "save old repo"
 cd /etc/yum.repos.d/; 
 mkdir -p save; mv *.repo save
 
 #################################################################
 ## Public
 if [[ $REPO_PUBLIC == 1 ]]; then
-	echo "set repo: public" 
+	work_output "set repo: public" 
 	curl -O http://mirrors.163.com/.help/CentOS7-Base-163.repo
 fi
 
 #################################################################
 ## Local：network http sourcd
 if [[ $REPO_LOCAL == 1 ]]; then
-	echo "set repo: local" 
+	work_output "set repo: local" 
 	PRIORITY=1
 	sudo rm /etc/yum.repos.d/local.repo -rf
 cat << EOF | sudo tee -a /etc/yum.repos.d/local.repo
@@ -56,14 +57,14 @@ fi
 #################################################################
 ## Proxy：local netowrk proxy
 if [[ $REPO_PROXY == 1 ]]; then
-	echo "set repo: proxy" 
+	work_output "set repo: proxy" 
 	sudo sed -i "/cachedir/a\proxy=http://$PROXY_HOST:3142" /etc/yum.conf
 fi
 
 #################################################################
 ## File, only http server itself use
 if [[ $REPO_FILE == 1 ]]; then
-	echo "set repo: file" 
+	work_output "set repo: file" 
 	PRIORITY=1
 	sudo rm /etc/yum.repos.d/file.repo -rf
 cat << EOF | sudo tee -a /etc/yum.repos.d/file.repo

@@ -1,14 +1,10 @@
 #!/bin/bash
-BASE=$(cd "$(dirname "$0")"; cd ../..; pwd)
-
-source $BASE/script/config.sh
-##############################################################################
 
 #install http file service
-echo "install http server"
+work_output "install http server"
 sudo yum install -y httpd
 
-echo "config http server"
+work_output "config http server"
 ## move welcome.conf, so we can't get file service directly
 sudo cp -f /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak
 sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
@@ -28,5 +24,5 @@ EOF
 
 mkdir $REPO_DST -p
 
-echo "http completed!"
-echo 
+work_output "http completed!"
+echo  

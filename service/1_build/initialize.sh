@@ -7,73 +7,66 @@ cd $BASE_PATH
 . 0_config/config.sh
 
 ##############################################################################
-while getopts :r:ms opt
-do
-	case "$opt" in
-	r) 	REPO=$OPTARG;;
-	m)	MORE=$OPTARG;;
-	s)	SERVICE=$OPTARG;;
-	*) 	echo "Unknown option: $opt";;
-esac
-done
+parse_param() {
+	local OPTIND
+	var=$*
+	set -- $var 
+	#echo $*
+
+	while getopts :r:s:m opt
+	do
+		case "$opt" in
+			r) 	REPO=$(decode "$OPTARG");;
+			s)	SERVER=$OPTARG;;
+			m)	MORE=$OPTARG;;
+			*) 	echo "Unknown option: $opt";;
+		esac
+	done
+	# echo "repo: " $REPO
+	# echo "more: " $MORE
+	# echo "SERVER: " $SERVER
+	# exit 1
+}
+parse_param $@
+
+
+##############################################################################
+## 执行说明
+#	1. 任何时候 scripts 执行的脚本出错，就会导致程序退出
+#	2. 如果脚本中需要引用函数 1）export函数 2) scripts source *.sh 方式执行
 
 ##############################################################################
 ## Repo
 if [ "$REPO" ]; then
-	# echo "use repo"
-	. script/repo.sh $OPTARG
-	if [ $? != 0 ]; then
-		echo "set repo failed"
-		exit $?
-	fi
+	scripts source 1_build/repo.sh $REPO
+	cd $BASE_PATH
 fi
 
 ##############################################################################
 ## System
-. script/system.sh &&
-	. script/common.sh
-
-if [ $? != 0 ]; then
-	echo "initialize system or common failed"
-	exit $?
-fi
+scripts 1_build/system.sh
+scripts 1_build/common.sh
 
 ##############################################################################
 ## More Script
-if [ "$MORE" and -e "$MORE" ]; then
-	echo "use More"
-	. $MORE
-	if [ $? != 0 ]; then
-		echo "set more failed"
-		exit $?
-	fi
-fi
+# if [ "$MORE" and -e "$MORE" ]; then
+# 	echo "use More"
+# 	scripts $MORE
+# fi
 
 ##############################################################################
 ## Install service
-. script/server/$SERVICE.sh
-
-##############################################################################
-## Clean
-# update install
-sudo yum clean all
-sudo yum makecache 
-
+scripts source 1_build/server/$SERVER.sh
+cp 1_build/server/start_$SERVER.sh /start.sh
 
 ##############################################################################
 ## Start srcipt
-cp $BASE/script/server/start_$SERVICE.sh /start.sh
 
 
 
-
-[ $PRIORITY -a $PRIORITY == 1 ] && \
-	yum install -y yum-plugin-priorities
-
-echo "yum install ..."
-yum install -y sudo net-tools telnet traceroute tree vim 
-
-#bash-completion 
+##############################################################################
+## Clean
+scripts source 1_build/clean.sh
 
 ##############################################################################
 echo "initialize complete ..."

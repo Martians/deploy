@@ -53,6 +53,7 @@ DOMAIN="data.com"
 #############################################################################
 # HTTP docker 里边，对应的数据目录
 REPO_DST=/html
+PROXY_DST=/var/cache/apt-cacher-ng
 
 #############################################################################
 ## Directory
@@ -66,7 +67,7 @@ PROXY_SRC=/mnt/proxy
 # 使用 origin（原生），或者base（经过改进的基础班）
 #	影响 0_Server 模板，和Initializer脚本
 USING_BASE=1
-IMAGE_PATH=template
 
-BASE_IMAGE_PATH=/0_server
-BASE_IMAGE_NAME=centos:base
+IMAGE_PATH=template
+BASE_SERVE_PATH=2_server/base
+

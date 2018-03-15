@@ -3,5 +3,7 @@
 <<'COMMENT'
 COMMENT
 
-echo "common complete ..."
-return 1
+#################################################################
+file_output "common.sh"
+# step_output ""
+# work_output ""

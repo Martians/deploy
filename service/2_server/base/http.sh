@@ -13,17 +13,14 @@ cd $BASE_PATH
 
 ###############################################################
 
-create_image $NAME
-#create_docker
+# 确保必须的镜像已经安装好
+create_prepare
 
+# 创建镜像
+success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 
-#echo "prepare network"
-#HOST=192.168.36.27
-#sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
-
-#echo "test dns"
-sudo netstat -antp | grep :$PORT[\t\ ] --color
-echo "brower:
-    docker exec -it http /bin/bash
-    http://$LOCAL:$PORT
-"
+# 创建容器
+ARGS="-v $REPO_SRC:$REPO_DST"
+success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
+###############################################################
+display_state

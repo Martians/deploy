@@ -18,7 +18,7 @@ ARG REPO=""
 ARG MORE=""
 COPY . $BASE
 
-RUN $BASE/script/initialize.sh 	\
+RUN $BASE/1_build/initialize.sh	\
 		-r $REPO 	\
 		-m $MORE 	\
 		-s $SERVICE
@@ -30,4 +30,3 @@ EXPOSE $LISTEN
 
 CMD ["/bin/bash"]
 CMD ["/start.sh"]
-doc
