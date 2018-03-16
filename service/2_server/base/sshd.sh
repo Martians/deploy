@@ -5,7 +5,7 @@
 # https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
 NAME=sshd
-PORT=2222
+PORT=0
 REPO="public local proxy"
 # 1_HOST
 HOST=1

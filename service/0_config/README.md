@@ -7,6 +7,7 @@
     3. 目录位置，Http、Proxy的Host宿主机上配置
 2. Volume基本都没怎么配置
 3. database的用户名密码没有专门配置
+4. server/original 中有原生的Centos启动版本，支持sshd、systemd
 
 # Image
 ## 是否使用BaseImage
