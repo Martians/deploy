@@ -242,7 +242,13 @@ alloc_network() {
 		create_network
 	fi
 
-	echo "set host address: $HOST"
+	# 可以根据需要，指定不同的名字
+	#	这里，没指定$2，name就是全局变量；指定了，name就是本地变量
+	if [[ "$2" ]]; then
+		local NAME=$2
+	fi
+
+	echo "set host address: $HOST, name: $NAME"
 	set -x
 	sudo pipework $DEVICE $NAME $HOST/$SUBNET@$GATEWAY
 	set +x

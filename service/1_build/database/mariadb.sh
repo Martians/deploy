@@ -22,6 +22,10 @@ yum -y install mariadb mariadb-server
 
 echo "update config"
 echo "update /etc/my.cnf"
+
+# table name upper or lower is ok
+sed -i "/\[mysqld]/a\lower_case_table_names=1" /etc/my.cnf
+
 sed -i "/\[mysqld_safe]/i\init_connect='SET collation_connection = utf8_unicode_ci'" /etc/my.cnf
 sed -i "/\[mysqld_safe]/i\init_connect='SET NAMES utf8'" /etc/my.cnf
 sed -i "/\[mysqld_safe]/i\character-set-server=utf8" /etc/my.cnf
