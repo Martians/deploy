@@ -77,6 +77,10 @@ create_image() {
 	if [ ! `docker images $IMAGE -q` ]; then
 		step_output "create image for $IMAGE"
 
+		# 将文件复制到临时路径，因为/docker复制到docker中的，因此docker中可以访问到
+		#	1. docker只是在image中存在这个文件
+		#	2. 实际docker运行时，为了访问最新文件，挂载了脚本目录到docker中，覆盖了/docker目录
+		#	3. 因此在实际docker中，是看不到CONFIG_PATH_2这个文件的
 		sudo \cp $CONFIG_PATH $CONFIG_PATH_2
 		set -x
 		docker build -t $IMAGE -f $IMAGE_PATH/0_server \
@@ -84,6 +88,7 @@ create_image() {
 			--build-arg SERVICE=$NAME 	\
 			--build-arg LISTEN="$PORT" .
 		set +x
+		# 将临时文件清除
 		sudo rm $CONFIG_PATH_2 -rf
 	fi
 }

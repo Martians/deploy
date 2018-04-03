@@ -45,6 +45,13 @@ docker exec $NAME-1 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-2 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-3 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 
+
+# 执行修改/etc/hosts的脚本
+script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
+docker exec $NAME-1 $script
+docker exec $NAME-2 $script
+docker exec $NAME-3 $script
+
 echo "enter host:
     ssh root@$HOST1
     ssh root@$HOST2

@@ -29,7 +29,9 @@ if [ -f "$CONFIG_PATH" ]; then
 
 # 在 Docker Image执行过程中，通过此处获取配置
 #	此时构建docker的用户并非是当前用户，而是 root
-#	这里是在构建时新复制出来的一份
+#	这里是在构建时新复制出来的一份，也复制到了docker的image中
+#	docker运行时，因为又将脚本目录挂载到了/docker下，因此是看不到这个文件的
+#	这里initialize中又复制了一份到 /root/docker_config 供后续使用
 elif [ -f "$CONFIG_PATH_2" ]; then
 	. $CONFIG_PATH_2
 fi
