@@ -4,14 +4,14 @@
 ## Local Network
 DEVICE=ens33
 
-HOST_LOCAL=192.168.36.10
+HOST_LOCAL=192.168.10.10
 NETMASK=255.255.254.0
-GATEWAY=192.168.37.254
+GATEWAY=192.168.10.254
 SUBNET=23
 
 #############################################################################
 ## Alloc Network
-SEGMENT=192.168.36
+SEGMENT=192.168.10
 
 HOST_1=11
 HOST_2=12

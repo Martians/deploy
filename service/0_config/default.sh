@@ -4,9 +4,9 @@
 ## Local Network
 DEVICE=ens33
 
-HOST_LOCAL=192.168.36.10
+HOST_LOCAL=192.168.10.10
 NETMASK=255.255.254.0
-GATEWAY=192.168.37.254
+GATEWAY=192.168.10.254
 SUBNET=23
 
 #############################################################################
@@ -15,7 +15,7 @@ SUBNET=23
 # 两种方式配置地址
 # echo $(alloc_host 1)
 # echo $(alloc_host DB)
-SEGMENT=192.168.36
+SEGMENT=192.168.10
 # 方式1：SEGMENT + SUFFIX
 	HOST_1=11
 	HOST_2=12
@@ -25,7 +25,7 @@ SEGMENT=192.168.36
 	HOST_DB=91
 
 # 方式2：保持该IP地址不变
-	HOST_EXAMPLE=192.168.36.88
+	HOST_EXAMPLE=192.168.10.88
 
 	# 根据类似于枚举的值，解析host的地址
 	#	给出的枚举是：1 2 TEST DB
