@@ -27,6 +27,12 @@ success create_docker -n $NAME-1 -p $PORT -t $1
 success create_docker -n $NAME-2 -p $PORT -t $1
 success create_docker -n $NAME-3 -p $PORT -t $1
 
+# 执行修改/etc/hosts的脚本，将cluster中的host都加进去
+script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
+docker exec $NAME-1 $script
+docker exec $NAME-2 $script
+docker exec $NAME-3 $script
+
 ###############################################################
 HOST1=$(alloc_host 1)
 alloc_network $HOST1 $NAME-1
@@ -44,13 +50,6 @@ echo "show host address:"
 docker exec $NAME-1 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-2 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-3 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
-
-
-# 执行修改/etc/hosts的脚本
-script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
-docker exec $NAME-1 $script
-docker exec $NAME-2 $script
-docker exec $NAME-3 $script
 
 echo "enter host:
     ssh root@$HOST1
