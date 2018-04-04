@@ -1,23 +1,26 @@
 #!/bin/bash
 
-DOMAIN="data.com"
-NETMASK="255.255.254.0"
-GATEWAY="192.168.37.254"
+host_reverse() {
+    echo $(alloc_host $1) | awk -F"." '{ print $4"."$3 }'
+}
 
-HOST_REPO="192.168.37.198"
-HOST_PROXY="192.168.37.199"
+# 根据外部配置，自动获取ip
+HOST_REPO=$(alloc_host REPO)
+HOST_PROXY=$(alloc_host PROXY)
+HOST1_HOST=$(alloc_host 1)
+HOST2_HOST=$(alloc_host 2)
+HOST3_HOST=$(alloc_host 3)
 
-TEST_HOST="192.168.37.200"
+# 得到ip的反向位置
+DNS_ARPA=$(echo $HOST_LOCAL | awk -F"." '{ print $2"."$1 }')
 
-HOST1_HOST="192.168.37.191"
-HOST2_HOST="192.168.37.192"
-HOST3_HOST="192.168.37.193"
+# no use now
+# PUBLIC_DNS=$HOST_DNS_PUBLIC
 
-
-DNS_ARPA=168.192
-HOST_REPO_LAST=198.37
-HOST_PROXY_LAST=199.37
-PUBLIC_DNS=192.168.30.1
+# echo "  DNS_ARPA: $DNS_ARPA"
+# echo "  HOST_REPO_LAST: $(host_reverse REPO)"
+# echo "  HOST_PROXY_LAST: $(host_reverse PROXY)"
+# echo "  PUBLIC_DNS: $HOST_DNS_PUBLIC"
 
 echo "repo: install dns server"
 sudo yum install -y bind bind-utils
@@ -63,7 +66,7 @@ host1   IN   A   $HOST1_HOST
 host2   IN   A   $HOST2_HOST
 host3   IN   A   $HOST3_HOST
 EOF
-sudo cat /var/named/$DOMAIN
+#sudo cat /var/named/$DOMAIN
 
 echo "set domain ptr"
 sudo rm /var/named/$DOMAIN.arpa -rf
@@ -79,13 +82,13 @@ cat << EOF | sudo tee -a /var/named/$DOMAIN.arpa
 @       IN    NS  ns.$DOMAIN.
 ns      IN    A   $HOST_REPO
 
-$HOST_REPO_LAST    IN   PTR  repo.$DOMAIN.
-$HOST_PROXY_LAST   IN   PTR  proxy.$DOMAIN.
-HOST1_HOST    IN   PTR  host1.$DOMAIN.
-HOST2_HOST    IN   PTR  host2.$DOMAIN.
-HOST3_HOST    IN   PTR  host3.$DOMAIN.
+$(host_reverse REPO)    IN   PTR  repo.$DOMAIN.
+$(host_reverse PROXY)   IN   PTR  proxy.$DOMAIN.
+$(host_reverse 1)       IN   PTR  host1.$DOMAIN.
+$(host_reverse 2)       IN   PTR  host2.$DOMAIN.
+$(host_reverse 3)       IN   PTR  host3.$DOMAIN.
 EOF
-sudo cat /var/named/$DOMAIN.arpa
+#sudo cat /var/named/$DOMAIN.arpa
 
 <<'COMMENT'
 sudo systemctl restart named.service

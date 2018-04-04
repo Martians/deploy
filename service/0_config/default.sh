@@ -52,6 +52,7 @@ REPO_MASK="public local proxy"
 
 BRIDGE=eth0m
 DOMAIN="data.com"
+HOST_DNS_PUBLIC=
 #############################################################################
 # HTTP docker 里边，对应的数据目录
 DOCK_PATH_REPO=/html
