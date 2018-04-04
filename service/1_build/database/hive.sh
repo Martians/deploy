@@ -5,11 +5,14 @@ METASTOR_HOST=localhost
 
 SOURCE=/source
 
-CHECK_FILE=/executed
 #######################################################################
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
+
+. 0_config/config.sh
 
 #rm /etc/httpd/conf.d/local.conf -rf
-if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
+if [ $(set_file_flag /installed) -eq 1 ]; then
   echo "already install, just start"
   systemctl start postgresql-9.5.service
   
@@ -158,4 +161,5 @@ nohup hive --service hiveserver2 &
 
 jps
 
-echo 1 > $CHECK_FILE
+#######################################################################
+set_file_flag /installed 1

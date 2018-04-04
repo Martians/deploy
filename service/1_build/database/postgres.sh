@@ -1,6 +1,20 @@
 #!/bin/bash
 # http://blog.csdn.net/pugu12/article/details/51241174
 
+#######################################################################
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
+
+. 0_config/config.sh
+
+#rm /etc/httpd/conf.d/local.conf -rf
+if [ $(set_file_flag /installed) -eq 1 ]; then
+  echo "already install, just start"
+  systemctl start postgresql-9.5.service
+  exit
+fi
+
+#######################################################################
 echo 'install postgres'
 yum install -y postgresql95-server.x86_64 postgresql95-contrib.x86_64
 
@@ -45,3 +59,6 @@ COMMENT
 echo "config hive in postgres"
 systemctl enable postgresql-9.5.service
 systemctl restart postgresql-9.5.service
+
+#######################################################################
+set_file_flag /installed 1

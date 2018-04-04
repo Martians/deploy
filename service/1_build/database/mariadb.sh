@@ -6,11 +6,14 @@ USER=long
 PASS=111111
 TEST_TABLE=test_table
 
-CHECK_FILE=/executed
 #######################################################################
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
+
+. 0_config/config.sh
 
 #rm /etc/httpd/conf.d/local.conf -rf
-if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
+if [ $(set_file_flag /installed) -eq 1 ]; then
   echo "already install, just start"
   systemctl start mariadb
   exit
@@ -92,4 +95,4 @@ EOF
 COMMENT
 
 #######################################################################
-echo 1 > $CHECK_FILE
+set_file_flag /installed 1

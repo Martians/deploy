@@ -5,16 +5,35 @@ COMMENT
 
 TABLE=csv_db
 SOURCE=/source/system
-CHECK_FILE=/executed
+
 #######################################################################
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
+
+. 0_config/config.sh
 
 #rm /etc/httpd/conf.d/local.conf -rf
-if [ -f $CHECK_FILE ] && [ `more $CHECK_FILE` -eq 1 ]; then
+if [ $(set_file_flag /installed) -eq 1 ]; then
 	echo "already install, just start"
 	systemctl start mariadb
 	systemctl start httpd
 	exit
 fi
+
+#######################################################################
+PORT=808
+BASE=/generate
+
+sudo cp -f /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak
+sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
+
+echo "exact data"
+tar -zxvf $SOURCE/benkeen-generatedata-3.2.8-1-ga5d6fea.tar.gz -C /
+mv /benkeen-generatedata* $BASE
+
+# for apache user create settings.php in such dir
+chmod 777 $BASE
+chmod 777 /$BASE/cache
 
 #######################################################################
 yum -y install mariadb mariadb-server
@@ -40,29 +59,14 @@ EOF
 # create table
 echo "create database $TABLE; show databases; \q;" | mysql -u root -p$PASSWD
 
-
 #######################################################################
-PORT=808
-HOME=/generate
-
-sudo cp -f /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak
-sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.save
-
-echo "exact data"
-tar -zxvf $SOURCE/benkeen-generatedata-3.2.8-1-ga5d6fea.tar.gz -C /
-mv benkeen-generatedata-a5d6fea $HOME
-
-# for apache user create settings.php in such dir
-chmod 777 $HOME
-chmod 777 /$HOME/cache
-
-# keep config in settings.php; remove settings.php and will reconfigure
-#rm $HOME/settings.example.php $HOME/settings.php  
+# keep config in settings.php; remove settings.php and will reconfigur
+#rm $BASE/settings.example.php $BASE/settings.php  
 
 cat << EOF | sudo tee -a /etc/httpd/conf.d/generate.conf
 <VirtualHost *:$PORT>
-    DocumentRoot "$HOME"
-    <Directory "$HOME">
+    DocumentRoot "$BASE"
+    <Directory "$BASE">
         Options Indexes FollowSymLinks
         AllowOverride None
         Require all granted
@@ -85,5 +89,4 @@ systemctl restart httpd
 
 #grant select,insert,update,delete,create,drop privileges on csv_db.* to root@localhost identified by '111111';
 #######################################################################
-
-echo 1 > $CHECK_FILE
+set_file_flag /installed 1
