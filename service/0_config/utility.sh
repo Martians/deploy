@@ -147,3 +147,48 @@ exist() {
 		echo $*
 	fi
 }
+
+#################################################################################################
+string_exist() {
+	# 这里使用了 -q, 不会输出grep的结果
+	echo "$1" | grep -q "$2"
+	echo $?
+}
+
+# 检查配置文件中，是否已经存在某个配置，不存在则加入到最后
+insert_not_exist() {
+	
+	if ! grep -q "$1" $2; then
+	# if ! grep "$1" $2 > /dev/null; then
+		echo "$1" >> $2
+		# echo "insert"
+		return 0
+	else
+		# echo "exist"
+		return 1
+	fi
+}
+
+#################################################################################################
+# 在文件中存取一个标志
+#	file [data]
+set_file_flag() {
+	
+	# 文件不存在，创建文件，写入默认值0
+	if [ ! -f $1 ]; then
+		# echo "create file $1"
+		mkdir -p $(dirname $1)
+		echo 0 > $1
+	fi
+
+	# 只有一个参数，读取标志
+	if [ $# == 1 ]; then
+		# echo "read"
+		cat $1
+
+	# 写入标志
+	else
+		# echo "write"
+		echo $2 > $1
+	fi
+}

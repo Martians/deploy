@@ -1,9 +1,5 @@
 #!/bin/bash
 
-host_reverse() {
-    echo $(alloc_host $1) | awk -F"." '{ print $4"."$3 }'
-}
-
 # 根据外部配置，自动获取ip
 HOST_REPO=$(alloc_host REPO)
 HOST_PROXY=$(alloc_host PROXY)
@@ -106,3 +102,6 @@ dig @$HOST_REPO soa repo.$DOMAIN
 echo "repo: dns completed"
 echo 
 COMMENT
+
+# 生成控制秘钥，以便在不重启服务的情况下更新配置
+# rndc-confgen -a

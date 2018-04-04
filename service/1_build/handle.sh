@@ -288,3 +288,38 @@ echo "enter host:
     ssh root@$HOST
 "
 }
+
+########################################################################################
+# 整个dns添加过程的，测试方式：
+# 	dns_add work 192.168.3.5
+# 	dns_reload
+
+# 	dig +short @127.0.0.1 work.data.com 
+# 	dig +short @127.0.0.1 -x 192.168.3.5
+
+# 往dns中添加PTR记录时
+host_reverse() {
+    echo $(alloc_host $1) | awk -F"." '{ print $4"."$3 }'
+}
+
+# 为docker配置dnsserver的地址
+dns_server() {
+	echo 
+}
+
+# 添加一个dns解析地址，到dns server
+dns_add() {
+	docker exec dns $DOCK_INNER_PATH/dns_add.sh "$1" "$2"
+}
+
+# 检查是否要重启dns server
+dns_reload() {
+	# 检查是否发生了dns的更新，在 /tmp/dns_reload 文件中检查标志，并重置
+	result=$(docker exec dns $DOCK_INNER_PATH/dns_reload.sh)
+
+	if [ $(string_exist "$result" 1) -eq 0 ]; then
+		color_output "restart dns"
+		#docker restart dns
+	fi
+}
+

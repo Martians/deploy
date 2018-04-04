@@ -75,4 +75,9 @@ BUILD_PATH=1_build
 IMAGE_PATH=template
 BASE_SERVE_PATH=2_server/base
 
+
+# 在docker内部，获取脚本的根路径
 DOCK_BASE_PATH=/docker/service
+
+# 存放docker内部执行的命令
+DOCK_INNER_PATH=$DOCK_BASE_PATH/$BUILD_PATH/inner

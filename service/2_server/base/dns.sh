@@ -2,8 +2,8 @@
 
 NAME=dns
 PORT="0"
-#REPO="public local proxy"
-REPO="local proxy"
+REPO="public local proxy"
+# REPO="local proxy"
 HOST=
 
 ###############################################################
@@ -24,9 +24,9 @@ ARGS="-p 53:53/tcp -p 53:53/udp"
 success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################
-display_brower
+echo "brower:
+    docker exec -it $NAME /bin/bash
 
-echo "
-    dig +short repo.data.com @127.0.0.1
-    dig +short -x $(alloc_host REPO) @127.0.0.1 
+    dig +short @127.0.0.1 repo.data.com 
+    dig +short @127.0.0.1 -x $(alloc_host REPO) 
 "
