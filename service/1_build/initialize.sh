@@ -7,6 +7,7 @@ cd $BASE_PATH
 . 0_config/config.sh
 
 # 将配置文件复制到docker中，方便后续在docker中执行相关脚本时用到
+#	注意，因为配置是复制到image中的，如果调整了docker_config的配置，需要重新生成images
 cp $CONFIG_PATH_2 /root/.docker_config
 ##############################################################################
 parse_param() {
