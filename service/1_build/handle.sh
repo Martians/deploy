@@ -299,7 +299,7 @@ echo "enter host:
 
 # 往dns中添加PTR记录时
 host_reverse() {
-    echo $(alloc_host $1) | awk -F"." '{ print $4"."$3 }'
+    echo $(alloc_host $1) | awk -F"." '{ print $4".："$3 }'
 }
 
 # 为docker配置dnsserver的地址
@@ -319,7 +319,7 @@ dns_reload() {
 
 	if [ $(string_exist "$result" 1) -eq 0 ]; then
 		color_output "restart dns"
-		#docker restart dns
+		docker restart dns
 	fi
 }
 

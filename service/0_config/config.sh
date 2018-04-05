@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 那些主动调用config.sh的脚本，已经设置好了 BASE_PATH，此处可以直接使用
-echo "config.sh: base path - $BASE_PATH"
+# echo "config.sh: base path - $BASE_PATH"
 
 # 工具函数
 . $BASE_PATH/0_config/utility.sh

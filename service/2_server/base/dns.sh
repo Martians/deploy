@@ -30,3 +30,5 @@ echo "brower:
     dig +short @127.0.0.1 repo.data.com 
     dig +short @127.0.0.1 -x $(alloc_host REPO) 
 "
+
+# yum install -y bind-utils

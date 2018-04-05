@@ -155,20 +155,6 @@ string_exist() {
 	echo $?
 }
 
-# 检查配置文件中，是否已经存在某个配置，不存在则加入到最后
-insert_not_exist() {
-	
-	if ! grep -q "$1" $2; then
-	# if ! grep "$1" $2 > /dev/null; then
-		echo "$1" >> $2
-		# echo "insert"
-		return 0
-	else
-		# echo "exist"
-		return 1
-	fi
-}
-
 #################################################################################################
 # 在文件中存取一个标志
 #	file [data]
@@ -192,3 +178,89 @@ set_file_flag() {
 		echo $2 > $1
 	fi
 }
+
+#################################################################################################
+# 检查配置文件中，是否已经存在某个配置，不存在则加入到最后
+#	value file [search]
+insert_not_exist() {
+	
+	if ! grep -q "$1" $2; then
+	# if ! grep "$1" $2 > /dev/null; then
+		echo "$1" >> $2
+		# echo "insert"
+		return 0
+	else
+		# echo "exist"
+		return 1
+	fi
+}
+
+# update_config file, keyword, [value], [seperator]
+update_config() {
+    # use = or $4 as seperator
+    if [[ ! -n $4 ]]; then {
+        sep="="
+    } else {
+        sep=$4
+    }
+    fi
+
+    # keyword not find
+    if [[ `grep -c "$2" $1` -eq 0 ]]; then {
+        if [[ $3 == "#" ]]; then {
+            echo "no need add #"    
+        
+        # update_config file "address", append "address" to file
+        } elif [[ ! -n $3 ]]; then {
+            sudo sh -c "echo $2 >> $1"
+        
+        # update_config file "address" "192.168.0.1", append "address=192.168.30.1" to file
+        } else {
+            sudo sh -c "echo $2$sep$3 >> $1"
+        }   
+        fi
+
+    # replace existing; if contain #, remove it
+    } else {
+        # update_config file "/dev/deb" "#", set the line commented
+        #   [/dev/deb 0 0] -> [# /dev/deb 0 0]
+        if [[ $3 == "#" ]]; then {
+            sudo sed -i "s/[ \t]*[^#]*.*\($2.*$\)/# \1/g" $1
+
+        # update_config file "/dev/deb", set the line un-commented, remove the remains
+        #   [# /dev/deb 0 0] -> [/dev/deb 0 0]
+        } elif [[ ! -n $3 ]]; then {
+            sudo sed -i "s/[# \t]*\($2\).*$/\1/g" $1
+
+        # update_config file "/dev/deb" "0 0 1", set the line un-commented, add the value
+        #   [# /dev/deb 1 1] -> [/dev/deb 0 0 1]
+        } else {
+            #sudo sed -i "s/[#]\?\($2\).*$/\1$sep$3/g" $1
+            sudo sed -i "s/[# \t]*\($2\).*$/\1$sep$3/g" $1
+        }   
+        fi
+    }   
+    fi
+}
+
+# append_config etc/config "config1" "add a new line"
+append_config()
+{
+	sudo sed  -i "/[# \t]*$2/a $3" $1
+}
+
+# delete_config etc/config "config1"
+# delete_config etc/config "config1" "\config1"
+delete_config()
+{
+    if [[ ! -n $3 ]]; then {
+        sudo sed  -i "/[# \t]*$2/d" $1
+
+    } else {
+        sudo sed -i "/[# \t]*$2/, /[# \t]*$3/d" $1
+    }
+    fi
+}
+
+
+
