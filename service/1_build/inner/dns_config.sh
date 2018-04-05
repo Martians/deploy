@@ -6,7 +6,7 @@ cd $BASE_PATH
 . 0_config/config.sh
 
 # 临时配置
-insert_not_exist "server $(alloc_host DNS)" /etc/resolv.conf 
+insert_not_exist "nameserver $(alloc_host DNS)" /etc/resolv.conf 
 
 # 永久配置
 

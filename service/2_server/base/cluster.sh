@@ -22,26 +22,27 @@ create_prepare
 # 创建镜像
 success create_image  -n $NAME -r $(encode $REPO) -p $PORT -t $1
 
-# 创建容器
-success create_docker -n $NAME-1 -p $PORT -t $1
-success create_docker -n $NAME-2 -p $PORT -t $1
-success create_docker -n $NAME-3 -p $PORT -t $1
-
 # 执行修改/etc/hosts的脚本，将cluster中的host都加进去
 script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
-docker exec $NAME-1 $script
-docker exec $NAME-2 $script
-docker exec $NAME-3 $script
 
-###############################################################
-HOST1=$(alloc_host 1)
-alloc_network $HOST1 $NAME-1
+# 创建容器
+for ((idx = 1; idx <= 3; idx++)); do
+	
+	success create_docker -n $NAME-$idx -p $PORT -t $1
+	docker exec $NAME-$idx $script
 
-HOST2=$(alloc_host 2)
-alloc_network $HOST2 $NAME-2
+	HOSTS=$(alloc_host $idx)
+	alloc_network $HOSTS $NAME-$idx
 
-HOST3=$(alloc_host 3)
-alloc_network $HOST3 $NAME-3
+	# 添加dns到dns server
+	dns_add $NAME-$idx $HOSTS
+
+	# 配置docker内部的dns服务器
+	dns_config $NAME-$idx
+done
+
+# 检查是否需要重启
+dns_reload
 
 ###############################################################
 
@@ -56,3 +57,7 @@ echo "enter host:
     ssh root@$HOST2
     ssh root@$HOST3
 "
+
+# 预先安装dns server
+# dns_reload没有生效
+# docker 内部的dns服务器，需要修改为最多三个dns
