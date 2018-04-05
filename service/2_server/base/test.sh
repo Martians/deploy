@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # config http://blog.csdn.net/field_yang/article/details/51568861
 # http://blog.csdn.net/luckytanggu/article/details/71514798
@@ -6,6 +7,12 @@ NAME=systemd
 PORT="0"
 REPO="public local proxy"
 HOST=TEST
+
+# 将ssdh作为模板的用法，暂未使用
+# NAME_STUB=test
+# PORT_STUB=0
+# HOST_STUB=TEST
+# REPO_STUB="public local proxy"
 
 ###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
