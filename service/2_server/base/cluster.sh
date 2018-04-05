@@ -58,11 +58,11 @@ dns_reload
 # docker 内部，网卡名称是 eth1
 echo "try start with last param [systemd]"
 echo "show host address:"
-docker exec $NAME-1 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
-docker exec $NAME-2 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
-docker exec $NAME-3 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
-echo "    docker exec $NAME-1 ping $NAME-2"
+for ((idx = 1; idx <= $COUNT; idx++)); do
+	docker exec $NAME-$idx ip addr show eth1 | grep inet | grep [0-9.].*/ --color
+done
 
+echo "    docker exec $NAME-1 ping $NAME-2"
 echo "enter host:"
 for ((idx = 1; idx <= $COUNT; idx++)); do
 	echo "    ssh root@$(alloc_host $idx)"
