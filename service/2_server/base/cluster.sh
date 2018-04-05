@@ -56,6 +56,7 @@ dns_reload
 ###############################################################
 
 # docker 内部，网卡名称是 eth1
+echo "try start with last param [systemd]"
 echo "show host address:"
 docker exec $NAME-1 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-2 ip addr show eth1 | grep inet | grep [0-9.].*/ --color

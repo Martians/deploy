@@ -37,4 +37,6 @@ HOST=$(alloc_host $HOST)
 alloc_network $HOST
 
 ###############################################################
+echo
+echo "try start with last param [systemd]"
 display_host 1
