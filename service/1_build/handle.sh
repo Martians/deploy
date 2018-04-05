@@ -307,12 +307,12 @@ dns_server() {
 	echo 
 }
 
-# 添加一个dns解析地址，到dns server
+# 添加一个dns解析地址，到dns server的docker中去
 dns_add() {
 	docker exec dns $DOCK_INNER_PATH/dns_add.sh "$1" "$2"
 }
 
-# 检查是否要重启dns server
+# 检查是否发生了配置改变，需要重启dns server
 dns_reload() {
 	# 检查是否发生了dns的更新，在 /tmp/dns_reload 文件中检查标志，并重置
 	result=$(docker exec dns $DOCK_INNER_PATH/dns_reload.sh)
@@ -323,3 +323,7 @@ dns_reload() {
 	fi
 }
 
+# 在docker中配置dns服务器地址
+dns_config() {
+	docker exec $1 $DOCK_INNER_PATH/dns_config.sh
+}
