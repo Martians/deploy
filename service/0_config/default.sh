@@ -36,8 +36,22 @@ SEGMENT=192.168.10
 		# 判断是否包含 .
 		if [[ $data =~ "." ]]; then
 			echo "$data"
-		else
+		
+		# 有相应的 HOST_$1 变量，与 SEGMENT 做拼接
+		elif [[ $data != "" ]]; then
 			echo "$SEGMENT.$data"
+		
+		# 没有相应的 HOST_$1 变量
+		else
+			# 传入的是一个数字，最后一位取相对于HOST_1的大小
+			#	如：$(alloc_host 5) 计算得到 15
+			#	这样即使没有进行很多配置，可以自动得到IP信息
+			if [ "$1" -gt 0 ] 2>/dev/null ;then 
+				(( value = $HOST_1 + ($1 - 1) ))
+				echo "$SEGMENT.$value"
+			else
+				echo "nothing"
+			fi
 		fi
 	}
 

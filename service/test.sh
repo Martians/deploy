@@ -10,4 +10,3 @@ cd $BASE_PATH
 
 # dig +short @127.0.0.1 work.data.com 
 # dig +short @127.0.0.1 -x 192.168.3.5
-

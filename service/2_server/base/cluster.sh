@@ -4,10 +4,12 @@
 # https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
 # https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
+# Usage: sh 2_server/base/cluster.sh [0|1] [systemd]
 NAME=sshd
 PORT=0
 REPO="public local proxy"
-COUNT=3
+COUNT=5
+
 ###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
 cd $BASE_PATH
@@ -27,8 +29,14 @@ script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
 
 # 创建容器
 for ((idx = 1; idx <= $COUNT; idx++)); do
-	
-	success create_docker -n $NAME-$idx -p $PORT -t $1
+	# 是否使用sysmted来启动	
+	if [[ $1 != "systemd" && $2 != "systemd" ]]; then
+		success create_docker -n $NAME-$idx -p $PORT -t $1
+	else
+		color_output "use systemd sshd"
+		success create_docker -n $NAME-$idx -p $PORT -i centos:sshd \
+			-a $(encode $SYSTMD) -e $INITIAL -t $1
+	fi
 	docker exec $NAME-$idx $script
 
 	HOSTS=$(alloc_host $idx)
@@ -52,6 +60,7 @@ echo "show host address:"
 docker exec $NAME-1 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-2 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
 docker exec $NAME-3 ip addr show eth1 | grep inet | grep [0-9.].*/ --color
+echo "    docker exec $NAME-1 ping $NAME-2"
 
 echo "enter host:"
 for ((idx = 1; idx <= $COUNT; idx++)); do
