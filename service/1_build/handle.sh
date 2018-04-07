@@ -327,3 +327,7 @@ dns_reload() {
 dns_config() {
 	docker exec $1 $DOCK_INNER_PATH/dns_config.sh
 }
+
+ntp_config() {
+	docker exec $1 $DOCK_INNER_PATH/ntp_config.sh	
+}

@@ -8,7 +8,8 @@
 NAME=sshd
 PORT=0
 REPO="public local proxy"
-COUNT=5
+COUNT=3
+CONF="dns"
 
 ###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
@@ -43,11 +44,20 @@ for ((idx = 1; idx <= $COUNT; idx++)); do
 	alloc_network $HOSTS $NAME-$idx
 
 	# 添加dns到dns server
-	create_prepare dns
-	dns_add $NAME-$idx $HOSTS
+	create_prepare $CONF
 
-	# 配置docker内部的dns服务器
-	dns_config $NAME-$idx
+	# 需要配置dns服务器
+	if [ $(string_exist "$CONF" dns) -eq 0 ]; then
+		dns_add $NAME-$idx $HOSTS
+
+		# 配置docker内部的dns服务器
+		dns_config $NAME-$idx
+	fi
+
+	# 需要配置 ntp 服务器
+	if [ $(string_exist "$CONF" ntp) -eq 0 ]; then
+		ntp_config $NAME-$idx
+	fi
 done
 
 # 检查是否需要重启
