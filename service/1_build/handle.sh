@@ -259,27 +259,28 @@ alloc_network() {
 	set +x
 }
 
+# 举例：
+	# 1) 检查zookeeper-1
+	# 2) 检查H1
+	# 3) 检查 HOST_1
 alloc_cluster_host() {
 	local NAME=$1
-	local idx=
+	local idx=$2
 
-	dyn_var $NAME
-	exit
 	# 分配IP地址,
 	#	外部已经定义了变量 $NAME_$idx, 则优先使用
-	if [[ $(dyn_var "$NAME_$idx") != "" ]]; then
+	if [[ $(dyn_var "${NAME}_${idx}") != "" ]]; then
 		# $NAME_$idx 中可能只定义了ip的最后一位
-		SUFFIX=$(dyn_var $NAME_$idx)
-		echo $SUFFIX
+		SUFFIX=$(dyn_var ${NAME}_${idx})
 
-	elif [[ $(dyn_var H$idx) != "" ]]; then
+	elif [[ $(dyn_var H${idx}) != "" ]]; then
 		# $NAME_$idx 中可能只定义了ip的最后一位
-		SUFFIX=$(dyn_var H$idx)
+		SUFFIX=$(dyn_var H${idx})
 	# 自动解析默认的index，转换为IP
 	else
 		SUFFIX=$idx
 	fi
-echo $SUFFIX
+
 	echo $(alloc_host $SUFFIX)
 }
 
@@ -314,6 +315,8 @@ echo "enter host:
 }
 
 display_cluster() {
+	local NAME=$1
+	local COUNT=$2
 	# docker 内部，网卡名称是 eth1
 	echo "try start with last param [systemd]"
 	echo "show host address:"
@@ -324,7 +327,8 @@ display_cluster() {
 	echo "    docker exec $NAME-1 ping $NAME-2"
 	echo "enter host:"
 	for ((idx = 1; idx <= $COUNT; idx++)); do
-		echo "    ssh root@$(alloc_host $idx)"
+		HOSTS=$(alloc_cluster_host $NAME $idx)	
+		echo "    ssh root@$HOSTS"
 	done
 }
 
