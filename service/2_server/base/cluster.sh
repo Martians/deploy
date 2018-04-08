@@ -74,9 +74,9 @@ fi
 
 ###############################################################
 # 没有配置NAME_STUB，就直接显示；否则取消显示
-#if [[ $NAME_STUB == "" ]]; then
-display_cluster $NAME $COUNT
-#fi
+if [[ $NAME_STUB == "" ]]; then
+	display_cluster $NAME $COUNT
+fi
 
 # client内部测试
 # yum install -y bind-utils
