@@ -259,6 +259,30 @@ alloc_network() {
 	set +x
 }
 
+alloc_cluster_host() {
+	local NAME=$1
+	local idx=
+
+	dyn_var $NAME
+	exit
+	# 分配IP地址,
+	#	外部已经定义了变量 $NAME_$idx, 则优先使用
+	if [[ $(dyn_var "$NAME_$idx") != "" ]]; then
+		# $NAME_$idx 中可能只定义了ip的最后一位
+		SUFFIX=$(dyn_var $NAME_$idx)
+		echo $SUFFIX
+
+	elif [[ $(dyn_var H$idx) != "" ]]; then
+		# $NAME_$idx 中可能只定义了ip的最后一位
+		SUFFIX=$(dyn_var H$idx)
+	# 自动解析默认的index，转换为IP
+	else
+		SUFFIX=$idx
+	fi
+echo $SUFFIX
+	echo $(alloc_host $SUFFIX)
+}
+
 ########################################################################################
 display_brower() {
 sudo netstat -antp | grep :$PORT[\t\ ] --color
@@ -287,6 +311,21 @@ echo "enter host:
     docker exec -it $NAME /bin/bash
     ssh root@$HOST
 "
+}
+
+display_cluster() {
+	# docker 内部，网卡名称是 eth1
+	echo "try start with last param [systemd]"
+	echo "show host address:"
+	for ((idx = 1; idx <= $COUNT; idx++)); do
+		docker exec $NAME-$idx ip addr show eth1 | grep inet | grep [0-9.].*/ --color
+	done
+
+	echo "    docker exec $NAME-1 ping $NAME-2"
+	echo "enter host:"
+	for ((idx = 1; idx <= $COUNT; idx++)); do
+		echo "    ssh root@$(alloc_host $idx)"
+	done
 }
 
 ########################################################################################

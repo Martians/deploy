@@ -50,7 +50,7 @@ SEGMENT=192.168.10
 				(( value = $HOST_1 + ($1 - 1) ))
 				echo "$SEGMENT.$value"
 			else
-				echo "nothing"
+				echo "null"
 			fi
 		fi
 	}

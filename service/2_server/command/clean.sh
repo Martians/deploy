@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $1 == 1 ]]; then
+if [[ $1 == 1 || $1 == y || $1 == Y ]]; then
 	read -p "Are you sure to remove vaolume and network? [Y/y]: " res 
 
 	if [[ $res == y || $res == Y ]]; then

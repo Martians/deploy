@@ -4,26 +4,26 @@
 # https://hub.docker.com/r/jdeathe/centos-ssh/~/dockerfile/   supervisord
 # https://hub.docker.com/r/kinogmt/centos-ssh/~/dockerfile/
 
+# Usage: sh 2_server/base/cluster.sh [0|1] [systemd]
+NAME=sshd
+PORT=0
+REPO="public local proxy"
+COUNT=3
+CONF="dns"
+
+###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
 cd $BASE_PATH
 
 . 0_config/config.sh
 
 ###############################################################
-# Usage: sh 2_server/base/cluster.sh [0|1] [systemd]
-NAME=$(default_value $NAME_STUB sshd)
-PORT=$(default_value $PORT_STUB 0)
-HOST=$(default_value $HOST_STUB 1)
-REPO="$(default_value $REPO_STUB "public local proxy")"
-COUNT="$(default_value $COUNT_STUB 3)"
-
-###############################################################
 
 # 确保必须的镜像已经安装好
 create_prepare
 
-# 创建镜像, 使用sshd而不是$NAME
-success create_image -n sshd -r $(encode $REPO) -p $PORT -t $1
+# 创建镜像
+success create_image -n $NAME -r $(encode $REPO) -p $PORT -t $1
 
 # 执行修改/etc/hosts的脚本，将cluster中的host都加进去
 script=$DOCK_BASE_PATH/$BUILD_PATH/server/cluster.sh
@@ -40,13 +40,7 @@ for ((idx = 1; idx <= $COUNT; idx++)); do
 	fi
 	docker exec $NAME-$idx $script
 
-alloc_cluster_host $NAME $idx
-exit
-	HOSTS=$(alloc_cluster_host $idx)
-	echo $HOSTS
-	exit
-
-	
+	HOSTS=$(alloc_host $idx)
 	alloc_network $HOSTS $NAME-$idx
 
 	# 添加dns到dns server
@@ -66,13 +60,23 @@ exit
 	fi
 done
 
-if [ $(string_exist "$CONF" dns) -eq 0 ]; then
-	# 检查是否需要重启
-	dns_reload
-fi
+# 检查是否需要重启
+dns_reload
 
 ###############################################################
-display_cluster
+
+# docker 内部，网卡名称是 eth1
+echo "try start with last param [systemd]"
+echo "show host address:"
+for ((idx = 1; idx <= $COUNT; idx++)); do
+	docker exec $NAME-$idx ip addr show eth1 | grep inet | grep [0-9.].*/ --color
+done
+
+echo "    docker exec $NAME-1 ping $NAME-2"
+echo "enter host:"
+for ((idx = 1; idx <= $COUNT; idx++)); do
+	echo "    ssh root@$(alloc_host $idx)"
+done
 
 # client内部测试
 # yum install -y bind-utils
