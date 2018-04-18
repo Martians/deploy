@@ -8,6 +8,7 @@
 2. Volume基本都没怎么配置
 3. database的用户名密码没有专门配置
 4. server/original 中有原生的Centos启动版本，支持sshd、systemd; 也是为了适应低版本docker，不支持 build arg等问题
+5. 如果.docker_config改变，需要重建image，因为复制了一份在镜像中；或者将.docker_config挂载到docker中去
 
 # Image
 ## 是否使用BaseImage
