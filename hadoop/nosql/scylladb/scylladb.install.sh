@@ -1,8 +1,14 @@
+
+# https://www.scylladb.com/download/centos_rpm/
+
 ## 配置
-# export HOST1=100.1.1.10
-# export HOST2=100.1.1.11
-# export HOST3=100.1.1.12
-# export LOCAL=1
+:<<COMMENT
+echo "
+export HOST1=100.1.1.10
+export HOST2=100.1.1.11
+export HOST3=100.1.1.12
+export LOCAL=1" >> ~/.bashrc 
+COMMENT
 
 if [ ! $LOCAL ] || [ ! $HOST1 ] || [ ! $HOST2 ] || [ ! $HOST3 ]; then
 	echo "should config: HOST1 HOST2 HOST3; LOCAL=1"
@@ -27,9 +33,9 @@ RPC=$LOCAL
 
 ##################################################################################################
 if yum list installed 2> /dev/null | grep -q scylla; then
-	echo "already installed"
+	echo "already installed ..."
 else
-	echo "install"
+	echo "install ..."
 	# 注意，yum不能使用代理
 	# sed -i "s/\(proxy\)/#\1/g" /etc/yum.conf
 
@@ -41,7 +47,7 @@ else
 fi
 
 ##################################################################################################
-echo "configure"
+echo "configure ..."
 
 sed -i "s/.*\(cluster_name: \).*/\1'$CLUSTER'/" $CONFIG_FILE
 sed -i "s/\(- seeds: \).*/\1\"$SEEDS\"/" $CONFIG_FILE
@@ -50,3 +56,11 @@ sed -i "s/.*\(rpc_address: \).*/\1\"$RPC\"/" $CONFIG_FILE
 sed -i "s/.*\(experimental: \).*/\1true/" $CONFIG_FILE
 
 cat $CONFIG_FILE | grep --color -e "cluster_name:" -e "- seeds:" -e "listen_address: " -e "rpc_address: " -e "experimental: "
+
+
+##################################################################################################
+echo "preparing ... "
+umount /var/lib/scylla
+mdadm -S /dev/md0
+sudo scylla_setup
+sudo systemctl start scylla-server
