@@ -16,7 +16,6 @@ cd $BASE_PATH
 . 0_config/config.sh
 
 ###############################################################
-
 # 创建镜像，这里镜像的名字，改成sshd，而不是$NAME (否则，如果将sshd当做模板，这里会出错)
 create_origin -p 0_ubuntu -i ubuntu:base -e "ubuntu/ssh.sh" -t $1
 

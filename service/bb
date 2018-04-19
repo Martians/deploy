@@ -1,0 +1,1484 @@
+[1;32m-- prepare: proxy -- [0m
+Unknown option: 
+  ----  create base image
++ docker build -t ubuntu:proxy -f template/0_proxy .
+Sending build context to Docker daemon  183.8kB
+Step 1/8 : FROM ubuntu:xenial
+xenial: Pulling from library/ubuntu
+d3938036b19c: Pulling fs layer
+a9b30c108bda: Pulling fs layer
+67de21feec18: Pulling fs layer
+817da545be2b: Pulling fs layer
+d967c497ce23: Pulling fs layer
+817da545be2b: Waiting
+d967c497ce23: Waiting
+67de21feec18: Verifying Checksum
+67de21feec18: Download complete
+a9b30c108bda: Verifying Checksum
+a9b30c108bda: Download complete
+d967c497ce23: Verifying Checksum
+d967c497ce23: Download complete
+817da545be2b: Verifying Checksum
+817da545be2b: Download complete
+d3938036b19c: Download complete
+d3938036b19c: Pull complete
+a9b30c108bda: Pull complete
+67de21feec18: Pull complete
+817da545be2b: Pull complete
+d967c497ce23: Pull complete
+Digest: sha256:9ee3b83bcaa383e5e3b657f042f4034c92cdd50c03f73166c145c9ceaea9ba7c
+Status: Downloaded newer image for ubuntu:xenial
+ ---> c9d990395902
+Step 2/8 : MAINTAINER long@126.com
+ ---> Running in 2153146e8472
+ ---> 76febce558f5
+Removing intermediate container 2153146e8472
+Step 3/8 : ARG BASE=/docker
+ ---> Running in ae223e130dcb
+ ---> 0b041e5b0fbd
+Removing intermediate container ae223e130dcb
+Step 4/8 : ARG EXEC=""
+ ---> Running in 8dc2c502fe76
+ ---> a1dda16210d7
+Removing intermediate container 8dc2c502fe76
+Step 5/8 : COPY . $BASE
+ ---> 96c0e35f75dd
+Step 6/8 : RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; 	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; 	apt-get update; 	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute; 	$BASE/1_build/server/proxy.sh; 	cp $BASE/1_build/server/start_proxy.sh /start.sh; 	apt-get autoclean autoremove clean; 	rm /var/lib/apt/lists/* -rf; 	rm /var/cache/apt/archives -rf
+ ---> Running in 2d5331ddd013
+Get:1 http://mirrors.163.com/ubuntu xenial InRelease [247 kB]
+Get:2 http://mirrors.163.com/ubuntu xenial-updates InRelease [102 kB]
+Get:3 http://mirrors.163.com/ubuntu xenial-backports InRelease [102 kB]
+Get:4 http://mirrors.163.com/ubuntu xenial-security InRelease [102 kB]
+Get:5 http://mirrors.163.com/ubuntu xenial/universe Sources [9802 kB]
+Get:6 http://mirrors.163.com/ubuntu xenial/main amd64 Packages [1558 kB]
+Get:7 http://mirrors.163.com/ubuntu xenial/restricted amd64 Packages [14.1 kB]
+Get:8 http://mirrors.163.com/ubuntu xenial/universe amd64 Packages [9827 kB]
+Get:9 http://mirrors.163.com/ubuntu xenial/multiverse amd64 Packages [176 kB]
+Get:10 http://mirrors.163.com/ubuntu xenial-updates/universe Sources [253 kB]
+Get:11 http://mirrors.163.com/ubuntu xenial-updates/main amd64 Packages [979 kB]
+Get:12 http://mirrors.163.com/ubuntu xenial-updates/restricted amd64 Packages [13.1 kB]
+Get:13 http://mirrors.163.com/ubuntu xenial-updates/universe amd64 Packages [800 kB]
+Get:14 http://mirrors.163.com/ubuntu xenial-updates/multiverse amd64 Packages [18.5 kB]
+Get:15 http://mirrors.163.com/ubuntu xenial-backports/main amd64 Packages [5153 B]
+Get:16 http://mirrors.163.com/ubuntu xenial-backports/universe amd64 Packages [7734 B]
+Get:17 http://mirrors.163.com/ubuntu xenial-security/universe Sources [79.0 kB]
+Get:18 http://mirrors.163.com/ubuntu xenial-security/main amd64 Packages [602 kB]
+Get:19 http://mirrors.163.com/ubuntu xenial-security/restricted amd64 Packages [12.7 kB]
+Get:20 http://mirrors.163.com/ubuntu xenial-security/universe amd64 Packages [431 kB]
+Get:21 http://mirrors.163.com/ubuntu xenial-security/multiverse amd64 Packages [3489 B]
+Fetched 25.1 MB in 9s (2600 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  file ifupdown iproute2 isc-dhcp-client isc-dhcp-common libatm1
+  libdns-export162 libexpat1 libffi6 libgmp10 libgnutls-openssl27 libgnutls30
+  libgpm2 libhogweed4 libidn11 libisc-export160 libmagic1 libmnl0 libmpdec2
+  libnettle6 libp11-kit0 libpython3.5 libpython3.5-minimal libpython3.5-stdlib
+  libsqlite3-0 libssl1.0.0 libtasn1-6 libxtables11 mime-support netbase
+  vim-common vim-runtime
+Suggested packages:
+  ppp rdnssd iproute2-doc resolvconf avahi-autoipd isc-dhcp-client-ddns
+  apparmor gnutls-bin gpm ctags vim-doc vim-scripts vim-gnome-py2
+  | vim-gtk-py2 | vim-gtk3-py2 | vim-athena-py2 | vim-nox-py2
+The following NEW packages will be installed:
+  file ifupdown iproute2 iputils-ping isc-dhcp-client isc-dhcp-common libatm1
+  libdns-export162 libexpat1 libffi6 libgmp10 libgnutls-openssl27 libgnutls30
+  libgpm2 libhogweed4 libidn11 libisc-export160 libmagic1 libmnl0 libmpdec2
+  libnettle6 libp11-kit0 libpython3.5 libpython3.5-minimal libpython3.5-stdlib
+  libsqlite3-0 libssl1.0.0 libtasn1-6 libxtables11 mime-support net-tools
+  netbase sudo telnet traceroute tree vim vim-common vim-runtime
+0 upgraded, 39 newly installed, 0 to remove and 5 not upgraded.
+Need to get 16.1 MB of archives.
+After this operation, 70.2 MB of additional disk space will be used.
+Get:1 http://mirrors.163.com/ubuntu xenial/main amd64 libatm1 amd64 1:2.5.1-1.5 [24.2 kB]
+Get:2 http://mirrors.163.com/ubuntu xenial/main amd64 libmnl0 amd64 1.0.3-5 [12.0 kB]
+Get:3 http://mirrors.163.com/ubuntu xenial/main amd64 libgpm2 amd64 1.20.4-6.1 [16.5 kB]
+Get:4 http://mirrors.163.com/ubuntu xenial/main amd64 libmagic1 amd64 1:5.25-2ubuntu1 [216 kB]
+Get:5 http://mirrors.163.com/ubuntu xenial/main amd64 file amd64 1:5.25-2ubuntu1 [21.2 kB]
+Get:6 http://mirrors.163.com/ubuntu xenial-updates/main amd64 iproute2 amd64 4.3.0-1ubuntu3.16.04.3 [522 kB]
+Get:7 http://mirrors.163.com/ubuntu xenial-updates/main amd64 ifupdown amd64 0.8.10ubuntu1.2 [54.9 kB]
+Get:8 http://mirrors.163.com/ubuntu xenial/main amd64 libgmp10 amd64 2:6.1.0+dfsg-2 [240 kB]
+Get:9 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libnettle6 amd64 3.2-1ubuntu0.16.04.1 [93.5 kB]
+Get:10 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libhogweed4 amd64 3.2-1ubuntu0.16.04.1 [136 kB]
+Get:11 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libidn11 amd64 1.32-3ubuntu1.2 [46.5 kB]
+Get:12 http://mirrors.163.com/ubuntu xenial/main amd64 libffi6 amd64 3.2.1-4 [17.8 kB]
+Get:13 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libp11-kit0 amd64 0.23.2-5~ubuntu16.04.1 [105 kB]
+Get:14 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libtasn1-6 amd64 4.7-3ubuntu0.16.04.3 [43.5 kB]
+Get:15 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libgnutls30 amd64 3.4.10-4ubuntu1.4 [548 kB]
+Get:16 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libgnutls-openssl27 amd64 3.4.10-4ubuntu1.4 [22.0 kB]
+Get:17 http://mirrors.163.com/ubuntu xenial/main amd64 iputils-ping amd64 3:20121221-5ubuntu2 [52.7 kB]
+Get:18 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libisc-export160 amd64 1:9.10.3.dfsg.P4-8ubuntu1.10 [153 kB]
+Get:19 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libdns-export162 amd64 1:9.10.3.dfsg.P4-8ubuntu1.10 [666 kB]
+Get:20 http://mirrors.163.com/ubuntu xenial-updates/main amd64 isc-dhcp-client amd64 4.3.3-5ubuntu12.10 [224 kB]
+Get:21 http://mirrors.163.com/ubuntu xenial-updates/main amd64 isc-dhcp-common amd64 4.3.3-5ubuntu12.10 [105 kB]
+Get:22 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libexpat1 amd64 2.1.0-7ubuntu0.16.04.3 [71.2 kB]
+Get:23 http://mirrors.163.com/ubuntu xenial/main amd64 libmpdec2 amd64 2.4.2-1 [82.6 kB]
+Get:24 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libssl1.0.0 amd64 1.0.2g-1ubuntu4.11 [1082 kB]
+Get:25 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libpython3.5-minimal amd64 3.5.2-2ubuntu0~16.04.4 [523 kB]
+Get:26 http://mirrors.163.com/ubuntu xenial/main amd64 mime-support all 3.59ubuntu1 [31.0 kB]
+Get:27 http://mirrors.163.com/ubuntu xenial/main amd64 libsqlite3-0 amd64 3.11.0-1ubuntu1 [396 kB]
+Get:28 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libpython3.5-stdlib amd64 3.5.2-2ubuntu0~16.04.4 [2132 kB]
+Get:29 http://mirrors.163.com/ubuntu xenial/main amd64 libxtables11 amd64 1.6.0-2ubuntu3 [27.2 kB]
+Get:30 http://mirrors.163.com/ubuntu xenial/main amd64 net-tools amd64 1.60-26ubuntu1 [175 kB]
+Get:31 http://mirrors.163.com/ubuntu xenial/main amd64 netbase all 5.3 [12.9 kB]
+Get:32 http://mirrors.163.com/ubuntu xenial-updates/main amd64 sudo amd64 1.8.16-0ubuntu1.5 [390 kB]
+Get:33 http://mirrors.163.com/ubuntu xenial-updates/main amd64 vim-common amd64 2:7.4.1689-3ubuntu1.2 [103 kB]
+Get:34 http://mirrors.163.com/ubuntu xenial/main amd64 telnet amd64 0.17-40 [63.5 kB]
+Get:35 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libpython3.5 amd64 3.5.2-2ubuntu0~16.04.4 [1360 kB]
+Get:36 http://mirrors.163.com/ubuntu xenial/universe amd64 traceroute amd64 1:2.0.21-1 [45.5 kB]
+Get:37 http://mirrors.163.com/ubuntu xenial/universe amd64 tree amd64 1.7.0-3 [40.6 kB]
+Get:38 http://mirrors.163.com/ubuntu xenial-updates/main amd64 vim-runtime all 2:7.4.1689-3ubuntu1.2 [5164 kB]
+Get:39 http://mirrors.163.com/ubuntu xenial-updates/main amd64 vim amd64 2:7.4.1689-3ubuntu1.2 [1036 kB]
+[91mdebconf: delaying package configuration, since apt-utils is not installed
+[0mFetched 16.1 MB in 8s (1882 kB/s)
+Selecting previously unselected package libatm1:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 4768 files and directories currently installed.)
+Preparing to unpack .../libatm1_1%3a2.5.1-1.5_amd64.deb ...
+Unpacking libatm1:amd64 (1:2.5.1-1.5) ...
+Selecting previously unselected package libmnl0:amd64.
+Preparing to unpack .../libmnl0_1.0.3-5_amd64.deb ...
+Unpacking libmnl0:amd64 (1.0.3-5) ...
+Selecting previously unselected package libgpm2:amd64.
+Preparing to unpack .../libgpm2_1.20.4-6.1_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.4-6.1) ...
+Selecting previously unselected package libmagic1:amd64.
+Preparing to unpack .../libmagic1_1%3a5.25-2ubuntu1_amd64.deb ...
+Unpacking libmagic1:amd64 (1:5.25-2ubuntu1) ...
+Selecting previously unselected package file.
+Preparing to unpack .../file_1%3a5.25-2ubuntu1_amd64.deb ...
+Unpacking file (1:5.25-2ubuntu1) ...
+Selecting previously unselected package iproute2.
+Preparing to unpack .../iproute2_4.3.0-1ubuntu3.16.04.3_amd64.deb ...
+Unpacking iproute2 (4.3.0-1ubuntu3.16.04.3) ...
+Selecting previously unselected package ifupdown.
+Preparing to unpack .../ifupdown_0.8.10ubuntu1.2_amd64.deb ...
+Unpacking ifupdown (0.8.10ubuntu1.2) ...
+Selecting previously unselected package libgmp10:amd64.
+Preparing to unpack .../libgmp10_2%3a6.1.0+dfsg-2_amd64.deb ...
+Unpacking libgmp10:amd64 (2:6.1.0+dfsg-2) ...
+Selecting previously unselected package libnettle6:amd64.
+Preparing to unpack .../libnettle6_3.2-1ubuntu0.16.04.1_amd64.deb ...
+Unpacking libnettle6:amd64 (3.2-1ubuntu0.16.04.1) ...
+Selecting previously unselected package libhogweed4:amd64.
+Preparing to unpack .../libhogweed4_3.2-1ubuntu0.16.04.1_amd64.deb ...
+Unpacking libhogweed4:amd64 (3.2-1ubuntu0.16.04.1) ...
+Selecting previously unselected package libidn11:amd64.
+Preparing to unpack .../libidn11_1.32-3ubuntu1.2_amd64.deb ...
+Unpacking libidn11:amd64 (1.32-3ubuntu1.2) ...
+Selecting previously unselected package libffi6:amd64.
+Preparing to unpack .../libffi6_3.2.1-4_amd64.deb ...
+Unpacking libffi6:amd64 (3.2.1-4) ...
+Selecting previously unselected package libp11-kit0:amd64.
+Preparing to unpack .../libp11-kit0_0.23.2-5~ubuntu16.04.1_amd64.deb ...
+Unpacking libp11-kit0:amd64 (0.23.2-5~ubuntu16.04.1) ...
+Selecting previously unselected package libtasn1-6:amd64.
+Preparing to unpack .../libtasn1-6_4.7-3ubuntu0.16.04.3_amd64.deb ...
+Unpacking libtasn1-6:amd64 (4.7-3ubuntu0.16.04.3) ...
+Selecting previously unselected package libgnutls30:amd64.
+Preparing to unpack .../libgnutls30_3.4.10-4ubuntu1.4_amd64.deb ...
+Unpacking libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Selecting previously unselected package libgnutls-openssl27:amd64.
+Preparing to unpack .../libgnutls-openssl27_3.4.10-4ubuntu1.4_amd64.deb ...
+Unpacking libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Selecting previously unselected package iputils-ping.
+Preparing to unpack .../iputils-ping_3%3a20121221-5ubuntu2_amd64.deb ...
+Unpacking iputils-ping (3:20121221-5ubuntu2) ...
+Selecting previously unselected package libisc-export160.
+Preparing to unpack .../libisc-export160_1%3a9.10.3.dfsg.P4-8ubuntu1.10_amd64.deb ...
+Unpacking libisc-export160 (1:9.10.3.dfsg.P4-8ubuntu1.10) ...
+Selecting previously unselected package libdns-export162.
+Preparing to unpack .../libdns-export162_1%3a9.10.3.dfsg.P4-8ubuntu1.10_amd64.deb ...
+Unpacking libdns-export162 (1:9.10.3.dfsg.P4-8ubuntu1.10) ...
+Selecting previously unselected package isc-dhcp-client.
+Preparing to unpack .../isc-dhcp-client_4.3.3-5ubuntu12.10_amd64.deb ...
+Unpacking isc-dhcp-client (4.3.3-5ubuntu12.10) ...
+Selecting previously unselected package isc-dhcp-common.
+Preparing to unpack .../isc-dhcp-common_4.3.3-5ubuntu12.10_amd64.deb ...
+Unpacking isc-dhcp-common (4.3.3-5ubuntu12.10) ...
+Selecting previously unselected package libexpat1:amd64.
+Preparing to unpack .../libexpat1_2.1.0-7ubuntu0.16.04.3_amd64.deb ...
+Unpacking libexpat1:amd64 (2.1.0-7ubuntu0.16.04.3) ...
+Selecting previously unselected package libmpdec2:amd64.
+Preparing to unpack .../libmpdec2_2.4.2-1_amd64.deb ...
+Unpacking libmpdec2:amd64 (2.4.2-1) ...
+Selecting previously unselected package libssl1.0.0:amd64.
+Preparing to unpack .../libssl1.0.0_1.0.2g-1ubuntu4.11_amd64.deb ...
+Unpacking libssl1.0.0:amd64 (1.0.2g-1ubuntu4.11) ...
+Selecting previously unselected package libpython3.5-minimal:amd64.
+Preparing to unpack .../libpython3.5-minimal_3.5.2-2ubuntu0~16.04.4_amd64.deb ...
+Unpacking libpython3.5-minimal:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Selecting previously unselected package mime-support.
+Preparing to unpack .../mime-support_3.59ubuntu1_all.deb ...
+Unpacking mime-support (3.59ubuntu1) ...
+Selecting previously unselected package libsqlite3-0:amd64.
+Preparing to unpack .../libsqlite3-0_3.11.0-1ubuntu1_amd64.deb ...
+Unpacking libsqlite3-0:amd64 (3.11.0-1ubuntu1) ...
+Selecting previously unselected package libpython3.5-stdlib:amd64.
+Preparing to unpack .../libpython3.5-stdlib_3.5.2-2ubuntu0~16.04.4_amd64.deb ...
+Unpacking libpython3.5-stdlib:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Selecting previously unselected package libxtables11:amd64.
+Preparing to unpack .../libxtables11_1.6.0-2ubuntu3_amd64.deb ...
+Unpacking libxtables11:amd64 (1.6.0-2ubuntu3) ...
+Selecting previously unselected package net-tools.
+Preparing to unpack .../net-tools_1.60-26ubuntu1_amd64.deb ...
+Unpacking net-tools (1.60-26ubuntu1) ...
+Selecting previously unselected package netbase.
+Preparing to unpack .../archives/netbase_5.3_all.deb ...
+Unpacking netbase (5.3) ...
+Selecting previously unselected package sudo.
+Preparing to unpack .../sudo_1.8.16-0ubuntu1.5_amd64.deb ...
+Unpacking sudo (1.8.16-0ubuntu1.5) ...
+Selecting previously unselected package vim-common.
+Preparing to unpack .../vim-common_2%3a7.4.1689-3ubuntu1.2_amd64.deb ...
+Unpacking vim-common (2:7.4.1689-3ubuntu1.2) ...
+Selecting previously unselected package telnet.
+Preparing to unpack .../telnet_0.17-40_amd64.deb ...
+Unpacking telnet (0.17-40) ...
+Selecting previously unselected package libpython3.5:amd64.
+Preparing to unpack .../libpython3.5_3.5.2-2ubuntu0~16.04.4_amd64.deb ...
+Unpacking libpython3.5:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Selecting previously unselected package traceroute.
+Preparing to unpack .../traceroute_1%3a2.0.21-1_amd64.deb ...
+Unpacking traceroute (1:2.0.21-1) ...
+Selecting previously unselected package tree.
+Preparing to unpack .../tree_1.7.0-3_amd64.deb ...
+Unpacking tree (1.7.0-3) ...
+Selecting previously unselected package vim-runtime.
+Preparing to unpack .../vim-runtime_2%3a7.4.1689-3ubuntu1.2_all.deb ...
+Adding 'diversion of /usr/share/vim/vim74/doc/help.txt to /usr/share/vim/vim74/doc/help.txt.vim-tiny by vim-runtime'
+Adding 'diversion of /usr/share/vim/vim74/doc/tags to /usr/share/vim/vim74/doc/tags.vim-tiny by vim-runtime'
+Unpacking vim-runtime (2:7.4.1689-3ubuntu1.2) ...
+Selecting previously unselected package vim.
+Preparing to unpack .../vim_2%3a7.4.1689-3ubuntu1.2_amd64.deb ...
+Unpacking vim (2:7.4.1689-3ubuntu1.2) ...
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+Processing triggers for systemd (229-4ubuntu21.2) ...
+Setting up libatm1:amd64 (1:2.5.1-1.5) ...
+Setting up libmnl0:amd64 (1.0.3-5) ...
+Setting up libgpm2:amd64 (1.20.4-6.1) ...
+Setting up libmagic1:amd64 (1:5.25-2ubuntu1) ...
+Setting up file (1:5.25-2ubuntu1) ...
+Setting up iproute2 (4.3.0-1ubuntu3.16.04.3) ...
+Setting up ifupdown (0.8.10ubuntu1.2) ...
+Creating /etc/network/interfaces.
+Setting up libgmp10:amd64 (2:6.1.0+dfsg-2) ...
+Setting up libnettle6:amd64 (3.2-1ubuntu0.16.04.1) ...
+Setting up libhogweed4:amd64 (3.2-1ubuntu0.16.04.1) ...
+Setting up libidn11:amd64 (1.32-3ubuntu1.2) ...
+Setting up libffi6:amd64 (3.2.1-4) ...
+Setting up libp11-kit0:amd64 (0.23.2-5~ubuntu16.04.1) ...
+Setting up libtasn1-6:amd64 (4.7-3ubuntu0.16.04.3) ...
+Setting up libgnutls30:amd64 (3.4.10-4ubuntu1.4) ...
+Setting up libgnutls-openssl27:amd64 (3.4.10-4ubuntu1.4) ...
+Setting up iputils-ping (3:20121221-5ubuntu2) ...
+Setcap is not installed, falling back to setuid
+Setting up libisc-export160 (1:9.10.3.dfsg.P4-8ubuntu1.10) ...
+Setting up libdns-export162 (1:9.10.3.dfsg.P4-8ubuntu1.10) ...
+Setting up isc-dhcp-client (4.3.3-5ubuntu12.10) ...
+Setting up isc-dhcp-common (4.3.3-5ubuntu12.10) ...
+Setting up libexpat1:amd64 (2.1.0-7ubuntu0.16.04.3) ...
+Setting up libmpdec2:amd64 (2.4.2-1) ...
+Setting up libssl1.0.0:amd64 (1.0.2g-1ubuntu4.11) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.22.1 /usr/local/share/perl/5.22.1 /usr/lib/x86_64-linux-gnu/perl5/5.22 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.22 /usr/share/perl/5.22 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base .) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+Setting up libpython3.5-minimal:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Setting up mime-support (3.59ubuntu1) ...
+Setting up libsqlite3-0:amd64 (3.11.0-1ubuntu1) ...
+Setting up libpython3.5-stdlib:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Setting up libxtables11:amd64 (1.6.0-2ubuntu3) ...
+Setting up net-tools (1.60-26ubuntu1) ...
+Setting up netbase (5.3) ...
+Setting up sudo (1.8.16-0ubuntu1.5) ...
+Setting up vim-common (2:7.4.1689-3ubuntu1.2) ...
+Setting up telnet (0.17-40) ...
+update-alternatives: using /usr/bin/telnet.netkit to provide /usr/bin/telnet (telnet) in auto mode
+Setting up libpython3.5:amd64 (3.5.2-2ubuntu0~16.04.4) ...
+Setting up traceroute (1:2.0.21-1) ...
+update-alternatives: using /usr/bin/traceroute.db to provide /usr/bin/traceroute (traceroute) in auto mode
+update-alternatives: using /usr/bin/traceroute6.db to provide /usr/bin/traceroute6 (traceroute6) in auto mode
+update-alternatives: using /usr/bin/lft.db to provide /usr/bin/lft (lft) in auto mode
+update-alternatives: using /usr/bin/traceproto.db to provide /usr/bin/traceproto (traceproto) in auto mode
+update-alternatives: using /usr/sbin/tcptraceroute.db to provide /usr/sbin/tcptraceroute (tcptraceroute) in auto mode
+Setting up tree (1.7.0-3) ...
+Setting up vim-runtime (2:7.4.1689-3ubuntu1.2) ...
+Setting up vim (2:7.4.1689-3ubuntu1.2) ...
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vim (vim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vimdiff (vimdiff) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rvim (rvim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rview (rview) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vi (vi) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/view (view) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/ex (ex) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/editor (editor) in auto mode
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+Processing triggers for systemd (229-4ubuntu21.2) ...
+proxy: install apt-cacher-ng
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  ca-certificates krb5-locales libasn1-8-heimdal libcurl3-gnutls
+  libgssapi-krb5-2 libgssapi3-heimdal libhcrypto4-heimdal libheimbase1-heimdal
+  libheimntlm0-heimdal libhx509-5-heimdal libk5crypto3 libkeyutils1
+  libkrb5-26-heimdal libkrb5-3 libkrb5support0 libldap-2.4-2
+  libroken18-heimdal librtmp1 libsasl2-2 libsasl2-modules libsasl2-modules-db
+  libwind0-heimdal libwrap0 openssl tcpd
+Suggested packages:
+  doc-base libfuse2 avahi-daemon krb5-doc krb5-user libsasl2-modules-otp
+  libsasl2-modules-ldap libsasl2-modules-sql libsasl2-modules-gssapi-mit
+  | libsasl2-modules-gssapi-heimdal
+The following NEW packages will be installed:
+  apt-cacher-ng ca-certificates curl krb5-locales libasn1-8-heimdal
+  libcurl3-gnutls libgssapi-krb5-2 libgssapi3-heimdal libhcrypto4-heimdal
+  libheimbase1-heimdal libheimntlm0-heimdal libhx509-5-heimdal libk5crypto3
+  libkeyutils1 libkrb5-26-heimdal libkrb5-3 libkrb5support0 libldap-2.4-2
+  libroken18-heimdal librtmp1 libsasl2-2 libsasl2-modules libsasl2-modules-db
+  libwind0-heimdal libwrap0 openssl tcpd
+0 upgraded, 27 newly installed, 0 to remove and 5 not upgraded.
+Need to get 3207 kB of archives.
+After this operation, 12.9 MB of additional disk space will be used.
+Get:1 http://mirrors.163.com/ubuntu xenial/main amd64 libwrap0 amd64 7.6.q-25 [46.2 kB]
+Get:2 http://mirrors.163.com/ubuntu xenial/universe amd64 apt-cacher-ng amd64 0.9.1-1ubuntu1 [504 kB]
+Get:3 http://mirrors.163.com/ubuntu xenial-updates/main amd64 openssl amd64 1.0.2g-1ubuntu4.11 [492 kB]
+Get:4 http://mirrors.163.com/ubuntu xenial-updates/main amd64 ca-certificates all 20170717~16.04.1 [168 kB]
+Get:5 http://mirrors.163.com/ubuntu xenial-updates/main amd64 krb5-locales all 1.13.2+dfsg-5ubuntu2 [13.2 kB]
+Get:6 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libroken18-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [41.4 kB]
+Get:7 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libasn1-8-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [174 kB]
+Get:8 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libkrb5support0 amd64 1.13.2+dfsg-5ubuntu2 [30.8 kB]
+Get:9 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libk5crypto3 amd64 1.13.2+dfsg-5ubuntu2 [81.2 kB]
+Get:10 http://mirrors.163.com/ubuntu xenial/main amd64 libkeyutils1 amd64 1.5.9-8ubuntu1 [9904 B]
+Get:11 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libkrb5-3 amd64 1.13.2+dfsg-5ubuntu2 [273 kB]
+Get:12 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libgssapi-krb5-2 amd64 1.13.2+dfsg-5ubuntu2 [120 kB]
+Get:13 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libhcrypto4-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [85.0 kB]
+Get:14 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libheimbase1-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [29.3 kB]
+Get:15 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libwind0-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [47.8 kB]
+Get:16 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libhx509-5-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [107 kB]
+Get:17 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libkrb5-26-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [202 kB]
+Get:18 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libheimntlm0-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [15.1 kB]
+Get:19 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libgssapi3-heimdal amd64 1.7~git20150920+dfsg-4ubuntu1.16.04.1 [96.1 kB]
+Get:20 http://mirrors.163.com/ubuntu xenial/main amd64 libsasl2-modules-db amd64 2.1.26.dfsg1-14build1 [14.5 kB]
+Get:21 http://mirrors.163.com/ubuntu xenial/main amd64 libsasl2-2 amd64 2.1.26.dfsg1-14build1 [48.7 kB]
+Get:22 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libldap-2.4-2 amd64 2.4.42+dfsg-2ubuntu3.2 [160 kB]
+Get:23 http://mirrors.163.com/ubuntu xenial-updates/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d-1ubuntu0.1 [54.4 kB]
+Get:24 http://mirrors.163.com/ubuntu xenial-updates/main amd64 libcurl3-gnutls amd64 7.47.0-1ubuntu2.7 [185 kB]
+Get:25 http://mirrors.163.com/ubuntu xenial/main amd64 libsasl2-modules amd64 2.1.26.dfsg1-14build1 [47.5 kB]
+Get:26 http://mirrors.163.com/ubuntu xenial-updates/main amd64 curl amd64 7.47.0-1ubuntu2.7 [138 kB]
+Get:27 http://mirrors.163.com/ubuntu xenial/main amd64 tcpd amd64 7.6.q-25 [23.0 kB]
+[91mdebconf: delaying package configuration, since apt-utils is not installed
+[0mFetched 3207 kB in 27s (117 kB/s)
+Selecting previously unselected package libwrap0:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 7883 files and directories currently installed.)
+Preparing to unpack .../libwrap0_7.6.q-25_amd64.deb ...
+Unpacking libwrap0:amd64 (7.6.q-25) ...
+Selecting previously unselected package apt-cacher-ng.
+Preparing to unpack .../apt-cacher-ng_0.9.1-1ubuntu1_amd64.deb ...
+Unpacking apt-cacher-ng (0.9.1-1ubuntu1) ...
+Selecting previously unselected package openssl.
+Preparing to unpack .../openssl_1.0.2g-1ubuntu4.11_amd64.deb ...
+Unpacking openssl (1.0.2g-1ubuntu4.11) ...
+Selecting previously unselected package ca-certificates.
+Preparing to unpack .../ca-certificates_20170717~16.04.1_all.deb ...
+Unpacking ca-certificates (20170717~16.04.1) ...
+Selecting previously unselected package krb5-locales.
+Preparing to unpack .../krb5-locales_1.13.2+dfsg-5ubuntu2_all.deb ...
+Unpacking krb5-locales (1.13.2+dfsg-5ubuntu2) ...
+Selecting previously unselected package libroken18-heimdal:amd64.
+Preparing to unpack .../libroken18-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libroken18-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libasn1-8-heimdal:amd64.
+Preparing to unpack .../libasn1-8-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libasn1-8-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libkrb5support0:amd64.
+Preparing to unpack .../libkrb5support0_1.13.2+dfsg-5ubuntu2_amd64.deb ...
+Unpacking libkrb5support0:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Selecting previously unselected package libk5crypto3:amd64.
+Preparing to unpack .../libk5crypto3_1.13.2+dfsg-5ubuntu2_amd64.deb ...
+Unpacking libk5crypto3:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Selecting previously unselected package libkeyutils1:amd64.
+Preparing to unpack .../libkeyutils1_1.5.9-8ubuntu1_amd64.deb ...
+Unpacking libkeyutils1:amd64 (1.5.9-8ubuntu1) ...
+Selecting previously unselected package libkrb5-3:amd64.
+Preparing to unpack .../libkrb5-3_1.13.2+dfsg-5ubuntu2_amd64.deb ...
+Unpacking libkrb5-3:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Selecting previously unselected package libgssapi-krb5-2:amd64.
+Preparing to unpack .../libgssapi-krb5-2_1.13.2+dfsg-5ubuntu2_amd64.deb ...
+Unpacking libgssapi-krb5-2:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Selecting previously unselected package libhcrypto4-heimdal:amd64.
+Preparing to unpack .../libhcrypto4-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libhcrypto4-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libheimbase1-heimdal:amd64.
+Preparing to unpack .../libheimbase1-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libheimbase1-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libwind0-heimdal:amd64.
+Preparing to unpack .../libwind0-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libwind0-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libhx509-5-heimdal:amd64.
+Preparing to unpack .../libhx509-5-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libhx509-5-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libkrb5-26-heimdal:amd64.
+Preparing to unpack .../libkrb5-26-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libkrb5-26-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libheimntlm0-heimdal:amd64.
+Preparing to unpack .../libheimntlm0-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libheimntlm0-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libgssapi3-heimdal:amd64.
+Preparing to unpack .../libgssapi3-heimdal_1.7~git20150920+dfsg-4ubuntu1.16.04.1_amd64.deb ...
+Unpacking libgssapi3-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Selecting previously unselected package libsasl2-modules-db:amd64.
+Preparing to unpack .../libsasl2-modules-db_2.1.26.dfsg1-14build1_amd64.deb ...
+Unpacking libsasl2-modules-db:amd64 (2.1.26.dfsg1-14build1) ...
+Selecting previously unselected package libsasl2-2:amd64.
+Preparing to unpack .../libsasl2-2_2.1.26.dfsg1-14build1_amd64.deb ...
+Unpacking libsasl2-2:amd64 (2.1.26.dfsg1-14build1) ...
+Selecting previously unselected package libldap-2.4-2:amd64.
+Preparing to unpack .../libldap-2.4-2_2.4.42+dfsg-2ubuntu3.2_amd64.deb ...
+Unpacking libldap-2.4-2:amd64 (2.4.42+dfsg-2ubuntu3.2) ...
+Selecting previously unselected package librtmp1:amd64.
+Preparing to unpack .../librtmp1_2.4+20151223.gitfa8646d-1ubuntu0.1_amd64.deb ...
+Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d-1ubuntu0.1) ...
+Selecting previously unselected package libcurl3-gnutls:amd64.
+Preparing to unpack .../libcurl3-gnutls_7.47.0-1ubuntu2.7_amd64.deb ...
+Unpacking libcurl3-gnutls:amd64 (7.47.0-1ubuntu2.7) ...
+Selecting previously unselected package libsasl2-modules:amd64.
+Preparing to unpack .../libsasl2-modules_2.1.26.dfsg1-14build1_amd64.deb ...
+Unpacking libsasl2-modules:amd64 (2.1.26.dfsg1-14build1) ...
+Selecting previously unselected package curl.
+Preparing to unpack .../curl_7.47.0-1ubuntu2.7_amd64.deb ...
+Unpacking curl (7.47.0-1ubuntu2.7) ...
+Selecting previously unselected package tcpd.
+Preparing to unpack .../tcpd_7.6.q-25_amd64.deb ...
+Unpacking tcpd (7.6.q-25) ...
+Processing triggers for systemd (229-4ubuntu21.2) ...
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+Setting up libwrap0:amd64 (7.6.q-25) ...
+Setting up apt-cacher-ng (0.9.1-1ubuntu1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.22.1 /usr/local/share/perl/5.22.1 /usr/lib/x86_64-linux-gnu/perl5/5.22 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.22 /usr/share/perl/5.22 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base .) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+invoke-rc.d: could not determine current runlevel
+invoke-rc.d: policy-rc.d denied execution of start.
+Setting up openssl (1.0.2g-1ubuntu4.11) ...
+Setting up ca-certificates (20170717~16.04.1) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.22.1 /usr/local/share/perl/5.22.1 /usr/lib/x86_64-linux-gnu/perl5/5.22 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.22 /usr/share/perl/5.22 /usr/local/lib/site_perl /usr/lib/x86_64-linux-gnu/perl-base .) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+Setting up krb5-locales (1.13.2+dfsg-5ubuntu2) ...
+Setting up libroken18-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libasn1-8-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libkrb5support0:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Setting up libk5crypto3:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Setting up libkeyutils1:amd64 (1.5.9-8ubuntu1) ...
+Setting up libkrb5-3:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Setting up libgssapi-krb5-2:amd64 (1.13.2+dfsg-5ubuntu2) ...
+Setting up libhcrypto4-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libheimbase1-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libwind0-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libhx509-5-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libkrb5-26-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libheimntlm0-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libgssapi3-heimdal:amd64 (1.7~git20150920+dfsg-4ubuntu1.16.04.1) ...
+Setting up libsasl2-modules-db:amd64 (2.1.26.dfsg1-14build1) ...
+Setting up libsasl2-2:amd64 (2.1.26.dfsg1-14build1) ...
+Setting up libldap-2.4-2:amd64 (2.4.42+dfsg-2ubuntu3.2) ...
+Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d-1ubuntu0.1) ...
+Setting up libcurl3-gnutls:amd64 (7.47.0-1ubuntu2.7) ...
+Setting up libsasl2-modules:amd64 (2.1.26.dfsg1-14build1) ...
+Setting up curl (7.47.0-1ubuntu2.7) ...
+Setting up tcpd (7.6.q-25) ...
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+Processing triggers for systemd (229-4ubuntu21.2) ...
+Processing triggers for ca-certificates (20170717~16.04.1) ...
+Updating certificates in /etc/ssl/certs...
+148 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+proxy: download centos mirror list
+[91m  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0[0m[91m 38 85207   38 32522    0     0   4051      0  0:00:21  0:00:08  0:00:13  7217[0m[91m100 85207  100 85207    0     0  10581      0  0:00:08  0:00:08 --:--:-- 24144
+[0mproxy: update proxy config
+check at http://127.0.0.1:3142
+cd /var/cache/apt-cacher-ng
+proxy: completed
+Reading package lists...
+Building dependency tree...
+Reading state information...
+ ---> 77542ce75099
+Removing intermediate container 2d5331ddd013
+Step 7/8 : CMD /bin/bash
+ ---> Running in bba2c99250c4
+ ---> d170ccb5cd6f
+Removing intermediate container bba2c99250c4
+Step 8/8 : CMD /start.sh
+ ---> Running in 679aa1094a0b
+ ---> f6975a755b74
+Removing intermediate container 679aa1094a0b
+Successfully built f6975a755b74
+Successfully tagged ubuntu:proxy
++ set +x
+"docker history" requires exactly 1 argument.
+See 'docker history --help'.
+
+Usage:  docker history [OPTIONS] IMAGE
+
+Show the history of an image
+Unknown option: 
+[1;32m-- create docker proxy -- [0m
++ docker run -itd --name proxy -h proxy -p 3142:3142 -v /home/long/source:/source -v /mnt/disk/docker:/docker -v /mnt/hgfs/proxy:/var/cache/apt-cacher-ng ubuntu:proxy
+911f28b42d4306fc2b466fc4f24fe49755f05b746386bacf24ef092350ddcf13
++ set +x
+tcp6       0      0 :::3142                 :::*                    LISTEN      87448/docker-proxy
+brower:
+    docker exec -it proxy /bin/bash
+    http://192.168.127.129:3142
+
+check state:
+    docker exec proxy du -ch --max-depth=1 /var/cache/apt-cacher-ng
+    docker logs -f proxy 
+
+[1;32m-- prepare: http -- [0m
+  ----  create base image
++ docker build -t centos:base -f template/0_centos .
+Sending build context to Docker daemon  221.7kB
+Step 1/4 : FROM centos:7.4.1708
+7.4.1708: Pulling from library/centos
+18b8eb7e7f01: Pulling fs layer
+18b8eb7e7f01: Verifying Checksum
+18b8eb7e7f01: Download complete
+18b8eb7e7f01: Pull complete
+Digest: sha256:2a61f8abd6250751c4b1dd3384a2bdd8f87e0e60d11c064b8a90e2e552fee2d7
+Status: Downloaded newer image for centos:7.4.1708
+ ---> 3afd47092a0e
+Step 2/4 : MAINTAINER long@126.com
+ ---> Running in edbf4261bbb0
+ ---> 23b20e453edb
+Removing intermediate container edbf4261bbb0
+Step 3/4 : RUN cd /etc/yum.repos.d/; mkdir -p save; mv *.repo save; 	curl -O http://mirrors.163.com/.help/CentOS7-Base-163.repo; 	yum makecache; 	yum install -y sudo vim net-tools telnet traceroute tree;  	yum clean all; rm -rf /var/cache/yum/*
+ ---> Running in d1272773a1bb
+[91m  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0[0m[91m100  1572  100  1572    0     0    279      0  0:00:05  0:00:05 --:--:--   383
+[0mLoaded plugins: fastestmirror, ovl
+Determining fastest mirrors
+Metadata Cache Created
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+Resolving Dependencies
+--> Running transaction check
+---> Package net-tools.x86_64 0:2.0-0.22.20131004git.el7 will be installed
+---> Package sudo.x86_64 0:1.8.19p2-11.el7_4 will be installed
+---> Package telnet.x86_64 1:0.17-64.el7 will be installed
+---> Package traceroute.x86_64 3:2.0.22-2.el7 will be installed
+---> Package tree.x86_64 0:1.6.0-10.el7 will be installed
+---> Package vim-enhanced.x86_64 2:7.4.160-2.el7 will be installed
+--> Processing Dependency: vim-common = 2:7.4.160-2.el7 for package: 2:vim-enhanced-7.4.160-2.el7.x86_64
+--> Processing Dependency: which for package: 2:vim-enhanced-7.4.160-2.el7.x86_64
+--> Processing Dependency: perl(:MODULE_COMPAT_5.16.3) for package: 2:vim-enhanced-7.4.160-2.el7.x86_64
+--> Processing Dependency: libperl.so()(64bit) for package: 2:vim-enhanced-7.4.160-2.el7.x86_64
+--> Processing Dependency: libgpm.so.2()(64bit) for package: 2:vim-enhanced-7.4.160-2.el7.x86_64
+--> Running transaction check
+---> Package gpm-libs.x86_64 0:1.20.7-5.el7 will be installed
+---> Package perl.x86_64 4:5.16.3-292.el7 will be installed
+--> Processing Dependency: perl(Socket) >= 1.3 for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Scalar::Util) >= 1.10 for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl-macros for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(threads::shared) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(threads) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(constant) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Time::Local) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Time::HiRes) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Storable) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Socket) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Scalar::Util) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Pod::Simple::XHTML) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Pod::Simple::Search) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Getopt::Long) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Filter::Util::Call) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(File::Temp) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(File::Spec::Unix) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(File::Spec::Functions) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(File::Spec) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(File::Path) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Exporter) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Cwd) for package: 4:perl-5.16.3-292.el7.x86_64
+--> Processing Dependency: perl(Carp) for package: 4:perl-5.16.3-292.el7.x86_64
+---> Package perl-libs.x86_64 4:5.16.3-292.el7 will be installed
+---> Package vim-common.x86_64 2:7.4.160-2.el7 will be installed
+--> Processing Dependency: vim-filesystem for package: 2:vim-common-7.4.160-2.el7.x86_64
+---> Package which.x86_64 0:2.20-7.el7 will be installed
+--> Running transaction check
+---> Package perl-Carp.noarch 0:1.26-244.el7 will be installed
+---> Package perl-Exporter.noarch 0:5.68-3.el7 will be installed
+---> Package perl-File-Path.noarch 0:2.09-2.el7 will be installed
+---> Package perl-File-Temp.noarch 0:0.23.01-3.el7 will be installed
+---> Package perl-Filter.x86_64 0:1.49-3.el7 will be installed
+---> Package perl-Getopt-Long.noarch 0:2.40-2.el7 will be installed
+--> Processing Dependency: perl(Pod::Usage) >= 1.14 for package: perl-Getopt-Long-2.40-2.el7.noarch
+--> Processing Dependency: perl(Text::ParseWords) for package: perl-Getopt-Long-2.40-2.el7.noarch
+---> Package perl-PathTools.x86_64 0:3.40-5.el7 will be installed
+---> Package perl-Pod-Simple.noarch 1:3.28-4.el7 will be installed
+--> Processing Dependency: perl(Pod::Escapes) >= 1.04 for package: 1:perl-Pod-Simple-3.28-4.el7.noarch
+--> Processing Dependency: perl(Encode) for package: 1:perl-Pod-Simple-3.28-4.el7.noarch
+---> Package perl-Scalar-List-Utils.x86_64 0:1.27-248.el7 will be installed
+---> Package perl-Socket.x86_64 0:2.010-4.el7 will be installed
+---> Package perl-Storable.x86_64 0:2.45-3.el7 will be installed
+---> Package perl-Time-HiRes.x86_64 4:1.9725-3.el7 will be installed
+---> Package perl-Time-Local.noarch 0:1.2300-2.el7 will be installed
+---> Package perl-constant.noarch 0:1.27-2.el7 will be installed
+---> Package perl-macros.x86_64 4:5.16.3-292.el7 will be installed
+---> Package perl-threads.x86_64 0:1.87-4.el7 will be installed
+---> Package perl-threads-shared.x86_64 0:1.43-6.el7 will be installed
+---> Package vim-filesystem.x86_64 2:7.4.160-2.el7 will be installed
+--> Running transaction check
+---> Package perl-Encode.x86_64 0:2.51-7.el7 will be installed
+---> Package perl-Pod-Escapes.noarch 1:1.04-292.el7 will be installed
+---> Package perl-Pod-Usage.noarch 0:1.63-3.el7 will be installed
+--> Processing Dependency: perl(Pod::Text) >= 3.15 for package: perl-Pod-Usage-1.63-3.el7.noarch
+--> Processing Dependency: perl-Pod-Perldoc for package: perl-Pod-Usage-1.63-3.el7.noarch
+---> Package perl-Text-ParseWords.noarch 0:3.29-4.el7 will be installed
+--> Running transaction check
+---> Package perl-Pod-Perldoc.noarch 0:3.20-4.el7 will be installed
+--> Processing Dependency: perl(parent) for package: perl-Pod-Perldoc-3.20-4.el7.noarch
+--> Processing Dependency: perl(HTTP::Tiny) for package: perl-Pod-Perldoc-3.20-4.el7.noarch
+--> Processing Dependency: groff-base for package: perl-Pod-Perldoc-3.20-4.el7.noarch
+---> Package perl-podlators.noarch 0:2.5.1-3.el7 will be installed
+--> Running transaction check
+---> Package groff-base.x86_64 0:1.22.2-8.el7 will be installed
+---> Package perl-HTTP-Tiny.noarch 0:0.033-3.el7 will be installed
+---> Package perl-parent.noarch 1:0.225-244.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                  Arch     Version                      Repository
+                                                                           Size
+================================================================================
+Installing:
+ net-tools                x86_64   2.0-0.22.20131004git.el7     base      305 k
+ sudo                     x86_64   1.8.19p2-11.el7_4            updates   1.1 M
+ telnet                   x86_64   1:0.17-64.el7                base       64 k
+ traceroute               x86_64   3:2.0.22-2.el7               base       59 k
+ tree                     x86_64   1.6.0-10.el7                 base       46 k
+ vim-enhanced             x86_64   2:7.4.160-2.el7              base      1.0 M
+Installing for dependencies:
+ gpm-libs                 x86_64   1.20.7-5.el7                 base       32 k
+ groff-base               x86_64   1.22.2-8.el7                 base      942 k
+ perl                     x86_64   4:5.16.3-292.el7             base      8.0 M
+ perl-Carp                noarch   1.26-244.el7                 base       19 k
+ perl-Encode              x86_64   2.51-7.el7                   base      1.5 M
+ perl-Exporter            noarch   5.68-3.el7                   base       28 k
+ perl-File-Path           noarch   2.09-2.el7                   base       26 k
+ perl-File-Temp           noarch   0.23.01-3.el7                base       56 k
+ perl-Filter              x86_64   1.49-3.el7                   base       76 k
+ perl-Getopt-Long         noarch   2.40-2.el7                   base       56 k
+ perl-HTTP-Tiny           noarch   0.033-3.el7                  base       38 k
+ perl-PathTools           x86_64   3.40-5.el7                   base       82 k
+ perl-Pod-Escapes         noarch   1:1.04-292.el7               base       51 k
+ perl-Pod-Perldoc         noarch   3.20-4.el7                   base       87 k
+ perl-Pod-Simple          noarch   1:3.28-4.el7                 base      216 k
+ perl-Pod-Usage           noarch   1.63-3.el7                   base       27 k
+ perl-Scalar-List-Utils   x86_64   1.27-248.el7                 base       36 k
+ perl-Socket              x86_64   2.010-4.el7                  base       49 k
+ perl-Storable            x86_64   2.45-3.el7                   base       77 k
+ perl-Text-ParseWords     noarch   3.29-4.el7                   base       14 k
+ perl-Time-HiRes          x86_64   4:1.9725-3.el7               base       45 k
+ perl-Time-Local          noarch   1.2300-2.el7                 base       24 k
+ perl-constant            noarch   1.27-2.el7                   base       19 k
+ perl-libs                x86_64   4:5.16.3-292.el7             base      688 k
+ perl-macros              x86_64   4:5.16.3-292.el7             base       43 k
+ perl-parent              noarch   1:0.225-244.el7              base       12 k
+ perl-podlators           noarch   2.5.1-3.el7                  base      112 k
+ perl-threads             x86_64   1.87-4.el7                   base       49 k
+ perl-threads-shared      x86_64   1.43-6.el7                   base       39 k
+ vim-common               x86_64   2:7.4.160-2.el7              base      5.9 M
+ vim-filesystem           x86_64   2:7.4.160-2.el7              base      9.8 k
+ which                    x86_64   2.20-7.el7                   base       41 k
+
+Transaction Summary
+================================================================================
+Install  6 Packages (+32 Dependent packages)
+
+Total download size: 21 M
+Installed size: 68 M
+Downloading packages:
+[91mwarning: /var/cache/yum/x86_64/7/base/packages/gpm-libs-1.20.7-5.el7.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID f4a80eb5: NOKEY
+[0mPublic key for gpm-libs-1.20.7-5.el7.x86_64.rpm is not installed
+Public key for sudo-1.8.19p2-11.el7_4.x86_64.rpm is not installed
+--------------------------------------------------------------------------------
+Total                                              1.5 MB/s |  21 MB  00:14     
+Retrieving key from http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+[91mImporting GPG key 0xF4A80EB5:
+ Userid     : "CentOS-7 Key (CentOS 7 Official Signing Key) <security@centos.org>"
+ Fingerprint: 6341 ab27 53d7 8a78 a7c2 7bb1 24c6 a8a7 f4a8 0eb5
+ From       : http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7
+[0mRunning transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : gpm-libs-1.20.7-5.el7.x86_64                                1/38 
+  Installing : groff-base-1.22.2-8.el7.x86_64                              2/38 
+  Installing : 1:perl-parent-0.225-244.el7.noarch                          3/38 
+  Installing : perl-HTTP-Tiny-0.033-3.el7.noarch                           4/38 
+  Installing : perl-podlators-2.5.1-3.el7.noarch                           5/38 
+  Installing : perl-Pod-Perldoc-3.20-4.el7.noarch                          6/38 
+  Installing : 1:perl-Pod-Escapes-1.04-292.el7.noarch                      7/38 
+  Installing : perl-Text-ParseWords-3.29-4.el7.noarch                      8/38 
+  Installing : perl-Encode-2.51-7.el7.x86_64                               9/38 
+  Installing : perl-Pod-Usage-1.63-3.el7.noarch                           10/38 
+  Installing : 4:perl-macros-5.16.3-292.el7.x86_64                        11/38 
+  Installing : 4:perl-libs-5.16.3-292.el7.x86_64                          12/38 
+  Installing : perl-Storable-2.45-3.el7.x86_64                            13/38 
+  Installing : perl-Exporter-5.68-3.el7.noarch                            14/38 
+  Installing : perl-constant-1.27-2.el7.noarch                            15/38 
+  Installing : perl-Time-Local-1.2300-2.el7.noarch                        16/38 
+  Installing : perl-Socket-2.010-4.el7.x86_64                             17/38 
+  Installing : perl-Carp-1.26-244.el7.noarch                              18/38 
+  Installing : perl-PathTools-3.40-5.el7.x86_64                           19/38 
+  Installing : perl-Scalar-List-Utils-1.27-248.el7.x86_64                 20/38 
+  Installing : perl-File-Temp-0.23.01-3.el7.noarch                        21/38 
+  Installing : perl-File-Path-2.09-2.el7.noarch                           22/38 
+  Installing : perl-threads-shared-1.43-6.el7.x86_64                      23/38 
+  Installing : perl-threads-1.87-4.el7.x86_64                             24/38 
+  Installing : 4:perl-Time-HiRes-1.9725-3.el7.x86_64                      25/38 
+  Installing : perl-Filter-1.49-3.el7.x86_64                              26/38 
+  Installing : 1:perl-Pod-Simple-3.28-4.el7.noarch                        27/38 
+  Installing : perl-Getopt-Long-2.40-2.el7.noarch                         28/38 
+  Installing : 4:perl-5.16.3-292.el7.x86_64                               29/38 
+  Installing : which-2.20-7.el7.x86_64                                    30/38 
+install-info: No such file or directory for /usr/share/info/which.info.gz
+  Installing : 2:vim-filesystem-7.4.160-2.el7.x86_64                      31/38 
+  Installing : 2:vim-common-7.4.160-2.el7.x86_64                          32/38 
+  Installing : 2:vim-enhanced-7.4.160-2.el7.x86_64                        33/38 
+  Installing : sudo-1.8.19p2-11.el7_4.x86_64                              34/38 
+  Installing : tree-1.6.0-10.el7.x86_64                                   35/38 
+  Installing : 3:traceroute-2.0.22-2.el7.x86_64                           36/38 
+  Installing : 1:telnet-0.17-64.el7.x86_64                                37/38 
+  Installing : net-tools-2.0-0.22.20131004git.el7.x86_64                  38/38 
+  Verifying  : perl-HTTP-Tiny-0.033-3.el7.noarch                           1/38 
+  Verifying  : net-tools-2.0-0.22.20131004git.el7.x86_64                   2/38 
+  Verifying  : perl-threads-shared-1.43-6.el7.x86_64                       3/38 
+  Verifying  : perl-Storable-2.45-3.el7.x86_64                             4/38 
+  Verifying  : 2:vim-filesystem-7.4.160-2.el7.x86_64                       5/38 
+  Verifying  : perl-Exporter-5.68-3.el7.noarch                             6/38 
+  Verifying  : perl-constant-1.27-2.el7.noarch                             7/38 
+  Verifying  : perl-PathTools-3.40-5.el7.x86_64                            8/38 
+  Verifying  : 4:perl-macros-5.16.3-292.el7.x86_64                         9/38 
+  Verifying  : 1:telnet-0.17-64.el7.x86_64                                10/38 
+  Verifying  : 1:perl-parent-0.225-244.el7.noarch                         11/38 
+  Verifying  : 3:traceroute-2.0.22-2.el7.x86_64                           12/38 
+  Verifying  : which-2.20-7.el7.x86_64                                    13/38 
+  Verifying  : groff-base-1.22.2-8.el7.x86_64                             14/38 
+  Verifying  : perl-File-Temp-0.23.01-3.el7.noarch                        15/38 
+  Verifying  : 1:perl-Pod-Simple-3.28-4.el7.noarch                        16/38 
+  Verifying  : tree-1.6.0-10.el7.x86_64                                   17/38 
+  Verifying  : perl-Time-Local-1.2300-2.el7.noarch                        18/38 
+  Verifying  : gpm-libs-1.20.7-5.el7.x86_64                               19/38 
+  Verifying  : 4:perl-libs-5.16.3-292.el7.x86_64                          20/38 
+  Verifying  : perl-Pod-Perldoc-3.20-4.el7.noarch                         21/38 
+  Verifying  : perl-Socket-2.010-4.el7.x86_64                             22/38 
+  Verifying  : perl-Carp-1.26-244.el7.noarch                              23/38 
+  Verifying  : 2:vim-common-7.4.160-2.el7.x86_64                          24/38 
+  Verifying  : perl-Scalar-List-Utils-1.27-248.el7.x86_64                 25/38 
+  Verifying  : 1:perl-Pod-Escapes-1.04-292.el7.noarch                     26/38 
+  Verifying  : sudo-1.8.19p2-11.el7_4.x86_64                              27/38 
+  Verifying  : perl-Pod-Usage-1.63-3.el7.noarch                           28/38 
+  Verifying  : 4:perl-5.16.3-292.el7.x86_64                               29/38 
+  Verifying  : perl-Encode-2.51-7.el7.x86_64                              30/38 
+  Verifying  : perl-podlators-2.5.1-3.el7.noarch                          31/38 
+  Verifying  : perl-Getopt-Long-2.40-2.el7.noarch                         32/38 
+  Verifying  : 2:vim-enhanced-7.4.160-2.el7.x86_64                        33/38 
+  Verifying  : perl-File-Path-2.09-2.el7.noarch                           34/38 
+  Verifying  : perl-threads-1.87-4.el7.x86_64                             35/38 
+  Verifying  : 4:perl-Time-HiRes-1.9725-3.el7.x86_64                      36/38 
+  Verifying  : perl-Filter-1.49-3.el7.x86_64                              37/38 
+  Verifying  : perl-Text-ParseWords-3.29-4.el7.noarch                     38/38 
+
+Installed:
+  net-tools.x86_64 0:2.0-0.22.20131004git.el7                                   
+  sudo.x86_64 0:1.8.19p2-11.el7_4                                               
+  telnet.x86_64 1:0.17-64.el7                                                   
+  traceroute.x86_64 3:2.0.22-2.el7                                              
+  tree.x86_64 0:1.6.0-10.el7                                                    
+  vim-enhanced.x86_64 2:7.4.160-2.el7                                           
+
+Dependency Installed:
+  gpm-libs.x86_64 0:1.20.7-5.el7                                                
+  groff-base.x86_64 0:1.22.2-8.el7                                              
+  perl.x86_64 4:5.16.3-292.el7                                                  
+  perl-Carp.noarch 0:1.26-244.el7                                               
+  perl-Encode.x86_64 0:2.51-7.el7                                               
+  perl-Exporter.noarch 0:5.68-3.el7                                             
+  perl-File-Path.noarch 0:2.09-2.el7                                            
+  perl-File-Temp.noarch 0:0.23.01-3.el7                                         
+  perl-Filter.x86_64 0:1.49-3.el7                                               
+  perl-Getopt-Long.noarch 0:2.40-2.el7                                          
+  perl-HTTP-Tiny.noarch 0:0.033-3.el7                                           
+  perl-PathTools.x86_64 0:3.40-5.el7                                            
+  perl-Pod-Escapes.noarch 1:1.04-292.el7                                        
+  perl-Pod-Perldoc.noarch 0:3.20-4.el7                                          
+  perl-Pod-Simple.noarch 1:3.28-4.el7                                           
+  perl-Pod-Usage.noarch 0:1.63-3.el7                                            
+  perl-Scalar-List-Utils.x86_64 0:1.27-248.el7                                  
+  perl-Socket.x86_64 0:2.010-4.el7                                              
+  perl-Storable.x86_64 0:2.45-3.el7                                             
+  perl-Text-ParseWords.noarch 0:3.29-4.el7                                      
+  perl-Time-HiRes.x86_64 4:1.9725-3.el7                                         
+  perl-Time-Local.noarch 0:1.2300-2.el7                                         
+  perl-constant.noarch 0:1.27-2.el7                                             
+  perl-libs.x86_64 4:5.16.3-292.el7                                             
+  perl-macros.x86_64 4:5.16.3-292.el7                                           
+  perl-parent.noarch 1:0.225-244.el7                                            
+  perl-podlators.noarch 0:2.5.1-3.el7                                           
+  perl-threads.x86_64 0:1.87-4.el7                                              
+  perl-threads-shared.x86_64 0:1.43-6.el7                                       
+  vim-common.x86_64 2:7.4.160-2.el7                                             
+  vim-filesystem.x86_64 2:7.4.160-2.el7                                         
+  which.x86_64 0:2.20-7.el7                                                     
+
+Complete!
+Loaded plugins: fastestmirror, ovl
+Cleaning repos: base extras updates
+Cleaning up everything
+Maybe you want: rm -rf /var/cache/yum, to also free up space taken by orphaned data from disabled or removed repos
+Cleaning up list of fastest mirrors
+ ---> 68c0975b0c15
+Removing intermediate container d1272773a1bb
+Step 4/4 : CMD /bin/bash
+ ---> Running in 092983896a67
+ ---> f58a8e392ee0
+Removing intermediate container 092983896a67
+Successfully built f58a8e392ee0
+Successfully tagged centos:base
++ set +x
+"docker history" requires exactly 1 argument.
+See 'docker history --help'.
+
+Usage:  docker history [OPTIONS] IMAGE
+
+Show the history of an image
+Unknown option: 
+  ====  create image for centos:http
+++ encode public proxy
+++ echo -n public proxy
+++ sed -e 's#[ \t]#||#g'
++ docker build -t centos:http -f template/0_server --build-arg 'REPO=public||proxy' --build-arg SERVICE=http --build-arg LISTEN=80 .
+Sending build context to Docker daemon  245.8kB
+Step 1/13 : FROM centos:base
+ ---> f58a8e392ee0
+Step 2/13 : MAINTAINER long@126.com
+ ---> Running in e9127cec5373
+ ---> fa70363da8ea
+Removing intermediate container e9127cec5373
+Step 3/13 : ARG BASE=/docker
+ ---> Running in 92981dcda98d
+ ---> 8a5cbfdb1d99
+Removing intermediate container 92981dcda98d
+Step 4/13 : ARG SERVICE="nothing"
+ ---> Running in 87b8ce4d97c9
+ ---> adfe2e8d81fa
+Removing intermediate container 87b8ce4d97c9
+Step 5/13 : ARG LISTEN=10000
+ ---> Running in 5c2a06f3c2c3
+ ---> c24dc9a71174
+Removing intermediate container 5c2a06f3c2c3
+Step 6/13 : ARG REPO=""
+ ---> Running in e4cdd1f47495
+ ---> 03eca5c1abb9
+Removing intermediate container e4cdd1f47495
+Step 7/13 : ARG MORE=""
+ ---> Running in 7a53da5f0b29
+ ---> 9c545f35f0e7
+Removing intermediate container 7a53da5f0b29
+Step 8/13 : ARG EXEC=""
+ ---> Running in 850e942b7ef4
+ ---> 69520c631af8
+Removing intermediate container 850e942b7ef4
+Step 9/13 : COPY . $BASE
+ ---> 0995671c62e8
+Step 10/13 : RUN $BASE/1_build/initialize.sh			-r $REPO 			-s $SERVICE
+ ---> Running in e49aed3258c2
+
+======================================
+[file:  repo.sh]
+  ----  repo mask: public local proxy
+  ----  repo param: public proxy
+ - using repo: public
+ - using repo: proxy
+  ----  save old repo
+  ----  set repo: public
+[91m  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0[0m[91m100  1572  100  1572    0     0    280      0  0:00:05  0:00:05 --:--:--   385
+[0m  ----  set repo: proxy
+
+======================================
+[file:  system.sh]
+
+======================================
+[file:  common.sh]
+Loaded plugins: fastestmirror, ovl
+Determining fastest mirrors
+Package 2:vim-enhanced-7.4.160-2.el7.x86_64 already installed and latest version
+Package net-tools-2.0-0.22.20131004git.el7.x86_64 already installed and latest version
+Package 1:telnet-0.17-64.el7.x86_64 already installed and latest version
+Package 3:traceroute-2.0.22-2.el7.x86_64 already installed and latest version
+Package tree-1.6.0-10.el7.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package iproute.x86_64 0:3.10.0-87.el7 will be installed
+--> Processing Dependency: libmnl.so.0(LIBMNL_1.0)(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Processing Dependency: libxtables.so.10()(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Processing Dependency: libmnl.so.0()(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Running transaction check
+---> Package iptables.x86_64 0:1.4.21-18.3.el7_4 will be installed
+--> Processing Dependency: libnfnetlink.so.0()(64bit) for package: iptables-1.4.21-18.3.el7_4.x86_64
+--> Processing Dependency: libnetfilter_conntrack.so.3()(64bit) for package: iptables-1.4.21-18.3.el7_4.x86_64
+---> Package libmnl.x86_64 0:1.0.3-7.el7 will be installed
+--> Running transaction check
+---> Package libnetfilter_conntrack.x86_64 0:1.0.6-1.el7_3 will be installed
+---> Package libnfnetlink.x86_64 0:1.0.1-4.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                    Arch       Version                Repository   Size
+================================================================================
+Installing:
+ iproute                    x86_64     3.10.0-87.el7          base        651 k
+Installing for dependencies:
+ iptables                   x86_64     1.4.21-18.3.el7_4      updates     428 k
+ libmnl                     x86_64     1.0.3-7.el7            base         23 k
+ libnetfilter_conntrack     x86_64     1.0.6-1.el7_3          base         55 k
+ libnfnetlink               x86_64     1.0.1-4.el7            base         26 k
+
+Transaction Summary
+================================================================================
+Install  1 Package (+4 Dependent packages)
+
+Total download size: 1.2 M
+Installed size: 3.2 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                              2.3 MB/s | 1.2 MB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : libmnl-1.0.3-7.el7.x86_64                                    1/5 
+  Installing : libnfnetlink-1.0.1-4.el7.x86_64                              2/5 
+  Installing : libnetfilter_conntrack-1.0.6-1.el7_3.x86_64                  3/5 
+  Installing : iptables-1.4.21-18.3.el7_4.x86_64                            4/5 
+  Installing : iproute-3.10.0-87.el7.x86_64                                 5/5 
+  Verifying  : iproute-3.10.0-87.el7.x86_64                                 1/5 
+  Verifying  : libnfnetlink-1.0.1-4.el7.x86_64                              2/5 
+  Verifying  : libnetfilter_conntrack-1.0.6-1.el7_3.x86_64                  3/5 
+  Verifying  : iptables-1.4.21-18.3.el7_4.x86_64                            4/5 
+  Verifying  : libmnl-1.0.3-7.el7.x86_64                                    5/5 
+
+Installed:
+  iproute.x86_64 0:3.10.0-87.el7                                                
+
+Dependency Installed:
+  iptables.x86_64 0:1.4.21-18.3.el7_4                                           
+  libmnl.x86_64 0:1.0.3-7.el7                                                   
+  libnetfilter_conntrack.x86_64 0:1.0.6-1.el7_3                                 
+  libnfnetlink.x86_64 0:1.0.1-4.el7                                             
+
+Complete!
+  ----  install http server
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+Resolving Dependencies
+--> Running transaction check
+---> Package httpd.x86_64 0:2.4.6-67.el7.centos.6 will be installed
+--> Processing Dependency: httpd-tools = 2.4.6-67.el7.centos.6 for package: httpd-2.4.6-67.el7.centos.6.x86_64
+--> Processing Dependency: system-logos >= 7.92.1-1 for package: httpd-2.4.6-67.el7.centos.6.x86_64
+--> Processing Dependency: /etc/mime.types for package: httpd-2.4.6-67.el7.centos.6.x86_64
+--> Processing Dependency: libaprutil-1.so.0()(64bit) for package: httpd-2.4.6-67.el7.centos.6.x86_64
+--> Processing Dependency: libapr-1.so.0()(64bit) for package: httpd-2.4.6-67.el7.centos.6.x86_64
+--> Running transaction check
+---> Package apr.x86_64 0:1.4.8-3.el7_4.1 will be installed
+---> Package apr-util.x86_64 0:1.5.2-6.el7 will be installed
+---> Package centos-logos.noarch 0:70.0.6-3.el7.centos will be installed
+---> Package httpd-tools.x86_64 0:2.4.6-67.el7.centos.6 will be installed
+---> Package mailcap.noarch 0:2.1.41-2.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package           Arch        Version                       Repository    Size
+================================================================================
+Installing:
+ httpd             x86_64      2.4.6-67.el7.centos.6         updates      2.7 M
+Installing for dependencies:
+ apr               x86_64      1.4.8-3.el7_4.1               updates      103 k
+ apr-util          x86_64      1.5.2-6.el7                   base          92 k
+ centos-logos      noarch      70.0.6-3.el7.centos           base          21 M
+ httpd-tools       x86_64      2.4.6-67.el7.centos.6         updates       88 k
+ mailcap           noarch      2.1.41-2.el7                  base          31 k
+
+Transaction Summary
+================================================================================
+Install  1 Package (+5 Dependent packages)
+
+Total download size: 24 M
+Installed size: 32 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                               24 MB/s |  24 MB  00:01     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : apr-1.4.8-3.el7_4.1.x86_64                                   1/6 
+  Installing : apr-util-1.5.2-6.el7.x86_64                                  2/6 
+  Installing : httpd-tools-2.4.6-67.el7.centos.6.x86_64                     3/6 
+  Installing : centos-logos-70.0.6-3.el7.centos.noarch                      4/6 
+  Installing : mailcap-2.1.41-2.el7.noarch                                  5/6 
+  Installing : httpd-2.4.6-67.el7.centos.6.x86_64                           6/6 
+  Verifying  : mailcap-2.1.41-2.el7.noarch                                  1/6 
+  Verifying  : httpd-2.4.6-67.el7.centos.6.x86_64                           2/6 
+  Verifying  : apr-util-1.5.2-6.el7.x86_64                                  3/6 
+  Verifying  : httpd-tools-2.4.6-67.el7.centos.6.x86_64                     4/6 
+  Verifying  : apr-1.4.8-3.el7_4.1.x86_64                                   5/6 
+  Verifying  : centos-logos-70.0.6-3.el7.centos.noarch                      6/6 
+
+Installed:
+  httpd.x86_64 0:2.4.6-67.el7.centos.6                                          
+
+Dependency Installed:
+  apr.x86_64 0:1.4.8-3.el7_4.1                                                  
+  apr-util.x86_64 0:1.5.2-6.el7                                                 
+  centos-logos.noarch 0:70.0.6-3.el7.centos                                     
+  httpd-tools.x86_64 0:2.4.6-67.el7.centos.6                                    
+  mailcap.noarch 0:2.1.41-2.el7                                                 
+
+Complete!
+  ----  config http server
+<VirtualHost *:80>
+    DocumentRoot "/html"
+    <Directory "/html">
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+      </Directory>
+</VirtualHost>
+  ----  http completed!
+
+
+======================================
+[file:  clean.sh]
+Loaded plugins: fastestmirror, ovl
+Cleaning repos: base extras updates
+Cleaning up everything
+Maybe you want: rm -rf /var/cache/yum, to also free up space taken by orphaned data from disabled or removed repos
+Cleaning up list of fastest mirrors
+initialize complete ...
+ ---> 9aeeef847dcb
+Removing intermediate container e49aed3258c2
+Step 11/13 : EXPOSE $LISTEN
+ ---> Running in ef1b1146c79b
+ ---> 83e9ba283275
+Removing intermediate container ef1b1146c79b
+Step 12/13 : CMD /bin/bash
+ ---> Running in c9ac09696cce
+ ---> 881936a30beb
+Removing intermediate container c9ac09696cce
+Step 13/13 : CMD /start.sh
+ ---> Running in 6307a380c8dd
+ ---> d3ca02de3ca7
+Removing intermediate container 6307a380c8dd
+Successfully built d3ca02de3ca7
+Successfully tagged centos:http
++ set +x
+Unknown option: 
+[1;32m-- create docker http -- [0m
++ docker run -itd --name http -h http -p 80:80 -v /home/long/source:/source -v /mnt/disk/docker:/docker -v /mnt/hgfs/repo:/html centos:http
+302bd324797b77936681ffb6b821e9ce7fbd0402cc4a281f26f2b4131cc98e30
++ set +x
+tcp6       0      0 :::80                   :::*                    LISTEN      88130/docker-proxy
+brower:
+    docker exec -it http /bin/bash
+    http://192.168.127.129:80
+
+[1;32m-- create prepre completed, wait to continue ...  -- [0m
+  ----  base image already exist
+Unknown option: 
+  ====  create image for centos:sshd
+++ encode public local proxy
+++ echo -n public local proxy
+++ sed -e 's#[ \t]#||#g'
++ docker build -t centos:sshd -f template/0_server --build-arg 'REPO=public||local||proxy' --build-arg SERVICE=sshd --build-arg LISTEN=0 .
+Sending build context to Docker daemon    258kB
+Step 1/13 : FROM centos:base
+ ---> f58a8e392ee0
+Step 2/13 : MAINTAINER long@126.com
+ ---> Using cache
+ ---> fa70363da8ea
+Step 3/13 : ARG BASE=/docker
+ ---> Using cache
+ ---> 8a5cbfdb1d99
+Step 4/13 : ARG SERVICE="nothing"
+ ---> Using cache
+ ---> adfe2e8d81fa
+Step 5/13 : ARG LISTEN=10000
+ ---> Using cache
+ ---> c24dc9a71174
+Step 6/13 : ARG REPO=""
+ ---> Using cache
+ ---> 03eca5c1abb9
+Step 7/13 : ARG MORE=""
+ ---> Using cache
+ ---> 9c545f35f0e7
+Step 8/13 : ARG EXEC=""
+ ---> Using cache
+ ---> 69520c631af8
+Step 9/13 : COPY . $BASE
+ ---> 3685e5ca7543
+Step 10/13 : RUN $BASE/1_build/initialize.sh			-r $REPO 			-s $SERVICE
+ ---> Running in aad53b562138
+
+======================================
+[file:  repo.sh]
+  ----  repo mask: public local proxy
+  ----  repo param: public local proxy
+ - using repo: public
+ - using repo: local
+ - using repo: proxy
+  ----  save old repo
+  ----  set repo: public
+[91m  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0[0m[91m  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0[0m[91m100  1572  100  1572    0     0    281      0  0:00:05  0:00:05 --:--:--   385
+[0m  ----  set repo: local
+[local_network]
+name=local network common repo
+baseurl=http://192.168.127.129/common/centos7/
+gpgcheck=0
+enabled=1
+priority=1
+# this repo not use proxy
+proxy=_none_
+  ----  set repo: proxy
+
+======================================
+[file:  system.sh]
+
+======================================
+[file:  common.sh]
+Loaded plugins: fastestmirror, ovl
+Determining fastest mirrors
+Package 2:vim-enhanced-7.4.160-2.el7.x86_64 already installed and latest version
+Package net-tools-2.0-0.22.20131004git.el7.x86_64 already installed and latest version
+Package 1:telnet-0.17-64.el7.x86_64 already installed and latest version
+Package 3:traceroute-2.0.22-2.el7.x86_64 already installed and latest version
+Package tree-1.6.0-10.el7.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package iproute.x86_64 0:3.10.0-87.el7 will be installed
+--> Processing Dependency: libmnl.so.0(LIBMNL_1.0)(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Processing Dependency: libxtables.so.10()(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Processing Dependency: libmnl.so.0()(64bit) for package: iproute-3.10.0-87.el7.x86_64
+--> Running transaction check
+---> Package iptables.x86_64 0:1.4.21-18.3.el7_4 will be installed
+--> Processing Dependency: libnetfilter_conntrack.so.3()(64bit) for package: iptables-1.4.21-18.3.el7_4.x86_64
+--> Processing Dependency: libnfnetlink.so.0()(64bit) for package: iptables-1.4.21-18.3.el7_4.x86_64
+---> Package libmnl.x86_64 0:1.0.3-7.el7 will be installed
+--> Running transaction check
+---> Package libnetfilter_conntrack.x86_64 0:1.0.6-1.el7_3 will be installed
+---> Package libnfnetlink.x86_64 0:1.0.1-4.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                  Arch     Version                Repository       Size
+================================================================================
+Installing:
+ iproute                  x86_64   3.10.0-87.el7          base            651 k
+Installing for dependencies:
+ iptables                 x86_64   1.4.21-18.3.el7_4      local_network   428 k
+ libmnl                   x86_64   1.0.3-7.el7            base             23 k
+ libnetfilter_conntrack   x86_64   1.0.6-1.el7_3          base             55 k
+ libnfnetlink             x86_64   1.0.1-4.el7            base             26 k
+
+Transaction Summary
+================================================================================
+Install  1 Package (+4 Dependent packages)
+
+Total download size: 1.2 M
+Installed size: 3.2 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                              4.3 MB/s | 1.2 MB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : libmnl-1.0.3-7.el7.x86_64                                    1/5 
+  Installing : libnfnetlink-1.0.1-4.el7.x86_64                              2/5 
+  Installing : libnetfilter_conntrack-1.0.6-1.el7_3.x86_64                  3/5 
+  Installing : iptables-1.4.21-18.3.el7_4.x86_64                            4/5 
+  Installing : iproute-3.10.0-87.el7.x86_64                                 5/5 
+  Verifying  : iproute-3.10.0-87.el7.x86_64                                 1/5 
+  Verifying  : libnetfilter_conntrack-1.0.6-1.el7_3.x86_64                  2/5 
+  Verifying  : libnfnetlink-1.0.1-4.el7.x86_64                              3/5 
+  Verifying  : iptables-1.4.21-18.3.el7_4.x86_64                            4/5 
+  Verifying  : libmnl-1.0.3-7.el7.x86_64                                    5/5 
+
+Installed:
+  iproute.x86_64 0:3.10.0-87.el7                                                
+
+Dependency Installed:
+  iptables.x86_64 0:1.4.21-18.3.el7_4                                           
+  libmnl.x86_64 0:1.0.3-7.el7                                                   
+  libnetfilter_conntrack.x86_64 0:1.0.6-1.el7_3                                 
+  libnfnetlink.x86_64 0:1.0.1-4.el7                                             
+
+Complete!
+install advance ...
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+Package 2:tar-1.26-32.el7.x86_64 already installed and latest version
+Package sudo-1.8.19p2-11.el7_4.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package bash-completion.noarch 1:2.1-6.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                 Arch           Version              Repository    Size
+================================================================================
+Installing:
+ bash-completion         noarch         1:2.1-6.el7          base          85 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+
+Total download size: 85 k
+Installed size: 259 k
+Downloading packages:
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : 1:bash-completion-2.1-6.el7.noarch                           1/1 
+  Verifying  : 1:bash-completion-2.1-6.el7.noarch                           1/1 
+
+Installed:
+  bash-completion.noarch 1:2.1-6.el7                                            
+
+Complete!
+Loaded plugins: fastestmirror, ovl
+Loading mirror speeds from cached hostfile
+Package passwd-0.79-4.el7.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package openssh-clients.x86_64 0:7.4p1-13.el7_4 will be installed
+--> Processing Dependency: openssh = 7.4p1-13.el7_4 for package: openssh-clients-7.4p1-13.el7_4.x86_64
+--> Processing Dependency: fipscheck-lib(x86-64) >= 1.3.0 for package: openssh-clients-7.4p1-13.el7_4.x86_64
+--> Processing Dependency: libfipscheck.so.1()(64bit) for package: openssh-clients-7.4p1-13.el7_4.x86_64
+--> Processing Dependency: libedit.so.0()(64bit) for package: openssh-clients-7.4p1-13.el7_4.x86_64
+---> Package openssh-server.x86_64 0:7.4p1-13.el7_4 will be installed
+--> Processing Dependency: libwrap.so.0()(64bit) for package: openssh-server-7.4p1-13.el7_4.x86_64
+--> Running transaction check
+---> Package fipscheck-lib.x86_64 0:1.4.1-6.el7 will be installed
+--> Processing Dependency: /usr/bin/fipscheck for package: fipscheck-lib-1.4.1-6.el7.x86_64
+---> Package libedit.x86_64 0:3.0-12.20121213cvs.el7 will be installed
+---> Package openssh.x86_64 0:7.4p1-13.el7_4 will be installed
+---> Package tcp_wrappers-libs.x86_64 0:7.6-77.el7 will be installed
+--> Running transaction check
+---> Package fipscheck.x86_64 0:1.4.1-6.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package             Arch     Version                     Repository       Size
+================================================================================
+Installing:
+ openssh-clients     x86_64   7.4p1-13.el7_4              local_network   654 k
+ openssh-server      x86_64   7.4p1-13.el7_4              local_network   458 k
+Installing for dependencies:
+ fipscheck           x86_64   1.4.1-6.el7                 base             21 k
+ fipscheck-lib       x86_64   1.4.1-6.el7                 base             11 k
+ libedit             x86_64   3.0-12.20121213cvs.el7      base             92 k
+ openssh             x86_64   7.4p1-13.el7_4              local_network   509 k
+ tcp_wrappers-libs   x86_64   7.6-77.el7                  base             66 k
+
+Transaction Summary
+================================================================================
+Install  2 Packages (+5 Dependent packages)
+
+Total download size: 1.8 M
+Installed size: 5.8 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                              4.9 MB/s | 1.8 MB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : fipscheck-1.4.1-6.el7.x86_64                                 1/7 
+  Installing : fipscheck-lib-1.4.1-6.el7.x86_64                             2/7 
+  Installing : openssh-7.4p1-13.el7_4.x86_64                                3/7 
+  Installing : libedit-3.0-12.20121213cvs.el7.x86_64                        4/7 
+  Installing : tcp_wrappers-libs-7.6-77.el7.x86_64                          5/7 
+  Installing : openssh-server-7.4p1-13.el7_4.x86_64                         6/7 
+  Installing : openssh-clients-7.4p1-13.el7_4.x86_64                        7/7 
+  Verifying  : fipscheck-lib-1.4.1-6.el7.x86_64                             1/7 
+  Verifying  : tcp_wrappers-libs-7.6-77.el7.x86_64                          2/7 
+  Verifying  : fipscheck-1.4.1-6.el7.x86_64                                 3/7 
+  Verifying  : libedit-3.0-12.20121213cvs.el7.x86_64                        4/7 
+  Verifying  : openssh-7.4p1-13.el7_4.x86_64                                5/7 
+  Verifying  : openssh-server-7.4p1-13.el7_4.x86_64                         6/7 
+  Verifying  : openssh-clients-7.4p1-13.el7_4.x86_64                        7/7 
+
+Installed:
+  openssh-clients.x86_64 0:7.4p1-13.el7_4                                       
+  openssh-server.x86_64 0:7.4p1-13.el7_4                                        
+
+Dependency Installed:
+  fipscheck.x86_64 0:1.4.1-6.el7            fipscheck-lib.x86_64 0:1.4.1-6.el7  
+  libedit.x86_64 0:3.0-12.20121213cvs.el7   openssh.x86_64 0:7.4p1-13.el7_4     
+  tcp_wrappers-libs.x86_64 0:7.6-77.el7    
+
+Complete!
+sshd config
+Generating public/private rsa key pair.
+Your identification has been saved in /etc/ssh/ssh_host_rsa_key.
+Your public key has been saved in /etc/ssh/ssh_host_rsa_key.pub.
+The key fingerprint is:
+SHA256:x+8AR+A795DrGcgtDvYDO5y9YZIAx5bexezly9VCKZo root@aad53b562138
+The key's randomart image is:
++---[RSA 2048]----+
+|        .        |
+|   . . + .   .   |
+|  . =   = + o    |
+|   = . o O + .   |
+|    o . E O o .  |
+|     ..o X B .   |
+|     .==* B o    |
+|     .=*o+ =     |
+|       .+oo .    |
++----[SHA256]-----+
+Generating public/private dsa key pair.
+Your identification has been saved in /etc/ssh/ssh_host_dsa_key.
+Your public key has been saved in /etc/ssh/ssh_host_dsa_key.pub.
+The key fingerprint is:
+SHA256:D0VwciQIA0EEBa0A+bJZzXFkBehXhlxOo8xmGG+aQtE root@aad53b562138
+The key's randomart image is:
++---[DSA 1024]----+
+|=OB++=+*Oo=      |
+|o ..EO=+oB       |
+|.o.+.oOo. .      |
+|o.o +*.  .       |
+| =. o.  S        |
+|o  .     o       |
+|          .      |
+|                 |
+|                 |
++----[SHA256]-----+
+Generating public/private ecdsa key pair.
+Your identification has been saved in /etc/ssh/ssh_host_ecdsa_key.
+Your public key has been saved in /etc/ssh/ssh_host_ecdsa_key.pub.
+The key fingerprint is:
+SHA256:eu9TMVjqBSha/l5Jra9zl7Rgy5ETuVkS1CShXoFinWE root@aad53b562138
+The key's randomart image is:
++---[ECDSA 256]---+
+|         oE==+.  |
+|      o +.=.oo.  |
+|     + o ..*.o   |
+|    . .  .+.O .  |
+|       .So.+ X   |
+|       .. = X .  |
+|      .... = * o |
+|       ...o = +  |
+|         .+= .   |
++----[SHA256]-----+
+Generating public/private ed25519 key pair.
+Your identification has been saved in /etc/ssh/ssh_host_ed25519_key.
+Your public key has been saved in /etc/ssh/ssh_host_ed25519_key.pub.
+The key fingerprint is:
+SHA256:6GyqdH0M8pvSejx9L52gUlE1f6bsgUA1fefolm8GqbQ root@aad53b562138
+The key's randomart image is:
++--[ED25519 256]--+
+|          .o=.   |
+|         ..  +. o|
+|         ..   .++|
+|       ..  . o.+.|
+|    . o S.  ..+o |
+|     * o. . ..*. |
+|  . .o*oo. + =.o |
+| . ..o*+o o E   +|
+|  ..o+oo . o.  o |
++----[SHA256]-----+
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 
+======================================
+[file:  clean.sh]
+Loaded plugins: fastestmirror, ovl
+Cleaning repos: base extras local_network updates
+Cleaning up everything
+Maybe you want: rm -rf /var/cache/yum, to also free up space taken by orphaned data from disabled or removed repos
+Cleaning up list of fastest mirrors
+initialize complete ...
+ ---> 210b490c8e24
+Removing intermediate container aad53b562138
+Step 11/13 : EXPOSE $LISTEN
+ ---> Running in c8e5045b9036
+ ---> 986e39e4ee3f
+Removing intermediate container c8e5045b9036
+Step 12/13 : CMD /bin/bash
+ ---> Running in 62336885cfff
+ ---> 04708b67b15f
+Removing intermediate container 62336885cfff
+Step 13/13 : CMD /start.sh
+ ---> Running in 39781915b483
+ ---> a5d466d55494
+Removing intermediate container 39781915b483
+Successfully built a5d466d55494
+Successfully tagged centos:sshd
++ set +x
+Unknown option: 
+[1;32m-- create docker sshd -- [0m
++ docker run -itd --name sshd -h sshd -v /home/long/source:/source -v /mnt/disk/docker:/docker centos:sshd
+2339497f1a9272624f83502817a289d9df5d4013aec132c56d0b464a67ed341e
++ set +x
+network exist
+set host address: 192.168.127.11, name: sshd
++ sudo pipework ens38 sshd 192.168.127.11/24@192.168.127.2
++ set +x
+
+try start with last param [systemd]
+[1;32m-- ssh clean cache [client side]: -- [0m
+    rm ~/.ssh/known_hosts -f
+or,
+    echo StrictHostKeyChecking=no > ~/.ssh/config
+    echo UserKnownHostsFile=/dev/null >> ~/.ssh/config
+
+show host address:
+    inet 192.168.127.11/24 scope global eth1
+
+enter host:
+    docker exec -it sshd /bin/bash
+    ssh root@192.168.127.11
+
