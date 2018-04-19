@@ -64,3 +64,7 @@ umount /var/lib/scylla
 mdadm -S /dev/md0
 sudo scylla_setup
 sudo systemctl start scylla-server
+
+echo "check"
+df -h | grep scylla
+
