@@ -8,3 +8,4 @@ GLOBAL_MACRO="-v /home/long/source:/source -v /mnt/disk/docker:/docker"
 
 SYSTMD="--privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
 INITIAL=/usr/sbin/init
+UBUNTU_INIT=/sbin/init

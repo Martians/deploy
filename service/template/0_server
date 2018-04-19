@@ -16,6 +16,7 @@ ARG SERVICE="nothing"
 ARG LISTEN=10000
 ARG REPO=""
 ARG MORE=""
+ARG EXEC=""
 COPY . $BASE
 
 RUN $BASE/1_build/initialize.sh	\

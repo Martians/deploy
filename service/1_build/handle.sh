@@ -4,8 +4,30 @@
 COMMENT
 
 ########################################################################################
-# 创建依赖的BASE image
-create_base() {
+# 创建基于模板的镜像
+create_origin() {
+	####################################################
+
+	local OPTIND
+	var=$*
+	set -- $var 
+
+	local EXEC
+	#echo "get $*"
+	while getopts :t:i:p:e: opt; do
+		case "$opt" in
+		t)	TYPE=$OPTARG;;
+		i)  BASE_IMAGE=$OPTARG;;
+		p)  BASE_TMPLT=$OPTARG;;
+		e)  EXEC=$OPTARG;;
+		*) 	echo "Unknown option: $OPT";;
+		esac
+	done
+	# echo "type:  " $TYPE
+	# echo "image: " $IMAGE
+	# echo "tmplt: " $BASE_TMPLT
+	# echo "exec:  " $EXEC
+	# exit 1
 
 	if [[ $BASE_TMPLT == "" ]]; then
 		BASE_TMPLT=0_centos
@@ -14,6 +36,13 @@ create_base() {
 	if [[ $BASE_IMAGE == "" ]]; then
 		BASE_IMAGE=centos:base
 	fi
+
+	if [[ $TYPE == 1 ]]; then
+		step_output "clean image: $BASE_IMAGE"
+		docker rmi -f $BASE_IMAGE
+	fi
+
+	####################################################
 	# echo "base template: " $BASE_TMPLT
 	# echo "base image: " $BASE_IMAGE
 
@@ -24,7 +53,8 @@ create_base() {
 			work_output "create base image"
 
 			set -x
-			docker build -t $BASE_IMAGE -f $IMAGE_PATH/$BASE_TMPLT .
+			docker build -t $BASE_IMAGE -f $IMAGE_PATH/$BASE_TMPLT \
+				--build-arg EXEC="$EXEC" .
 			set +x
 			val=$?
 
@@ -37,22 +67,25 @@ create_base() {
 	fi
 }
 
+# 创建基于其他镜像的镜像
 create_image() {
-	success create_base
-	local PORT TYPE REPO NAME
+	success create_origin
+
+	local PORT TYPE REPO NAME EXEC
 
 	local OPTIND
 	var=$*
 	set -- $var 
 	#echo "get $*"
 
-	while getopts :n:r:p:t: opt
+	while getopts :n:r:p:e:t: opt
 	do
 		case "$opt" in
 		t)	TYPE=$OPTARG;;
 		r)	REPO=$(decode "$OPTARG");;
 		n) 	NAME=$OPTARG;;
 		p)	PORT=$OPTARG;;
+		e)  EXEC=$OPTARG;;
 		*) 	echo "Unknown option: $OPT";;
 		esac
 	done
@@ -86,7 +119,9 @@ create_image() {
 		docker build -t $IMAGE -f $IMAGE_PATH/0_server \
 			--build-arg REPO=$(encode $REPO)	\
 			--build-arg SERVICE=$NAME 	\
-			--build-arg LISTEN="$PORT" .
+			--build-arg LISTEN="$PORT" 	\
+			--build-arg EXEC="$EXEC" .
+		# EXEC no used in o_server now
 		set +x
 		# 将临时文件清除
 		sudo rm $CONFIG_PATH_2 -rf
@@ -153,34 +188,6 @@ create_docker() {
 	else
 		color_output "already started"
 	fi
-}
-
-create_proxy() {
-	BASE_TMPLT=0_proxy
-	BASE_IMAGE=ubuntu:proxy
-
-	## 用于后续在 create_docker 使用
-	IMAGE=$BASE_IMAGE
-
-	local OPTIND
-	var=$*
-	set -- $var 
-
-	#echo "get $*"
-	while getopts :t: opt
-	do
-		case "$opt" in
-		t)	TYPE=$OPTARG;;
-		*) 	echo "Unknown option: $OPT";;
-		esac
-	done
-
-	if [[ $TYPE == 1 ]]; then
-		step_output "clean image: $BASE_IMAGE"
-		docker rmi -f $BASE_IMAGE
-	fi
-
-	success create_base
 }
 
 # 在创建其他的容器之前，检查是否要先创建依赖容器

@@ -16,11 +16,11 @@ cd $BASE_PATH
 # fi
 
 ###############################################################
-# 创建 proxy镜像, 直接使用docker模板，而不是基于其他镜像
-create_origin -p 0_proxy -i ubuntu:proxy -t $1
+# 创建 proxy镜像
+create_ubuntu -p 0_proxy -i ubuntu:proxy -t $1
 
 ARGS="-v $HOST_PATH_PROXY:$DOCK_PATH_PROXY"
-success create_docker -i ubuntu:proxy -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
+success create_docker -n $NAME -p $PORT -a $(encode $ARGS) -t $1 
 
 ###############################################################
 display_brower
