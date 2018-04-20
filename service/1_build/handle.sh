@@ -51,7 +51,12 @@ create_origin() {
 
 		if [ ! `docker images $BASE_IMAGE -q` ]; then
 			work_output "create base image"
-			EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=$EXEC")
+			
+			# 仅用于 ubuntu 搭建
+			if [[ $EXEC ]]; then
+				EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=$EXEC")
+				sudo \cp $CONFIG_PATH $CONFIG_PATH_2
+			fi
 
 			set -x
 			docker build -t $BASE_IMAGE -f $IMAGE_PATH/$BASE_TMPLT \
@@ -60,6 +65,11 @@ create_origin() {
 			val=$?
 
 			docker history $IMAGE
+
+			# 仅用于 ubuntu 搭建
+			if [[ $EXEC ]]; then
+				sudo rm $CONFIG_PATH_2 -rf
+			fi
 			return $val
 			# docker tag centos:base centos
 		else

@@ -29,6 +29,11 @@ else
 fi
 
 ###############################################################
+# script=$DOCK_BASE_PATH/$BUILD_PATH/ubuntu/repo.sh
+# echo "@@@@@@@@ exec $NAME host: $script"
+# docker exec -it $NAME $script
+
+###############################################################
 # # 如果不是使用stub模式，就输出sshd的展示信息
 # if [[ $NAME_STUB == "" ]]; then
 HOST=$(alloc_host $HOST)

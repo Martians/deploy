@@ -16,12 +16,7 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak; \
 	sed -i "s/http:\/\/\(.*ubuntu.com\)/http:\/\/mirrors.163.com/g"  /etc/apt/sources.list; \
 	apt-get update; \
 	apt-get install -y sudo vim net-tools tree iputils-ping telnet traceroute; \
-	if [ $EXEC ]; then sh $BASE/1_build/$EXEC; fi; 
-
-CMD ["/bin/bash"]
-
-# docker build -t ubuntu:base -f 0_ubuntu . && docker history ubuntu:base && echo; docker images ubuntu*
-# docker run -it --name ubuntu ubuntu:base
+	if [ $EXEC ]; then /bin/bash $BASE/1_build/$EXEC; fi; 
 
 EXPOSE $LISTEN
 

@@ -1,10 +1,21 @@
 #!/bin/bash
 
 ##############################################################################
-# BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
-# cd $BASE_PATH
+BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
+cd $BASE_PATH
 
-# . 0_config/config.sh
+. 0_config/config.sh
+
+cp $CONFIG_PATH_2 /root/.docker_config
+
+##############################################################################
+echo "use local repo" $HOST_PROXY
+cat << EOF | sudo tee -a /etc/apt/apt.conf
+Acquire::http::proxy "http://$HOST_PROXY:3142/";
+Acquire::ftp::proxy "ftp://$HOST_PROXY:3142/";
+Acquire::https::proxy "https://$HOST_PROXY:3142/";
+EOF
+
 ##############################################################################
 cp /docker/1_build/server/start_sshd.sh /start.sh
 mkdir -p /var/run/sshd
