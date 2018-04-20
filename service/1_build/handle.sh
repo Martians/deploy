@@ -51,7 +51,7 @@ create_origin() {
 
 		if [ ! `docker images $BASE_IMAGE -q` ]; then
 			work_output "create base image"
-			EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=\"$EXEC\"")
+			EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=$EXEC")
 
 			set -x
 			docker build -t $BASE_IMAGE -f $IMAGE_PATH/$BASE_TMPLT \
@@ -110,7 +110,7 @@ create_image() {
 
 	if [ ! `docker images $IMAGE -q` ]; then
 		step_output "create image for $IMAGE"
-		EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=\"$EXEC\"")
+		EXEC_PARAM=$(exist $EXEC "--build-arg EXEC=$EXEC")
 
 		# 将文件复制到临时路径，因为/docker复制到docker中的，因此docker中可以访问到
 		#	1. docker只是在image中存在这个文件
