@@ -187,7 +187,7 @@ create_docker() {
 
 		set -x
 		docker run -itd --name $NAME -h $NAME \
-			$PORT_PARAM			\
+			$PORT_PARAM	  $MORE	\
 			$GLOBAL_MACRO $ARGS \
 			$IMAGE $EXEC
 		# docker run -itd --name $NAME -h $NAME -v $HOST_PATH_REPO:/html -P $IMAGE

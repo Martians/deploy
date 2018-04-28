@@ -20,8 +20,10 @@ COUNT="$(default_value $COUNT_STUB 3)"
 # 配置dns、ntp(但docker中ntp client无法无法生效)
 CONFIG="$(default_value $CONFIGIG_STUB dns)"
 
-###############################################################
 
+# 如果需要额外参数，只需要如此设置
+MORE="-v /mnt/hgfs/local/testing:/testing"
+###############################################################
 # 确保必须的镜像已经安装好
 create_prepare
 
