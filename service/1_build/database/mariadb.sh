@@ -20,7 +20,21 @@ if [ $(set_file_flag /installed) -eq 1 ]; then
 fi
 
 #######################################################################
-#sh /docker/service/script/hadoop/mariadb.sh 
+# http://mirrors.ustc.edu.cn/help/mariadb.html
+cat << EOF | sudo tee -a /etc/yum.repos.d/mariadb.repo
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.2/centos7-amd64
+gpgkey=http://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=0
+EOF
+sudo sed -i 's#yum\.mariadb\.org#mirrors.ustc.edu.cn/mariadb/yum#' /etc/yum.repos.d/mariadb.repo
+sudo sed -i 's#http://mirrors\.ustc\.edu\.cn#http://mirrors.ustc.edu.cn#g' /etc/yum.repos.d/mariadb.repo
+
+# 最新源中使用https，就要取消代理
+#	或者将https转换成http，gpgcheck改成0
+#sed -i "s/\(proxy\)/#\1/g" /etc/yum.conf 
+
 yum -y install mariadb mariadb-server
 
 echo "update config"
