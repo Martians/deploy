@@ -48,7 +48,7 @@ SEGMENT=192.168.10
 			#			如：$(alloc_host 5) 计算得到 15
 			#			这样即使没有进行很多配置，可以自动得到IP信息
 			#	2）N > 10: 直接使用最后一位的数字
-			if [ "$1" -gt 0 ] 2>/dev/null ;then 
+			if [ "$1" -ge 0 ] 2>/dev/null ;then 
 				if (( "$1" <= 10 )); then
 					(( value = $HOST_1 + ($1 - 1) ))
 				else
