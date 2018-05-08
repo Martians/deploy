@@ -170,9 +170,14 @@ create_docker() {
 	# exit 1
 
 	# type == 0 || type == 1, remove docker
-	if [[ $TYPE == 0 || $TYPE == 1 ]]; then
+	if [[ $TYPE == 0 || $TYPE == 1 || $TYPE == -1 ]]; then
 		step_output "remove container: $NAME"
 		docker rm -f $NAME
+
+		if [[ $TYPE == -1 ]]; then
+			echo "exec: " docker rm -f $NAME
+			exit
+		fi
 	fi
 
 	if [ ! `docker images $IMAGE -q` ]; then
