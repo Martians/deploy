@@ -22,7 +22,7 @@ CONFIG="$(default_value $CONFIGIG_STUB dns)"
 
 
 # 如果需要额外参数，只需要如此设置
-MORE="-v /mnt/hgfs/local/testing:/testing"
+MORE="-v /mnt/hgfs/local/testing:/root/testing"
 ###############################################################
 # 确保必须的镜像已经安装好
 create_prepare
@@ -45,6 +45,8 @@ for ((idx = 1; idx <= $COUNT; idx++)); do
 			-a $(encode $SYSTMD) -e $INITIAL -t $1
 	fi
 	docker exec $NAME-$idx $script
+	# 在每个节点上设置自己的在clueter中的index
+	docker exec $NAME-$idx sh -c "echo \"export LOCAL=$idx\" >> /root/.bashrc"
 
 	###########################################################################
 	# 根据已经配置的宏，分配IP地址
