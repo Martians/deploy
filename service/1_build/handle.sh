@@ -190,10 +190,13 @@ create_docker() {
 		color_output "create docker $NAME"
 		PORT_PARAM=$(exist $PORT -p $PORT:$PORT)
 
+		# 可以通过定义系统宏，来指定额外的参数
+		# 		export DOCKER_MACRO="-v /mnt/hgfs/github/yugabyte-db:/yugabyte"
 		set -x
 		docker run -itd --name $NAME -h $NAME \
 			$PORT_PARAM	  $MORE	\
 			$GLOBAL_MACRO $ARGS \
+			$DOCKER_MACRO \
 			$IMAGE $EXEC
 		# docker run -itd --name $NAME -h $NAME -v $HOST_PATH_REPO:/html -P $IMAGE
 		set +x
