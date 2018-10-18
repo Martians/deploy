@@ -45,6 +45,9 @@ unused.txt
 # language
 	## go
 vendor/
+	## python
+*__pycache__/
+*.pyc
 
 # Generated files
 build/
@@ -62,3 +65,4 @@ gen/
 out/
 log/
 output/
+download/
