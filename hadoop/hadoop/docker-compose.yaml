@@ -2,10 +2,9 @@ version: '3'
 
 services:
   namenode:
-    env_file: ./config.sh
+    env_file: config.sh
     image: 'uhopper/hadoop-namenode'
-    #container_name: namenode
-    #domainname: data.com
+    container_name: namenode
     hostname: namenode
     ports:
       - "8020:8020"
@@ -13,16 +12,27 @@ services:
     volumes:
       - $NAME_HOME:/hadoop/dfs/name
     environment:
-      - NOTHING
+      - CLUSTER_NAME=$CLUSTER_NAME
 
   datanode:
     env_file: ./config.sh
     image: "uhopper/hadoop-datanode"
+    container_name: datanode
     hostname: datanode
     volumes:
       - $DATA_HOME:/hadoop/dfs/data
+    ports:
+      - "111:111/tcp"
+      - "111:111/udp"
+      - "2049:2049"
+      - "4242:4242"
+      - "4242:4242/udp"
     environment:
-      - NOTHING
+      # - NOTHING
+      - CLUSTER_NAME=$CLUSTER_NAME
+      # must set as env here, or shell will not allowed
+      - CORE_CONF_nfs_exports_allowed_hosts=* rw
+      - HDFS_CONF_nfs_exports_allowed_hosts=* rw
     depends_on:
       - "namenode"
 
@@ -66,4 +76,4 @@ services:
 networks:
   default:
     external:
-      name: hadoop-network
+      name: $NETWORK
