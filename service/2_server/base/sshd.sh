@@ -8,7 +8,7 @@
 NAME=sshd
 PORT=0
 REPO="public local proxy"
-HOST=0
+HOST=5
 
 ###############################################################
 BASE_PATH=$(cd "$(dirname "$0")"; cd ../..; pwd)
