@@ -1,2 +1,8 @@
-git fetch origin
-git merge origin/master
+#!/bin/sh
+
+if [ -e ../code/pull ]; then
+	sh ../code/pull
+else
+	git fetch origin
+	git merge origin/master
+fi
