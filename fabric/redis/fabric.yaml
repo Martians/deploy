@@ -1,0 +1,23 @@
+
+
+run:
+    warn: true
+    echo: true
+    hide: stdout
+
+user: root
+connect_kwargs:
+    password: '111111'
+
+
+hosts:
+  - 192.168.0.80
+  - 192.168.0.82
+  - 192.168.0.83
+
+
+install:
+    source: http://download.redis.io/releases/redis-5.0.0.tar.gz
+    compile: /tmp/redis
+    path: /opt/redis
+    aaaa: 111
