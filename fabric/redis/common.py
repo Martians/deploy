@@ -1,7 +1,8 @@
 # coding=utf-8
 import os
 
-from fabric import Connection, SerialGroup as Group, Config
+from fabric import Connection, Config
+import redis.hosts as hosts
 
 ''' 将当前工程目录下的 fabric.yaml 复制出去
 '''
@@ -15,7 +16,7 @@ def copy_config():
         print("update config, try next time!")
         exit(-1)
 
-config = Config()
-
-hosts = Group(*config.hosts)
 copy_config()
+
+hosts.parse_info(Config())
+hosts.list_host()

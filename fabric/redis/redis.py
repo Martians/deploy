@@ -19,9 +19,9 @@ def download(c, pack_name, http_source, install_path, tar_path="/tmp"):
     if c.run("[ -f {}/*{} ]".format(tar_path, package)).failed:
         c.run("wget {} -P {}".format(http_source, tar_path))
 
-    temp_path = os.path.dirname(install_path)
-    c.run("tar zxvf {}/{} -C {} ".format(tar_path, package, temp_path))
-    c.run("mv {}/*{}* {}".format(temp_path, pack_name, install_path))
+    base_path = os.path.dirname(install_path)
+    c.run("tar zxvf {}/{} -C {} ".format(tar_path, package, base_path))
+    c.run("mv {}/*{}* {}".format(base_path, pack_name, install_path))
     return 0
 
 
