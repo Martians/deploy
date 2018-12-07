@@ -1,9 +1,9 @@
 
 
 run:
-#    warn: true
-#    echo: true
-    hide: false
+##    warn: true
+    echo: true
+#    hide: false
 
 # 默认用户名密码
 user: root

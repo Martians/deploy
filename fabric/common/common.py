@@ -2,13 +2,22 @@
 import os
 
 from fabric import Connection, Config
-import redis.hosts as hosts
+import common.hosts as hosts
 
 ''' 将当前工程目录下的 fabric.yaml 复制出去
 '''
 def copy_config():
     c = Connection("127.0.0.1")
-    src = os.path.dirname(os.path.abspath(__file__)) + "/fabric.yaml"
+
+    module = os.path.dirname(os.path.abspath(__file__)) + "/fabric.yaml"
+
+    if os.path.exists(module):
+        src = module
+    elif os.path.exists("fabric.yaml"):
+        src = "fabric.yaml"
+    elif os.path.exists("../fabric.yaml"):
+        src = "../fabric.yaml"
+
     dst = "~/.fabric.yaml"
 
     if c.local("diff {} {}".format(src, dst), warn=True).failed:
@@ -16,7 +25,14 @@ def copy_config():
         print("update config, try next time!")
         exit(-1)
 
+
+def enable(c, f):
+    c.config.run.warn = False if f else True
+
+
 copy_config()
 
 hosts.parse_info(Config())
 hosts.list_host()
+
+

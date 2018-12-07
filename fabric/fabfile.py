@@ -4,13 +4,13 @@ import sys, os
 sys.path.append(os.path.dirname(os.getcwd()))
 
 from fabric import task
+from common.common import *
+from common.hosts import *
 from redis.redis import *
-from redis.hosts import *
-
 
 @task
 def install(c):
-    install_master(hosts.conn(0))
+    install_master(conn(0))
 
 @task
 def clear(c, name):
