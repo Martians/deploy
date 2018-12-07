@@ -32,7 +32,10 @@ def enable(c, f):
 
 copy_config()
 
-hosts.parse_info(Config())
-hosts.list_host()
+config = Config()
+hosts.parse_info(config, config.user, config.connect_kwargs.password)
+
+# 输出所有host信息
+# hosts.list_host()
 
 

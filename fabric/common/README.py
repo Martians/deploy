@@ -9,4 +9,12 @@
     http://docs.pyinvoke.org/en/latest/invoke.html#inv
 
     https://github.com/pyinvoke/invoke/issues/471
+    
+    run:
+        warn: true      默认所有错误都不抛出异常；不应该配置此选项
+        echo: true      打印执行的所有shell命令内容，相当于 se -x
+        hide: false     是否对外输出命令的执行结果
+    
+    1. 只查看执行的命令：echo = True, hide = True
+    2. 输出所有内容：echo = True, hide = False
 '''

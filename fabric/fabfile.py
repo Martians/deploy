@@ -10,22 +10,28 @@ from redis.redis import *
 
 @task
 def install(c):
+    install_varify(conn(0))
     install_master(conn(0))
+    install_slave(conn(0))
 
 @task
-def clear(c, name):
-    pass
-
-
-@task
-def start(c, name):
-    pass
+def clear(c):
+    redis_clear(c)
 
 
 @task
-def stop(c, name):
-    pass
+def start(c):
+    redis_start(c)
+
+
+@task
+def stop(c):
+    redis_stop(c)
 
 @task
 def config(c):
     print(Config())
+
+@task
+def stat(c):
+    redis_stat(c)

@@ -1,7 +1,8 @@
 # coding=utf-8
+from invoke import Responder
 
 from common.disk import *
-
+import common.hosts as hosts
 
 def download(c, pack_name, http_source, install_path, temp_path="/tmp"):
     # 目标位置已经安装   /opt/redis
@@ -24,3 +25,19 @@ def download(c, pack_name, http_source, install_path, temp_path="/tmp"):
     actual = file_search(c, base_path, pack_name, dir=True)
     c.run("mv {}/{} {}".format(base_path, actual, install_path))
     return 0
+
+''' 方式1：使用sshpass，需要先安装
+        sshpass -p 111111 scp -r /opt/redis/ root@192.168.0.81:/tmp
+'''
+def copy_slave(c, path, sshpass=False):
+
+    for host in hosts.lists(index=False, other=True):
+        user = hosts.get_host_item(host, "user")
+        paww = hosts.get_host_item(host, "pass")
+        command = "scp -r {} {}@{}:{}".format(c.install.path, user, host['host'], path)
+
+        if sshpass:
+            c.run("sshpass -p {} {}".format(paww, command))
+        else:
+            sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
+            c.run(command, pty=True, watchers=[sudopass])

@@ -29,7 +29,7 @@ test_save = None
 ########################################################################################################################
 
 
-def grep_line(file, key=None):
+def grep_line_index(file, key=None):
     ''' 找到 key所在的行号
     '''
     if key:
@@ -144,7 +144,7 @@ def filter_multi(value):
 ########################################################################################################################
 @task
 def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=True, prefix='', suffix='',
-           grep_prefix=None, result_prefix=None, grep_reverse=False):
+           grep_prefix=None, result_prefix=None):
     '''
     参数：
         1. 同 grep_data
@@ -157,8 +157,7 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
     ''' 检查item是否已经存在，并确保操作是幂等的
     '''
     if prepare:
-        result = grep_data(c, key=key, value=value, file=file, sep=sep, prefix=grep_prefix if grep_prefix else prefix, suffix=suffix)[0]
-        if result ^ grep_reverse:
+        if grep_data(c, key=key, value=value, file=file, sep=sep, prefix=grep_prefix if grep_prefix else prefix, suffix=suffix)[0]:
             print("update, item [{key}{sep}{value}] already exist".format(key=key, value=value, sep=sep))
             return 2, None
 
@@ -185,6 +184,10 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
         data = '{key}{sep}{value}'.format(key=key, value=value.replace('\n', '\\n'), sep=sep)
     else:
         data = '{key}'.format(key=key)
+
+    if value == '\1':
+        search = '{prefix}\({key}{suffix}{sep}*.*\)'.format(key=key, prefix=prefix, suffix=suffix, sep=sep)
+        data = '\\1'
 
     command = 'sed {option} "s|{search}|{result_prefix}{data}|" {file}'.\
         format(file=file, option=option, search=search, data=data, result_prefix=result_prefix if result_prefix else "")
@@ -249,12 +252,12 @@ def append(c, file=None, key=None, data=None, pos=0):
     file = file if file else default_config
 
     # 对应的data 已经存在了
-    index = grep_line(file, data)[0]
+    index = grep_line_index(file, data)[0]
     if index != -1:
         # 调整参数，以免 pos = 0
         spos = 1 if pos == 0 else pos
 
-        key_line = grep_line(file, key)[0]
+        key_line = grep_line_index(file, key)[0]
         if key_line + spos == index:
             print("update: [{data}] already exist, line: {index}".format(data=data, index=index))
             return False, None
@@ -262,12 +265,12 @@ def append(c, file=None, key=None, data=None, pos=0):
             print("update: [{data}] already exist, line: {index}, key not exist".format(data=data, index=index))
             return False, None
 
-    index = grep_line(file, key)[0]
+    index = grep_line_index(file, key)[0]
 
     if index == -1:
         if pos == 0:
             # 没有指定相对位置，就加入到最后一行
-            index = grep_line(file)[0]
+            index = grep_line_index(file)[0]
         else:
             # 如果指定了pos， 则必须添加
             print("append, item [{key}] not find, can't append: {data}"

@@ -1,5 +1,8 @@
 # coding=utf-8
 
+'''
+    更多方法：https://blog.csdn.net/ialexanderi/article/details/79021312
+'''
 def file_exist(c, path, name=None, dir=False):
     ''' 精确名字查找
     '''
@@ -14,7 +17,8 @@ def file_search(c, path, name=None, dir=False):
     flag = 'd' if dir else '^d'
     result = c.run("ls -l {} | grep ^[{}] | awk '{{print $9}}' | grep {}".format(path, flag, name), warn=True)
 
-    fileList = result.stdout.split('\n')[:-1]
+    # split('\n')[:-1]
+    fileList = result.stdout.strip().split('\n')
     if len(fileList) == 1:
         return fileList[0]
 

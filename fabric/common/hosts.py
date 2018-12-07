@@ -45,7 +45,7 @@ host_local = {}
            - /mnt/disk1
            - /mnt/disk2
 '''
-def parse_info(config):
+def parse_info(config, user=None, paww=None):
     parse_host(config.hosts)
 
     import copy
@@ -53,7 +53,11 @@ def parse_info(config):
     host_local = copy.copy(config.hosts)
     del host_local['list']
 
+    if user: host_local['user'] = user
+    if paww: host_local['pass'] = paww
+
 def parse_host(hosts):
+    index = 0
     for item in hosts.list:
         host = item.copy()
         if 'host' not in host:
@@ -74,6 +78,9 @@ def parse_host(hosts):
 
         ''' 添加index、ip last
         '''
+
+        host['index'] = index
+        index += 1
         host_array.append(host)
         add_host_index(host['host'], host)
 
@@ -164,9 +171,45 @@ def get_item(index, name, sep=","):
     host = get_host(index)
     return get_host_item(host, name, sep)
 
+def lists(index=True, other=False):
+    return [host['index'] if index else host
+            for host in host_array
+            if not other or host is not host_array[0]]
+
+def group(thread=True):
+    name = 'thread_group' if thread else 'group'
+    if name not in host_local:
+        host_local.name = ThreadingGroup() if thread else Group()
+        host_local.name.extend([conn(index) for index in lists()])
+    return host_local.name
+
+def execute(command, thread=True, err=True, output=False):
+    results = group(thread=thread).run(command, warn=True, hide=True)
+
+    count = 0
+    if err:
+        for connection, item in results.items():
+            if item.failed: count += 1
+
+    if count:
+        print("execute [{}], failed count <{}>:".format(command, count))
+
+        for connection, item in results.items():
+            if item.failed:
+                failed = item.stderr.strip()
+                print("\t<{0.host}> {1.stdout}{2}".format(connection, item, failed if failed else ""))
+        print()
+    else:
+        print("execute [{}] success".format(command))
+
+    if output:
+        for connection, item in results.items():
+            if not item.failed:
+                print("\t<{0.host}> {1}".format(connection, item.stdout.strip()))
+    return results
 
 #######################################################################################################################
-from fabric import Connection, SerialGroup as Group, Config
+from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
 
 def conn(data):
@@ -186,7 +229,8 @@ def conn(data):
 
 
 if __name__ == '__main__':
-    parse_info(Config())
+    config = Config()
+    parse_info(config, config.user, config.connect_kwargs.password)
     list_host()
 
     def test_host_info():
@@ -216,6 +260,21 @@ if __name__ == '__main__':
         conn(0).run("hostname")
         conn(1).run("hostname")
 
+    def test_get_list():
+        print(lists())
+        print(lists(other=True, index=False))
+
+    def test_group():
+        group().run("hostname")
+        group(False).run("hostname")
+        execute("ls /bb", thread=True)
+        execute("ls /bb", thread=False)
+
+        execute("pwd", output=True)
+
     test_host_info()
     test_host_item()
     test_get_host()
+    test_get_list()
+    test_group()
+
