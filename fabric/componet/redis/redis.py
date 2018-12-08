@@ -9,6 +9,13 @@ from common.pack import *
 import common.hosts as hosts
 import common.sed as sed
 
+
+def base(c):
+    if 'base' not in c.install:
+        c.install.base = (c.install.path if c.install.path else '/opt') + '/redis'
+    return c.install.base
+
+
 """ 1. 准备 
         安装：fab install && fab cluster
         修改：fab clear && fab cluster （增加instance个数等）
@@ -37,25 +44,25 @@ def cluster(c):
 @task
 def clear(c):
     hosts.execute('cd {path}; rm nodes.conf server.log -rf'
-                  .format(path=c.install.path, base=c.install.cluster.directory))
+                  .format(path=base(c), base=c.install.cluster.directory))
 
     for index in range(1, c.install.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; rm nodes.conf server.log -rf'
-                      .format(path=c.install.path, base=c.install.cluster.directory, index=index))
+                      .format(path=base(c), base=c.install.cluster.directory, index=index))
     stop(c)
 
 @task
 def clean(c):
     stop(c)
-    hosts.execute('rm {path} -rf'.format(path=c.install.path))
+    hosts.execute('rm {path} -rf'.format(path=base(c)))
 
 @task
 def start(c):
-    hosts.execute("cd {path}; redis-server redis.conf".format(path=c.install.path))
+    hosts.execute("cd {path}; redis-server redis.conf".format(path=base(c)))
 
     for index in range(1, c.install.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; redis-server redis.conf'
-              .format(path=c.install.path,base=c.install.cluster.directory, index=index))
+                      .format(path=base(c), base=c.install.cluster.directory, index=index))
     stat(c)
 
 @task
@@ -76,11 +83,11 @@ def install_varify(c):
     lists = []
     for index in hosts.lists():
         c = hosts.conn(index)
-        if file_exist(c, c.install.path, dir=True):
+        if file_exist(c, base(c), dir=True):
             lists.append(hosts.get_host(index))
 
     for host in lists:
-        print("path [{}] already exist on host [{}]".format(c.install.path, host['host']))
+        print("path [{}] already exist on host [{}]".format(base(c), host['host']))
 
     if len(lists):
         print("{} host not empty, install failed, please clean first!".format(len(lists)))
@@ -88,14 +95,14 @@ def install_varify(c):
 
 
 def compile_redis(c):
-    with c.cd(c.install.compile):
+    with c.cd(c.install.compile + '/redis'):
         if not file_exist(c, 'src', 'redis-server'):
             c.run("make MALLOC=libc -j5")
 
-        c.run("mkdir -p {}".format(c.install.path))
+        c.run("mkdir -p {}".format(base(c)))
         with c.cd("src"):
             c.run("sudo \\cp redis-server redis-cli /usr/local/bin".format(""))
-            c.run("sudo \\cp redis-server redis-cli ../redis.conf {}".format(c.install.path))
+            c.run("sudo \\cp redis-server redis-cli ../redis.conf {}".format(base(c)))
 
 
 def install_master(c):
@@ -105,7 +112,7 @@ def install_master(c):
 
 
 def config_master(c):
-    file = c.install.path + "/redis.conf"
+    file = base(c) + "/redis.conf"
     sed.update(c, "bind", "0.0.0.0", file=file)
     sed.update(c, "daemonize", "yes", file=file)
     sed.update(c, "logfile", "server.log", file=file)
@@ -118,14 +125,14 @@ def config_master(c):
 
 
 def install_slave(c):
-    copy_slave(c, c.install.path)
+    copy_slave(c, base(c))
     config_slave(c)
 
 
 def config_slave(c):
     for index in hosts.lists(other=True):
         c = hosts.conn(index)
-        with c.cd(c.install.path):
+        with c.cd(base(c)):
             c.run("sudo \\cp redis-server redis-cli /usr/local/bin".format(""))
 
 ########################################################################################################################
@@ -162,11 +169,11 @@ def cluster_master(c):
 
 
 def create_cluster(c):
-    temp = os.path.dirname(c.install.path) + "/temp"
+    temp = os.path.dirname(base(c)) + "/temp"
     hosts.execute('''
             mkdir -p {temp}; rm -rf {temp}/*
             mkdir -p {path}; rm -rf {path}/{base}
-            '''.format(path=c.install.path, temp=temp,
+            '''.format(path=base(c), temp=temp,
                        base=c.install.cluster.directory))
     for index in range(1, c.install.cluster.instance):
         hosts.execute(''' 
@@ -175,10 +182,10 @@ def create_cluster(c):
           
           sudo sed -i "s#\(^port \).*#\\1{port}#g" redis.conf
           sudo sed -i "s#\(^pidfile [^0-9]*\)[0-9]*\([^0-9]\)#\\1{port}\\2#g" redis.conf
-          '''.format(path=c.install.path, temp=temp,
+          '''.format(path=base(c), temp=temp,
                      base=c.install.cluster.directory, index=index,
                      port=(int(c.install.cluster.portbase) + index)))
     hosts.execute('''
             mv {temp} {path}/{base}
-            '''.format(path=c.install.path, temp=temp,
-                          base=c.install.cluster.directory))
+            '''.format(path=base(c), temp=temp,
+                       base=c.install.cluster.directory))

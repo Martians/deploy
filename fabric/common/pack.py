@@ -3,7 +3,7 @@ import os
 
 from invoke import Responder
 from common.disk import *
-
+from common.init import *
 
 def download(c, name, http, local=None, path=None, temp="/tmp"):
     """ 下载并解压
@@ -58,7 +58,7 @@ def copy_slave(c, path, sshpass=False):
     for host in hosts.lists(index=False, other=True):
         user = hosts.get_host_item(host, "user")
         paww = hosts.get_host_item(host, "pass")
-        command = "scp -r {} {}@{}:{}".format(c.install.path, user, host['host'], path)
+        command = "scp -r {} {}@{}:{}".format(path, user, host['host'], os.path.dirname(path))
 
         if sshpass:
             c.run("sshpass -p {} {}".format(paww, command))
@@ -69,7 +69,6 @@ def copy_slave(c, path, sshpass=False):
 
 if __name__ == '__main__':
     from fabric import Config, Connection
-    from common.init import *
 
     c = hosts.conn(0)
 

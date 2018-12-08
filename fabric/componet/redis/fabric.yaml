@@ -15,7 +15,7 @@ hosts:
     list:
         - name: local
           host: 192.168.0.80
-          user: root
+          user: long
           pass: '111111'
         - host: 192.168.0.82
         - host: 192.168.0.83

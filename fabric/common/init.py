@@ -40,7 +40,6 @@ def enable(c, f):
     """
     c.config.run.warn = False if f else True
 
-
 copy_config()
 
 config = Config()
