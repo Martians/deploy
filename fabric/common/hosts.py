@@ -2,13 +2,19 @@
 
 valid_item = ['name', 'host', 'user', 'pass', 'port', 'disk']
 
-# 按照加入的顺序列出的host
+""" 
+    1. 按照index序号
+    2. 相关字符串索引
+    3. 其他配置内容，主要是host默认配置，如disk等
+    
+"""
 host_array = []
 host_index = {}
 host_local = {}
 
-''' 解析配置文件
-    1. 建立索引：使用下方配置例子：192.168.0.80
+""" 解析配置
+
+    1. 建立索引：使用下方配置例子中的：192.168.0.80
         1. first  ：'local' => host          字符串
         2. host ip：'192.168.0.80' => host   字符串
         3. last ip：'80' => host             字符串（如果没有冲突时，自动添加为索引）
@@ -43,7 +49,9 @@ host_local = {}
          disk:                          # 获得默认 disk时，将array内容合并成字符串
            - /mnt/disk1
            - /mnt/disk2
-'''
+"""
+
+
 def parse_info(config, user=None, paww=None):
     parse_host(config.hosts)
 
@@ -54,6 +62,7 @@ def parse_info(config, user=None, paww=None):
 
     if user: host_local['user'] = user
     if paww: host_local['pass'] = paww
+
 
 def parse_host(hosts):
     index = 0
@@ -77,9 +86,9 @@ def parse_host(hosts):
 
         ''' 添加index、ip last
         '''
-
         host['index'] = index
         index += 1
+
         host_array.append(host)
         add_host_index(host['host'], host)
 
@@ -105,8 +114,13 @@ def add_host_iplast():
         add_host_index(ip, host)
 
 ########################################################################################################################
-def list_host(array=True, index=True, other=True):
-    # https://docs.python.org/3/library/pprint.html
+
+
+def dump(array=True, index=True, other=True):
+    """ 用于debug
+
+        https://docs.python.org/3/library/pprint.html
+    """
     import pprint
     if array:
         # pprint.pprint(host_array)
@@ -125,10 +139,11 @@ def list_host(array=True, index=True, other=True):
 
 
 def get_host(index):
-    '''
+    """ 根据任何索引，获取host
+
         1. key 为字符串：name、host、ip last
         2. key 作为整数：根据编号进行查找
-    '''
+    """
     if index in host_index:
         return host_index[index]
 
@@ -171,6 +186,8 @@ def get_item(index, name, sep=","):
     return get_host_item(host, name, sep)
 
 ########################################################################################################################
+
+
 def lists(index=True, other=False):
     return [host['index'] if index else host
             for host in host_array
@@ -194,10 +211,9 @@ from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
 
 def conn(data):
-
-    ''' 建立到某个host的连接
-            可以指定 ip最后一位、name
-    '''
+    """ 建立到某个host的连接，并保存下来
+            可以指定 ip最后一位、name、host、index等
+    """
     host = get_host(data)
 
     if 'conn' not in host:
@@ -212,7 +228,7 @@ def conn(data):
 if __name__ == '__main__':
     config = Config()
     parse_info(config, config.user, config.connect_kwargs.password)
-    list_host()
+    dump()
 
     def test_host_info():
         # host

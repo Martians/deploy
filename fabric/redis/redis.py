@@ -9,15 +9,14 @@ from common.pack import *
 import common.hosts as hosts
 import common.sed as sed
 
-''' 1. 准备 
+""" 1. 准备 
         安装：fab install && fab cluster
         修改：fab clear && fab cluster （增加instance个数等）
         删除：fab clean
     
     2. 使用
         fab start stop stat
-'''
-
+"""
 @task
 def install(c):
     c = hosts.conn(0)
@@ -69,9 +68,11 @@ def stat(c):
     hosts.execute("echo redis-server `ps aux | grep redis-server | grep -v 'grep' | wc -l`", out=True, hide=True)
 
 ########################################################################################################################
-''' 如果已经安装，就拒绝
-'''
+
+
 def install_varify(c):
+    """ 如果已经安装，就拒绝
+    """
     lists = []
     for index in hosts.lists():
         c = hosts.conn(index)
@@ -98,7 +99,7 @@ def compile_redis(c):
 
 
 def install_master(c):
-    download(c, "redis", c.install.source, c.install.compile)
+    download(c, "redis", http=c.install.source, path=c.install.compile)
     compile_redis(c)
     config_master(c)
 
@@ -167,7 +168,6 @@ def create_cluster(c):
             mkdir -p {path}; rm -rf {path}/{base}
             '''.format(path=c.install.path, temp=temp,
                        base=c.install.cluster.directory))
-
     for index in range(1, c.install.cluster.instance):
         hosts.execute(''' 
           mkdir -p {temp}/{index}; cd {temp}/{index}
@@ -178,7 +178,6 @@ def create_cluster(c):
           '''.format(path=c.install.path, temp=temp,
                      base=c.install.cluster.directory, index=index,
                      port=(int(c.install.cluster.portbase) + index)))
-
     hosts.execute('''
             mv {temp} {path}/{base}
             '''.format(path=c.install.path, temp=temp,

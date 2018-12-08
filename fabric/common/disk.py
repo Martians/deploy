@@ -1,19 +1,20 @@
 # coding=utf-8
 
-'''
-    更多方法：https://blog.csdn.net/ialexanderi/article/details/79021312
-'''
+
 def file_exist(c, path, name=None, dir=False):
-    ''' 精确名字查找
-    '''
+    """ 模糊名字查找
+    """
     flag = 'd' if dir else 'f'
-    name = '*' + name + '*' if name else ""
-    return c.run("[ -{} {}/{} ]".format(flag, path, name), warn=True).ok
+    if name:
+        path = '{}/*{}*'.format(path, name)
+    return c.run("[ -{} {} ]".format(flag, path), warn=True).ok
 
 
-def file_search(c, path, name=None, dir=False):
-    ''' 模糊名字查找
-    '''
+def file_actual(c, path, name=None, dir=False):
+    """ 模糊名字匹配
+
+        更多方式：https://blog.csdn.net/ialexanderi/article/details/79021312
+    """
     flag = 'd' if dir else '^d'
     result = c.run("ls -l {} | grep ^[{}] | awk '{{print $9}}' | grep {}".format(path, flag, name), warn=True)
 
