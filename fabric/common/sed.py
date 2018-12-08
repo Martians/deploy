@@ -24,9 +24,9 @@ def enable(c, key, value=None, prefix='^#.*', suffix='', sep=' ', file=None, gre
     return work.update(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file, grep_prefix=grep_prefix)
 
 
-''' 增加#前缀
-'''
 def disable(c, key, value=None, prefix='^', suffix='', sep=' ', file=None, result_prefix='# '):
+    ''' 增加#前缀
+    '''
     if work.grep_data(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file):
         return work.update(c, key, value='\1', prefix=prefix, suffix=suffix, sep=sep, file=file, result_prefix=result_prefix, prepare=False, check=False)
     else:

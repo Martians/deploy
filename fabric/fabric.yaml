@@ -14,8 +14,8 @@ connect_kwargs:
 hosts:
     list:
         - name: local
-          host: 192.168.0.80
-          user: long
+          host: 192.168.0.81
+          user: root
           pass: '111111'
         - host: 192.168.0.82
         - host: 192.168.0.83
@@ -26,6 +26,10 @@ hosts:
 
 install:
     source: http://download.redis.io/releases/redis-5.0.0.tar.gz
-    compile: /tmp/redis
+    compile: /tmp/compile/redis
     path: /opt/redis
-    aaaa: 111
+    cluster:
+        directory: 'cluster'
+        instance: 5
+        portbase: 7000
+        replica: 0

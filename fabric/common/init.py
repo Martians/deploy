@@ -4,7 +4,9 @@ import os
 from fabric import Connection, Config
 import common.hosts as hosts
 
-''' 将当前工程目录下的 fabric.yaml 复制出去
+''' 确保当前目录下的yaml生效
+        1. 比较 ./fabric.yaml 和 ~/.fabric.yaml 的差别
+        2. ./fabric.yaml 复制到 ~/.fabric.yaml
 '''
 def copy_config():
     c = Connection("127.0.0.1")
@@ -20,12 +22,18 @@ def copy_config():
 
     dst = "~/.fabric.yaml"
 
-    if c.local("diff {} {}".format(src, dst), warn=True).failed:
+    if c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
         c.local("\cp {} {}".format(src, dst))
         print("update config, try next time!")
         exit(-1)
 
 
+''' 如果希望动态修改默认配置
+        假设全局配置为 run.warn = True；这里将包含的操作中，临时设置 run.warn = False
+            enable(c, 1)
+            do work ...
+            enable(c, 0)
+'''
 def enable(c, f):
     c.config.run.warn = False if f else True
 

@@ -1,4 +1,6 @@
 # coding=utf-8
+import os
+
 from invoke import Responder
 
 from common.disk import *
@@ -18,6 +20,8 @@ def download(c, pack_name, http_source, install_path, temp_path="/tmp"):
 
     # 解压：到目标目录的父目录下 /opt/redis-5.0.0
     base_path = os.path.dirname(install_path)
+    c.run("mkdir -p {}".format(base_path))
+
     if not file_search(c, base_path, pack_name, dir=True):
         c.run("tar zxvf {}/{} -C {} ".format(temp_path, package, base_path))
 

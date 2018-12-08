@@ -17,4 +17,24 @@
     
     1. 只查看执行的命令：echo = True, hide = True
     2. 输出所有内容：echo = True, hide = False
+    
+    一次执行多条命令：
+    传入multi line
+    exec.multi
+    
+    pty=True 需要输入密码的部分
+    
+    导入common
+    
+    必须导入 init.py， 执行默认脚本
+    
+    1. 存在问题
+        模块相对位置
+        配置文件识别
+        
+        sed 解析
+    
+    使用方式
+    
+    
 '''

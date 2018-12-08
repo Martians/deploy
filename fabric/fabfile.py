@@ -4,34 +4,40 @@ import sys, os
 sys.path.append(os.path.dirname(os.getcwd()))
 
 from fabric import task
-from common.common import *
+import redis.redis as redis
+
+from common.init import *
 from common.hosts import *
-from redis.redis import *
 
 @task
 def install(c):
-    install_varify(conn(0))
-    install_master(conn(0))
-    install_slave(conn(0))
+    redis.install(c)
+
+@task
+def cluster(c):
+    redis.cluster(c)
 
 @task
 def clear(c):
-    redis_clear(c)
-
+    redis.clear(c)
 
 @task
 def start(c):
-    redis_start(c)
+    redis.start(c)
 
 
 @task
 def stop(c):
-    redis_stop(c)
+    redis.stop(c)
+
+@task
+def stat(c):
+    redis.stat(c)
+
+@task
+def clean(c):
+    redis.clean(c)
 
 @task
 def config(c):
     print(Config())
-
-@task
-def stat(c):
-    redis_stat(c)

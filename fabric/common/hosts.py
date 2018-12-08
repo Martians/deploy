@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 valid_item = ['name', 'host', 'user', 'pass', 'port', 'disk']
 
 # 按照加入的顺序列出的host
@@ -105,7 +104,7 @@ def add_host_iplast():
         ip = host['host'].split('.')[-1]
         add_host_index(ip, host)
 
-
+########################################################################################################################
 def list_host(array=True, index=True, other=True):
     # https://docs.python.org/3/library/pprint.html
     import pprint
@@ -171,10 +170,12 @@ def get_item(index, name, sep=","):
     host = get_host(index)
     return get_host_item(host, name, sep)
 
+########################################################################################################################
 def lists(index=True, other=False):
     return [host['index'] if index else host
             for host in host_array
             if not other or host is not host_array[0]]
+
 
 def group(thread=True):
     name = 'thread_group' if thread else 'group'
@@ -183,30 +184,10 @@ def group(thread=True):
         host_local.name.extend([conn(index) for index in lists()])
     return host_local.name
 
-def execute(command, thread=True, err=True, output=False):
-    results = group(thread=thread).run(command, warn=True, hide=True)
 
-    count = 0
-    if err:
-        for connection, item in results.items():
-            if item.failed: count += 1
-
-    if count:
-        print("execute [{}], failed count <{}>:".format(command, count))
-
-        for connection, item in results.items():
-            if item.failed:
-                failed = item.stderr.strip()
-                print("\t<{0.host}> {1.stdout}{2}".format(connection, item, failed if failed else ""))
-        print()
-    else:
-        print("execute [{}] success".format(command))
-
-    if output:
-        for connection, item in results.items():
-            if not item.failed:
-                print("\t<{0.host}> {1}".format(connection, item.stdout.strip()))
-    return results
+def execute(command, thread=True, err=True, out=False, hide=None):
+    import common.execute as execute
+    return execute.group(command, thread=thread, err=err, out=out, hide=True)
 
 #######################################################################################################################
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
@@ -267,10 +248,6 @@ if __name__ == '__main__':
     def test_group():
         group().run("hostname")
         group(False).run("hostname")
-        execute("ls /bb", thread=True)
-        execute("ls /bb", thread=False)
-
-        execute("pwd", output=True)
 
     test_host_info()
     test_host_item()
