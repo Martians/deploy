@@ -15,7 +15,7 @@ hosts:
     list:
         - name: local
           host: 192.168.0.80
-          user: root
+          user: long
           pass: '111111'
         - host: 192.168.0.82
         - host: 192.168.0.83
@@ -24,10 +24,9 @@ hosts:
         - /mnt/disk2
 
 install:
-    source: http://download.redis.io/releases/redis-5.0.0.tar.gz
-    parent:  /opt
-
-    compile: /tmp/compile
+    source: https://archive.apache.org/dist/ignite/2.6.0/apache-ignite-hadoop-2.6.0-bin.zip
+    parent: /opt
+    work: /mnt/disk/work
     cluster:
         directory: 'cluster'
         instance: 5

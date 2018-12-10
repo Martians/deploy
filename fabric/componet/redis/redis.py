@@ -9,10 +9,10 @@ from common.pack import *
 import common.hosts as hosts
 import common.sed as sed
 
-
 def base(c):
     if 'base' not in c.install:
-        c.install.base = (c.install.path if c.install.path else '/opt') + '/redis'
+        parent = c.install.parent if c.install.parent else fabric_config.install.parent
+        c.install.base = os.path.join(parent, 'redis')
     return c.install.base
 
 
@@ -95,7 +95,7 @@ def install_varify(c):
 
 
 def compile_redis(c):
-    with c.cd(c.install.compile + '/redis'):
+    with c.cd(os.path.join(c.install.compile, 'redis')):
         if not file_exist(c, 'src', 'redis-server'):
             c.run("make MALLOC=libc -j5")
 
@@ -106,13 +106,13 @@ def compile_redis(c):
 
 
 def install_master(c):
-    download(c, "redis", http=c.install.source, path=c.install.compile)
+    download(c, "redis", source=c.install.source, parent=c.install.compile)
     compile_redis(c)
     config_master(c)
 
 
 def config_master(c):
-    file = base(c) + "/redis.conf"
+    file = os.path.join(base(c), "redis.conf")
     sed.update(c, "bind", "0.0.0.0", file=file)
     sed.update(c, "daemonize", "yes", file=file)
     sed.update(c, "logfile", "server.log", file=file)
@@ -169,7 +169,7 @@ def cluster_master(c):
 
 
 def create_cluster(c):
-    temp = os.path.dirname(base(c)) + "/temp"
+    temp = os.path.join(os.path.dirname(base(c)), "temp")
     hosts.execute('''
             mkdir -p {temp}; rm -rf {temp}/*
             mkdir -p {path}; rm -rf {path}/{base}

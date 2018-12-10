@@ -1,4 +1,5 @@
 
+# 用于进行 common 库的调试
 
 run:
 ##    warn: true
@@ -24,10 +25,8 @@ hosts:
         - /mnt/disk2
 
 install:
-    source: http://download.redis.io/releases/redis-5.0.0.tar.gz
+    source: https://archive.apache.org/dist/ignite/2.6.0/apache-ignite-hadoop-2.6.0-bin.zip
     parent:  /opt
-
-    compile: /tmp/compile
     cluster:
         directory: 'cluster'
         instance: 5

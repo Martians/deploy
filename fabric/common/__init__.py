@@ -36,4 +36,9 @@
         1. 只查看执行的命令：echo = True, hide = True
         2. 输出所有内容：echo = True, hide = False
         3. pty=True 需要输入密码的部分
+
+
+Todo
+    将配置文件分离出来
+
 """

@@ -13,17 +13,20 @@ def copy_config():
     c = Connection("127.0.0.1")
 
     name = "fabric.yaml"
-    module = os.path.dirname(os.path.abspath(__file__)) + '/' + name
+    origin = os.path.join(os.getcwd(), name)
+    module = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
 
-    if os.path.exists(module):
+    if os.path.exists(origin):
+        src = origin
+    elif os.path.exists(module):
         src = module
-    elif os.path.exists(name):
-        src = name
     elif os.path.exists("../" + name):
         src = "../" + name
+    else:
+        print("not find yaml!")
+        exit(-1)
 
     dst = '~/.' + name
-
     if c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
         c.local("\cp {} {}".format(src, dst))
         print("update config, try next time!")
@@ -40,12 +43,24 @@ def enable(c, f):
     """
     c.config.run.warn = False if f else True
 
+
+""" 默认配置内容
+"""
+config = {
+    'install': {
+        'path': '/opt',
+        'local': '/home/long/source'
+    }
+}
+
 copy_config()
 
-config = Config()
-hosts.parse_info(config, config.user, config.connect_kwargs.password)
+fabric_config = Config()
+hosts.parse_info(fabric_config, fabric_config.user, fabric_config.connect_kwargs.password)
 
 # 输出所有host信息
 # hosts.dump()
 
 
+if __name__ == '__main__':
+    print(config.install.parent)
