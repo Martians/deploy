@@ -53,7 +53,7 @@ def multi(c, commands, go_on=False, hide=None):
         print("\nmulti command, total {}\n".format(len(commands)))
 
 
-def group(command, err=True, out=False, hide=None, thread=True):
+def group(group, command, err=True, out=False, hide=None, pty=None):
     """ group
         1. stderr：命令执行过程中不抛出异常（warn=True），执行完成后手动打印出来
         2. stdout：根据默认配置，决定是否输出
@@ -68,7 +68,7 @@ def group(command, err=True, out=False, hide=None, thread=True):
             2. 按conn执行：每个conn执行完所有命令后，转到下一个conn；这种方式可以自行调用 execute.run，在外层使用串行循环
     """
     command = command.strip()
-    results = hosts.group(thread=thread).run(command, warn=True, hide=hide)
+    results = group.run(command, warn=True, hide=hide, pty=pty)
     count = 0
 
     ''' 输出错误的结果
@@ -101,6 +101,7 @@ if __name__ == '__main__':
     from common.init import *
 
     c = hosts.conn(0)
+    g = hosts.group(thread=True)
 
     succ = '''pwd
        pwd'''
@@ -116,17 +117,17 @@ if __name__ == '__main__':
         multi(c, fail, go_on=True)
 
     def test_group():
-        group("pwd")                # 执行成功，不显示输出结果
-        group("pwd", out=True)      # 执行成功，也显示输出结果
+        group(g, "pwd")                # 执行成功，不显示输出结果
+        group(g, "pwd", out=True)      # 执行成功，也显示输出结果
 
         # group("ls /bb")           # 执行失败，程序退出
-        group("ls /bb", err=False)  # 执行失败也继续
+        group(g, "ls /bb", err=False)  # 执行失败也继续
 
-        group("pwd", thread=False, out=True)  # 串行执行，乱序返回
+        group(g, "pwd", out=True)  # 串行执行，乱序返回
 
     def test_group_multi():
-        group(succ)
-        group(fail)
+        group(g, succ)
+        group(g, fail)
 
     test_multi()
     test_group()

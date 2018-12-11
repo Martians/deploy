@@ -35,7 +35,7 @@ def disable(c, key, value=None, prefix='^', suffix='', sep=' ', file=None, resul
 
 
 def append(c, key, data=None, file=None, pos=0):
-    return work.append(key=key, data=data, file=file, pos=pos)
+    return work.append(c, key=key, data=data, file=file, pos=pos)
 
 
 ''' 考虑内容

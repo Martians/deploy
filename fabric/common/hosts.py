@@ -194,17 +194,18 @@ def lists(index=True, other=False):
             if not other or host is not host_array[0]]
 
 
-def group(thread=True):
+def group(thread=True, other=False):
     name = 'thread_group' if thread else 'group'
     if name not in host_local:
         host_local.name = ThreadingGroup() if thread else Group()
-        host_local.name.extend([conn(index) for index in lists()])
+        host_local.name.extend([conn(index) for index in lists() if not other or index > 0])
     return host_local.name
 
 
-def execute(command, thread=True, err=True, out=False, hide=None):
+def execute(command, thread=True, err=True, out=False, hide=True, other=False, pty=None):
     import common.execute as execute
-    return execute.group(command, thread=thread, err=err, out=out, hide=True)
+    return execute.group(group(thread=thread, other=other),
+                         command, err=err, out=out, hide=hide, pty=pty)
 
 #######################################################################################################################
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup

@@ -125,7 +125,7 @@ def config_master(c):
 
 
 def install_slave(c):
-    copy_slave(c, base(c))
+    master_copy(c, base(c))
     config_slave(c)
 
 

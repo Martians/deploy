@@ -29,7 +29,7 @@ test_save = None
 ########################################################################################################################
 
 
-def grep_line_index(file, key=None):
+def grep_line_index(c, file, key=None):
     ''' 找到 key所在的行号
     '''
     if key:
@@ -252,7 +252,7 @@ def append(c, file=None, key=None, data=None, pos=0):
     file = file if file else default_config
 
     # 对应的data 已经存在了
-    index = grep_line_index(file, data)[0]
+    index = grep_line_index(c, file, data)[0]
     if index != -1:
         # 调整参数，以免 pos = 0
         spos = 1 if pos == 0 else pos

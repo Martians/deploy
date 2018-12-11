@@ -47,7 +47,7 @@ def download(c, name, source=None, parent=None, local=None, temp="/tmp"):
             print("download, get [{}] in local dir: {}".format(package, local))
 
     if file_path:
-        c.run("\cp {} {} -rf".format(file_path, temp))
+        c.run("sudo \cp {} {} -rf".format(file_path, temp))
 
     else:
         """ 没有找到，需要下载
@@ -58,66 +58,93 @@ def download(c, name, source=None, parent=None, local=None, temp="/tmp"):
             print("download, [{}] already download: {}".format(package, temp))
         file_path = '{}/{}'.format(temp, package)
 
-    ###############################################################################################################
-    ''' 解压到 path下，名称可能带有版本号 
-    
+    return unpack(c, name, file_path, parent)
+
+
+def unpack(c, name, path, parent):
+    """ 解压到 path下，名称可能带有版本号
+
         path下不能存在任何包含 name 的文件夹，否则无法判断哪个是解压出来后的目录
-    '''
+    """
     c.run("mkdir -p {}".format(parent))
     if not file_actual(c, parent, name, dir=True):
-        print("un-tar package [{}] ...".format(file_path))
-        if file_path.endswith('tar.gz'):
-            c.run("tar zxvf {} -C {} ".format(file_path, parent))
-        elif file_path.endswith('zip'):
-            c.run("unzip {} -d {} ".format(file_path, parent))
+        print("un-tar package [{}] ...".format(path))
+        if path.endswith('tar.gz'):
+            c.run("sudo tar zxvf {} -C {} ".format(path, parent))
+        elif path.endswith('zip'):
+            c.run("sudo unzip {} -d {} ".format(path, parent))
     else:
         print(1)
 
     ''' move，去掉名称中的版本号
     '''
     actual = file_actual(c, parent, name, dir=True)
-    c.run("mv {}/{} {}/{}".format(parent, actual, parent, name))
-    return 0
+    c.run("sudo mv {}/{} {}/{}".format(parent, actual, parent, name))
 
-def copy_slave(c, path, sshpass=False):
 
-    """ scp
-        1. 使用sshpass，主机需要先安装
-            sshpass -p 111111 scp -r /opt/redis/ root@192.168.0.81:/tmp
+def master_copy(c, path, dest=None, sshpass=False, other=True, async=False):
 
-        2. 使用Responder
-    """
-    for host in hosts.lists(index=False, other=True):
-        user = hosts.get_host_item(host, "user")
-        paww = hosts.get_host_item(host, "pass")
-        command = "scp -r {} {}@{}:{}".format(path, user, host['host'], os.path.dirname(path))
+    if async:
+        """ 异步线程方式执行，需要已经设置了免密码登陆
+        """
+        host = hosts.get_host(0)
+        command = "scp -r {}@{}:{} {}".format(hosts.get_host_item(host, 'user'), host['host'], path,
+                                              dest if dest else os.path.dirname(path))
+        hosts.execute(command, thread=True, other=other, out=True, hide=None, pty=True)
 
-        if sshpass:
-            c.run("sshpass -p {} {}".format(paww, command))
-        else:
-            sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
-            c.run(command, pty=True, watchers=[sudopass])
+    else:
+        """ scp
+            1. 使用sshpass，主机需要先安装
+                sshpass -p 111111 scp -r /opt/redis/ root@192.168.0.81:/tmp
+    
+            2. 使用Responder
+        """
+        for host in hosts.lists(index=False, other=other):
+            user = hosts.get_host_item(host, "user")
+            paww = hosts.get_host_item(host, "pass")
+            command = "scp -r {} {}@{}:{}".format(path, user, host['host'],
+                                                  dest if dest else os.path.dirname(path))
+
+            if sshpass:
+                c.run("sshpass -p {} {}".format(paww, command))
+            else:
+                sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
+                c.run(command, pty=True, watchers=[sudopass])
 
 
 if __name__ == '__main__':
     from fabric import Config, Connection
-
     c = hosts.conn(0)
 
-    """ 1. 指定local具体位置
-    """
-    c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
-    download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz",
-             local="/home/long/source/component/redis/redis-5.0.0.tar.gz")
 
-    """ 2. 指定local的目录，需要搜索
-            但是默认local已经存在与 source 相同名字的包
-    """
-    c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
-    download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz")
+    def download_test(c):
 
-    ''' 3. 指定local的目录，需要搜索，并添加 tar.gz、zip后缀
-            但是没有指定source，也不知道默认版本号
-    '''
-    c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
-    download(c, "redis")
+        """ 1. 指定local具体位置
+        """
+        c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
+        download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz",
+                 local="/home/long/source/component/redis/redis-5.0.0.tar.gz")
+
+        """ 2. 指定local的目录，需要搜索
+                但是默认local已经存在与 source 相同名字的包
+        """
+        c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
+        download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz")
+
+        ''' 3. 指定local的目录，需要搜索，并添加 tar.gz、zip后缀
+                但是没有指定source，也不知道默认版本号
+        '''
+        c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
+        download(c, "redis")
+
+
+    def master_copy_test(c):
+        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
+        master_copy(c, "/tmp/redis-5.0.0.tar.gz")
+
+        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
+        master_copy(c, "/tmp/redis-5.0.0.tar.gz", async=True)
+
+
+    # download_test(c)
+    master_copy_test(c)

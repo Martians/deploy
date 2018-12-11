@@ -53,10 +53,21 @@ config = {
     }
 }
 
-copy_config()
 
-fabric_config = Config()
-hosts.parse_info(fabric_config, fabric_config.user, fabric_config.connect_kwargs.password)
+def init_config():
+    pass
+
+
+if 1:
+    copy_config()
+
+    """ fabric config
+    """
+    fabric_config = Config()
+    hosts.parse_info(fabric_config, fabric_config.user, fabric_config.connect_kwargs.password)
+
+    init_config()
+
 
 # 输出所有host信息
 # hosts.dump()
