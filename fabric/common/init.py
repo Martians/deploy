@@ -46,10 +46,10 @@ def enable(c, f):
 
 """ 默认配置内容
 """
-config = {
+default_config = {
     'install': {
-        'path': '/opt',
-        'local': '/home/long/source'
+        'parent': '/opt',
+        'source': '/home/long/source'
     }
 }
 

@@ -24,11 +24,3 @@ hosts:
         - /mnt/disk2
 
 install:
-    source: https://archive.apache.org/dist/ignite/2.6.0/apache-ignite-hadoop-2.6.0-bin.zip
-    parent: /opt
-    work: /mnt/disk/work/benchmark
-    cluster:
-        directory: 'cluster'
-        instance: 5
-        portbase: 7000
-        replica: 0

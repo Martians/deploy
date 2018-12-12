@@ -22,6 +22,10 @@ cat << EOF | sudo tee -a /etc/httpd/conf.d/local.conf
 </VirtualHost>
 EOF
 
+# hostname
+# sed -i "s/#\(ServerName\).*/\1 0.0.0.0:80/g" /etc/httpd/conf/httpd.conf | grep ServerName
+# echo $HOST_LOCAL
+
 mkdir $DOCK_PATH_REPO -p
 
 work_output "http completed!"

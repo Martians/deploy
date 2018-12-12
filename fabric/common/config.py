@@ -33,7 +33,7 @@ def grep_line_index(c, file, key=None):
     ''' 找到 key所在的行号
     '''
     if key:
-        command = "sed -n '/{key}/=' {file}".format(file=file, key=key)
+        command = "sed -n '#{key}#=' {file}".format(file=file, key=key)
     else:
         # 找到最后一行的行号
         command = "sed -n '$=' {file}".format(file=file)
@@ -265,12 +265,12 @@ def append(c, file=None, key=None, data=None, pos=0):
             print("update: [{data}] already exist, line: {index}, key not exist".format(data=data, index=index))
             return False, None
 
-    index = grep_line_index(file, key)[0]
+    index = grep_line_index(c, file, key)[0]
 
     if index == -1:
         if pos == 0:
             # 没有指定相对位置，就加入到最后一行
-            index = grep_line_index(file)[0]
+            index = grep_line_index(c, file)[0]
         else:
             # 如果指定了pos， 则必须添加
             print("append, item [{key}] not find, can't append: {data}"

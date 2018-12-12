@@ -1,5 +1,4 @@
 
-# 用于进行 common 库的调试
 
 run:
 ##    warn: true
@@ -11,14 +10,14 @@ user: root
 connect_kwargs:
     password: '111111'
 
-
 hosts:
     list:
         - name: local
           host: 192.168.0.80
-          user: root
+          user: long
           pass: '111111'
           type: control
+        - host: 192.168.0.81
         - host: 192.168.0.82
         - host: 192.168.0.83
     disk:
@@ -26,10 +25,14 @@ hosts:
         - /mnt/disk2
 
 install:
-    source: https://archive.apache.org/dist/ignite/2.6.0/apache-ignite-hadoop-2.6.0-bin.zip
-    parent:  /opt
-    cluster:
-        directory: 'cluster'
-        instance: 5
-        portbase: 7000
-        replica: 0
+  abc: 1
+
+flink:
+    parallelism: 2
+    jobmanager:
+      heap: 512m
+
+    taskmanager:
+      heap: 512m
+      slot: 2
+    disk: /mnt/disk1

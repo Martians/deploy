@@ -13,11 +13,11 @@ sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 from fabric import task
 from common.hosts import *
 
-from componet.flink import flink
+from project.p2018_12_01.realtime import real
 
 @task
 def config(c):
     print(Config())
 
-ns = Collection(flink, config)
+ns = Collection(real, config)
 

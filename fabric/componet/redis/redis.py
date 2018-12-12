@@ -11,7 +11,7 @@ import common.sed as sed
 
 def base(c):
     if 'base' not in c.install:
-        parent = c.install.parent if c.install.parent else fabric_config.install.parent
+        parent = c.install.parent if 'parent' in c.install else default_config['install']['parent']
         c.install.base = os.path.join(parent, 'redis')
     return c.install.base
 
@@ -106,7 +106,7 @@ def compile_redis(c):
 
 
 def install_master(c):
-    download(c, "redis", source=c.install.source, parent=c.install.compile)
+    download(c, "redis", source='http://download.redis.io/releases/redis-5.0.0.tar.gz', parent=c.install.compile)
     compile_redis(c)
     config_master(c)
 

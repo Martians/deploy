@@ -1,6 +1,6 @@
 # coding=utf-8
 
-valid_item = ['name', 'host', 'user', 'pass', 'port', 'disk']
+valid_item = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
 
 """ 
     1. 按照index序号
@@ -90,7 +90,11 @@ def parse_host(hosts):
         index += 1
 
         host_array.append(host)
-        add_host_index(host['host'], host)
+
+        """ control 不加入到 序列中
+        """
+        if 'type' not in host or host['type'] != 'control':
+            add_host_index(host['host'], host)
 
     add_host_iplast()
 
@@ -210,6 +214,9 @@ def execute(command, thread=True, err=True, out=False, hide=True, other=False, p
 #######################################################################################################################
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
+
+def one():
+    return conn(0)
 
 def conn(data):
     """ 建立到某个host的连接，并保存下来
