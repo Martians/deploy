@@ -42,4 +42,9 @@ Todo
     将配置文件分离出来
     角色划分：安装点、其他机器（master、slave等）
 
+
+    pip install pyYaml
+    pip install fabric
+
+
 """

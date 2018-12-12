@@ -140,14 +140,12 @@ if __name__ == '__main__':
     def master_copy_test(c):
         hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf; rm -rf /opt/redis ", other=False)
         download(c, "redis")
-        
-        download(c, "redis", copy=True)
 
-        copy_pack(c, "/tmp/redis-5.0.0.tar.gz")
+        copy_pack(c, package())
 
         hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
         copy_pack(c, "/tmp/redis-5.0.0.tar.gz", async=True)
 
 
-    download_test(c)
+    # download_test(c)
     master_copy_test(c)
