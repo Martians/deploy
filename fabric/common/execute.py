@@ -53,7 +53,7 @@ def multi(c, commands, go_on=False, hide=None):
         print("\nmulti command, total {}\n".format(len(commands)))
 
 
-def group(group, command, err=True, out=False, hide=None, pty=None):
+def group(group, command, err=True, out=False, **kwargs):
     """ group
         1. stderr：命令执行过程中不抛出异常（warn=True），执行完成后手动打印出来
         2. stdout：根据默认配置，决定是否输出
@@ -68,7 +68,7 @@ def group(group, command, err=True, out=False, hide=None, pty=None):
             2. 按conn执行：每个conn执行完所有命令后，转到下一个conn；这种方式可以自行调用 execute.run，在外层使用串行循环
     """
     command = command.strip()
-    results = group.run(command, warn=True, hide=hide, pty=pty)
+    results = group.run(command, warn=True, **kwargs)
     count = 0
 
     ''' 输出错误的结果

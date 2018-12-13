@@ -84,15 +84,16 @@ def unpack(c, name, path, parent=None):
     c.run("sudo mv {}/{} {}/{}".format(parent, actual, parent, name))
 
 
-def copy_pack(c, path, dest=None, sshpass=False, other=True, async=False):
+def copy_pack(c, path, dest=None, sshpass=False, other=False, async=False):
 
     if async:
         """ 异步线程方式执行，需要已经设置了免密码登陆
         """
-        host = hosts.get_host(0)
+        host = hosts.one(True)
         command = "scp -r {}@{}:{} {}".format(hosts.get_host_item(host, 'user'), host['host'], path,
                                               dest if dest else os.path.dirname(path))
-        hosts.execute(command, thread=True, other=other, out=True, hide=None, pty=True)
+        sudopass = Responder(pattern=r'.*password:', response=hosts.get_host_item(host, 'pass') + '\n')
+        hosts.execute(command, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
 
     else:
         """ scp
@@ -106,7 +107,6 @@ def copy_pack(c, path, dest=None, sshpass=False, other=True, async=False):
             paww = hosts.get_host_item(host, "pass")
             command = "scp -r {} {}@{}:{}".format(path, user, host['host'],
                                                   dest if dest else os.path.dirname(path))
-
             if sshpass:
                 c.run("sshpass -p {} {}".format(paww, command))
             else:
@@ -116,7 +116,7 @@ def copy_pack(c, path, dest=None, sshpass=False, other=True, async=False):
 
 if __name__ == '__main__':
     from fabric import Config, Connection
-    c = hosts.conn(0)
+    c = hosts.one()
 
     """ 测试方式：
             修改 init: config.install.source的值为无效值
@@ -137,15 +137,17 @@ if __name__ == '__main__':
         print("\n======================== local 搜索失败，从网络下载")
         download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz", local='/tmp')
 
-    def master_copy_test(c):
-        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf; rm -rf /opt/redis ", other=False)
+    def copy_test(c):
         download(c, "redis")
 
-        copy_pack(c, package())
+        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=False)
+        copy_pack(c, package(), '/tmp')
 
         hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
-        copy_pack(c, "/tmp/redis-5.0.0.tar.gz", async=True)
+        copy_pack(c, package(), '/tmp', async=True)
 
 
     # download_test(c)
-    master_copy_test(c)
+    # copy_test(c)
+
+    copy_test(c)
