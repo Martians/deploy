@@ -22,6 +22,8 @@ local parameters:
 # ss
 listen_address: localhost
 
+num.io.threads=8
+
 
 
 # set broadcast_rpc_address to a value other than 0.0.0.0.
@@ -34,8 +36,3 @@ if [ "x$LOCAL_JMX" = "x" ]; then
     LOCAL_JMX=yes
 fi
 cc_address:   localhost
-
-
-1111111111111111111111111111111111111111111111
-1111111111111111111111111111111111111111111111
-1111111111111111111111111111111111111111111111

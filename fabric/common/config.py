@@ -33,7 +33,7 @@ def grep_line_index(c, file, key=None):
     ''' 找到 key所在的行号
     '''
     if key:
-        command = "sed -n '#{key}#=' {file}".format(file=file, key=key)
+        command = "sed -n '/{key}/=' {file}".format(file=file, key=key)
     else:
         # 找到最后一行的行号
         command = "sed -n '$=' {file}".format(file=file)
@@ -51,7 +51,7 @@ def grep_line_index(c, file, key=None):
 
 def grep_data(c, key, file=None, value=None, sep=' ',
               cache=None, show=0, mute=False,
-              prefix='[^#]*', suffix=''):
+              prefix='[^#]*', suffix='', more_sep=True):
     '''
         使用grep，检查 key [sep value] 在文件中是否存在
 
@@ -86,7 +86,7 @@ def grep_data(c, key, file=None, value=None, sep=' ',
             1. 只查找，未被注释的选项，所以前缀prefix为 ^#
             2. {sep}*：可以出现多次sep的最后一个字符（如：[: ]，可以出现多次空格）
     '''
-    data = '{sep}*{value}{tail}'.format(value=value, sep=sep, tail=tail) if value else ''
+    data = '{sep}{more}{value}{tail}'.format(value=value, sep=sep, more='*' if more_sep else '', tail=tail) if value else ''
     search = '{prefix}{key}{suffix}{data}'.format(key=key, prefix=prefix, suffix=suffix, data=data)
 
     ''' 构造 option
@@ -144,7 +144,7 @@ def filter_multi(value):
 ########################################################################################################################
 @task
 def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=True, prefix='', suffix='',
-           grep_prefix=None, result_prefix=None):
+           grep_prefix=None, result_prefix=None, more_sep=True):
     '''
     参数：
         1. 同 grep_data
@@ -157,7 +157,7 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
     ''' 检查item是否已经存在，并确保操作是幂等的
     '''
     if prepare:
-        if grep_data(c, key=key, value=value, file=file, sep=sep, prefix=grep_prefix if grep_prefix else prefix, suffix=suffix)[0]:
+        if grep_data(c, key=key, value=value, file=file, sep=sep, more_sep=more_sep, prefix=grep_prefix if grep_prefix else prefix, suffix=suffix)[0]:
             print("update, item [{key}{sep}{value}] already exist".format(key=key, value=value, sep=sep))
             return 2, None
 
@@ -178,7 +178,8 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
             1. {sep}*：可以出现多次sep的最后一个字符（如：[: ]，可以出现多次空格）
             2. {sep}*[.*]后边的部分，表示将key当前的value全部删除
     '''
-    search = '{prefix}{key}{suffix}{sep}*.*'.format(key=key, prefix=prefix, suffix=suffix, sep=sep)
+    search = '{prefix}{key}{suffix}{sep}{more}.*'.format(key=key, prefix=prefix, suffix=suffix,
+                                                         sep=sep, more='*' if more_sep else '')
 
     if value:
         data = '{key}{sep}{value}'.format(key=key, value=value.replace('\n', '\\n'), sep=sep)
@@ -209,7 +210,7 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
         # 如果是多行，直接进行检查，不匹配多个项目
         if value and value.count('\n'):
             show = 0
-            if not grep_data(c, key=key, value=value, file=file, sep=sep, prefix=prefix, suffix=suffix,
+            if not grep_data(c, key=key, value=value, file=file, sep=sep, prefix=prefix, suffix=suffix, more_sep=more_sep,
                                cache=result.stdout if test_just else None)[0]:
                 print("update, item [{key}{sep}{value}] not find"
                       .format(key=key, value=value, sep=sep))
@@ -218,8 +219,8 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
         # 检查是否只有一个项目匹配，以免同时改动多个项目
         else:
             # 如果是 test_mode，文件并未发生改变，所以不能直接 grep file
-            watch = grep_data(c, key=key, value=value, file=file, sep=sep, prefix=grep_prefix if grep_prefix else prefix, suffix=suffix,
-                                show=1, mute=True,
+            watch = grep_data(c, key=key, value=value, file=file, sep=sep, prefix=grep_prefix if grep_prefix else prefix,
+                                suffix=suffix, more_sep=more_sep, show=1, mute=True,
                                 # -i 模式下，sed的输出为空，因此不能使用 result.stdout；必须重新从文件中读取；仅test_just模式下可用
                                 cache=result.stdout if test_just else None)
             count = watch[1].stdout.count('\n')
@@ -257,7 +258,7 @@ def append(c, file=None, key=None, data=None, pos=0):
         # 调整参数，以免 pos = 0
         spos = 1 if pos == 0 else pos
 
-        key_line = grep_line_index(file, key)[0]
+        key_line = grep_line_index(c, file, key)[0]
         if key_line + spos == index:
             print("update: [{data}] already exist, line: {index}".format(data=data, index=index))
             return False, None
@@ -460,7 +461,7 @@ if __name__ == '__main__':
 
         if new_file:
             # 将共享目录之外的文件，复制进来，便于测试检查结果
-            c.run("\cp {temp} temp_file -rf".format(temp=temp_file))
+            c.run("\cp {temp} conf.properties -rf".format(temp=temp_file))
 
         dump_change(c)
         print("success")

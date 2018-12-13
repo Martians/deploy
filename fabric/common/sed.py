@@ -11,18 +11,18 @@ def grep(c, key, value=None, prefix='[^#]*', suffix='', sep=' ', file=None):
     return work.grep_data(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file)
 
 
-def update(c, key, value=None, prefix='^', suffix='', sep=' ', file=None):
-    return work.update(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file)
+def update(c, key, value=None, prefix='^', suffix='', sep=' ', file=None, **kwargs):
+    return work.update(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file, **kwargs)
 
 
-def enable(c, key, value=None, prefix='^#.*', suffix='', sep=' ', file=None, grep_prefix="^[^#]*"):
+def enable(c, key, value=None, prefix='^#.*', suffix='', sep=' ', file=None, grep_prefix="^[^#]*", **kwargs):
     """ 取消#前缀，并修改
         1. 查找时使用 prefix：^[^#]*
         2. 修改时使用 prefix：^#.*
 
         构造起来比较麻烦，这里取消update之前、之后的grep检查
     """
-    return work.update(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file, grep_prefix=grep_prefix)
+    return work.update(c, key, value=value, prefix=prefix, suffix=suffix, sep=sep, file=file, grep_prefix=grep_prefix, **kwargs)
 
 
 def disable(c, key, value=None, prefix='^', suffix='', sep=' ', file=None, result_prefix='# '):

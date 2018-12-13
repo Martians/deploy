@@ -1,7 +1,8 @@
 # coding=utf-8
 import os
 
-from fabric import Connection, SerialGroup as Group, Config, task
+from fabric import Connection, SerialGroup as Group, Config
+from invoke import task
 
 from common.init import *
 from common.pack import *
@@ -19,40 +20,31 @@ def base(c):
 @task
 def install(c):
     source = 'http://mirror.bit.edu.cn/apache/kafka/2.0.0/kafka_2.11-2.0.0.tgz'
+    temp = '/tmp'
 
     c = hosts.one()
     download(c, "kafka", source=source)
-    copy_pack(c, package(), async=False)
+    copy_pack(c, dest=temp, async=True)
 
-    hosts.execute('rm -rf /opt/*kafka*', other=True)
-    for index in hosts.lists(other=True):
-        unpack(hosts.conn(index), 'kafka', dest)
+    hosts.execute('rm -rf /opt/*kafka*')
+    for index in hosts.lists():
+        unpack(hosts.conn(index), 'kafka', path=package(temp))
 
-    config(c)
-
-def config(c):
-    c = hosts.conn(0)
-
-    conf = os.path.join(base(c), "conf")
-    file = os.path.join(conf, "flink-conf.yaml")
-
-    list = [host['host'] for host in hosts.lists(index=False, other=False)]
-    c.run('echo "{}" > {}/slaves'.format('\n'.join(list), conf))
+    configure(c)
 
 
-    sed.update(c, "jobmanager.heap.size:", c.flink.jobmanager.heap, file=file)
+def configure(c):
 
-    sed.update(c, "taskmanager.heap.size:", c.flink.taskmanager.heap, file=file)
-    sed.update(c, "taskmanager.numberOfTaskSlots:", str(c.flink.taskmanager.slot), file=file)
+    file = os.path.join(base(c), "config/server.properties")
+    for index in hosts.lists():
+        c = hosts.conn(index)
+        sed.update(c, "log.dirs", hosts.get_item(index, 'disk', ','), sep='=', file=file)
+        sed.update(c, "broker.id", str(int(index) + 1), sep='=', file=file)
+        sed.update(c, "zookeeper.connect", hosts.get_item(0, 'host') + ":2181", sep='=', more_sep=False, file=file)
 
-    sed.update(c, "parallelism.default:", str(c.flink.parallelism), file=file)
-
-    # if 'disk' in c.flink:
-    #     sed.append(c, "taskmanager.tmp.dirs:", 'aabbcc', file=file)
-    master_copy(c, conf, async=False)
-
-
-    sed.update(c, "broker.id=", hosts.get_host(0)['host'], file=file)
+        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:9092'.format(hosts.get_item(index, 'host')),
+                   sep='=', more_sep=False, file=file)
+        sed.append(c, key='^group.initial.rebalance.delay.ms', data='auto.create.topics.enable=false', file=file)
 
 @task()
 def start(c):
@@ -66,4 +58,4 @@ def clean(c):
 
 
 c = hosts.one()
-install(c)
+configure(c)

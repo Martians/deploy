@@ -104,9 +104,10 @@ def parse_host(hosts):
 
         if 'type' in host and host['type'] == 'control':
             host_one = host
+            host['index'] = -1
             add_host_index(host['type'], host)
         else:
-            ''' 添加index、ip last
+            ''' 添加index、ip last exceed host cou
                     '''
             host['index'] = index
             index += 1
@@ -120,6 +121,7 @@ def parse_host(hosts):
         for index in range(len(host_array)):
             if host_array[index]['host'] == host_one['host']:
                 host_array[index] = host_one
+                host_one['index'] = index
     else:
         host_one = host_array[0]
     add_host_iplast()
@@ -273,6 +275,7 @@ def conn(data):
 
 
 if __name__ == '__main__':
+    from common.init import *
     config = Config()
     parse_info(config, config.user, config.connect_kwargs.password)
     dump()
@@ -323,13 +326,13 @@ if __name__ == '__main__':
         print("\nasync:")
         group(False).run("hostname")
 
-        print("\nslave:")
-        group(other=True).run("hostname")
+        # print("\nslave:")
+        # group(other=True).run("hostname")
 
-    test_host_info()
-    test_host_item()
-    test_get_host()
-    test_get_list()
-    test_get_item()
+    # test_host_info()
+    # test_host_item()
+    # test_get_host()
+    # test_get_list()
+    # test_get_item()
     test_group()
 

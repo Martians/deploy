@@ -50,41 +50,17 @@ def download(c, name, source=None, local=None, path="/tmp"):
     default_config['install']['package'] = file_path
 
 
-def package():
-    return default_config['install']['package']
-
-
-def unpack(c, name, path, parent=None):
-    dest = '{}/{}'.format(parent, name)
-
-    if file_exist(c, dest, dir=True):
-        print("install path [{}] already exist".format(dest))
-        return 1
-
-    """ 解压到 path下，名称可能带有版本号
-
-        path下不能存在任何包含 name 的文件夹，否则无法判断哪个是解压出来后的目录
-    """
-    parent = parent if parent else default_config['install']['parent']
-
-    c.run("mkdir -p {}".format(parent))
-    if not file_actual(c, parent, name, dir=True):
-        print("un-tar package [{}] ...".format(path))
-
-        if path.endswith('zip'):
-            c.run("sudo unzip {} -d {} ".format(path, parent))
-        else:
-            c.run("sudo tar zxvf {} -C {} ".format(path, parent))
+def package(parent=None):
+    path = default_config['install']['package']
+    if parent:
+        file = os.path.basename(path)
+        return os.path.join(parent, file)
     else:
-        print(1)
-
-    ''' move，去掉名称中的版本号
-    '''
-    actual = file_actual(c, parent, name, dir=True)
-    c.run("sudo mv {}/{} {}/{}".format(parent, actual, parent, name))
+        return path
 
 
-def copy_pack(c, path, dest=None, sshpass=False, other=False, async=False):
+def copy_pack(c, path=None, dest=None, sshpass=False, other=False, async=False):
+    path = path if path else package()
 
     if async:
         """ 异步线程方式执行，需要已经设置了免密码登陆
@@ -114,6 +90,36 @@ def copy_pack(c, path, dest=None, sshpass=False, other=False, async=False):
                 c.run(command, pty=True, watchers=[sudopass])
 
 
+def unpack(c, name, path=None, parent=None):
+    parent = parent if parent else default_config['install']['parent']
+    path = path if path else package()
+
+    if file_exist(c, parent, name, dir=True):
+        print("unpack, install path [{}/{}] already exist".format(parent, name))
+        return 1
+
+    """ 解压到 path下，名称可能带有版本号
+
+        path下不能存在任何包含 name 的文件夹，否则无法判断哪个是解压出来后的目录
+    """
+
+    c.run("mkdir -p {}".format(parent))
+    if not file_actual(c, parent, name, dir=True):
+        print("unpack package [{}] ...".format(path))
+
+        if path.endswith('zip'):
+            c.run("sudo unzip {} -d {} ".format(path, parent))
+        else:
+            c.run("sudo tar zxvf {} -C {} ".format(path, parent))
+    else:
+        print(1)
+
+    ''' move，去掉名称中的版本号
+    '''
+    actual = file_actual(c, parent, name, dir=True)
+    c.run("sudo mv {}/{} {}/{}".format(parent, actual, parent, name))
+
+
 if __name__ == '__main__':
     from fabric import Config, Connection
     c = hosts.one()
@@ -140,14 +146,24 @@ if __name__ == '__main__':
     def copy_test(c):
         download(c, "redis")
 
+        print("\n======================== copy to all host")
         hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=False)
         copy_pack(c, package(), '/tmp')
 
+        print("\n======================== copy to slave, async")
         hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
         copy_pack(c, package(), '/tmp', async=True)
 
+    def unpack_test(c):
+        download(c, "redis")
 
-    # download_test(c)
-    # copy_test(c)
+        print("\n======================== unpack")
+        c.run("sudo rm -rf /opt/redis")
+        unpack(c, 'redis')
 
+        print("\n======================== unpack but exist ")
+        unpack(c, 'redis')
+
+    download_test(c)
     copy_test(c)
+    unpack_test(c)
