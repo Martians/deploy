@@ -22,7 +22,9 @@
 
             通过执行 init.copy_config 来确保本地的config文件得到使用
 
-        3. sed解析
+        3. 屏幕回显丢失
+            如果远端不是主动关闭的（持续方式输出、或者尚未执行完成），此时 control-c 那么就会丢失回显
+            对长时间执行的命令，使用 pty=True
 
 ## 使用方式：
     1. 必须引入 init 模块，这样会自动初始化 hosts
@@ -37,7 +39,6 @@
         2. 输出所有内容：echo = True, hide = False
         3. pty=True 需要输入密码的部分
 
-
 Todo
     将配置文件分离出来
     角色划分：安装点、其他机器（master、slave等）
@@ -45,11 +46,6 @@ Todo
 
     pip install pyYaml
     pip install fabric
-
-
-
-屏幕回显消失，配置默认#    pty: true，似乎也不起效果
-如果远端不是主动关闭的，那么就会丢失回显
 
 help complete
 

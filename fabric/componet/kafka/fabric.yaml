@@ -4,7 +4,7 @@ run:
 ##    warn: true
     echo: true
 #    hide: false
-    pty: true         # 如果命令不会主动关闭（需要control-c方式），就使用此选项
+#    pty: true
 
 tasks:
     collection_name: kafka

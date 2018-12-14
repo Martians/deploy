@@ -63,7 +63,7 @@ def install(c):
 
 
 def prepare(c):
-    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', other=True, hide=None)
+    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', other=True, hide=None, pty=True)
 
 
 def configure(c):
@@ -115,23 +115,23 @@ def topic(c, type='desc', topic=local.topic, replica=local.replica, partition=lo
     with c.cd(base(c)):
         if type == 'create':
             c.run('''bin/kafka-topics.sh {} --create --topic {} --replication-factor {} --partitions {} '''
-                  .format(local.zook_list, topic, replica, partition))
+                  .format(local.zook_list, topic, replica, partition), pty=True)
 
         elif type == 'delete':
             c.run('''bin/kafka-topics.sh {} --delete --topic {}'''
-                  .format(local.zook_list, topic))
+                  .format(local.zook_list, topic), pty=True)
         else:
             # type == 'desc':
-            c.run('bin/kafka-topics.sh {} --describe'.format(local.zook_list))
+            c.run('bin/kafka-topics.sh {} --describe'.format(local.zook_list), pty=True)
 
 @task
 def stat(c, control=False):
     c = hosts.conn(0)
     shell = 'bin/zookeeper-shell.sh {}'.format(local.zook_host)
     if control:
-        c.run("cd {base}; echo 'get /controller' | {shell}".format(base=base(c), shell=shell))
+        c.run("cd {base}; echo 'get /controller' | {shell}".format(base=base(c), shell=shell), pty=True)
     else:
-        c.run("cd {base}; echo 'ls /brokers/ids' | {shell}".format(base=base(c), shell=shell))
+        c.run("cd {base}; echo 'ls /brokers/ids' | {shell}".format(base=base(c), shell=shell), pty=True)
 
 
 @task
@@ -139,7 +139,7 @@ def produce(c, message=local.message, topic=local.topic, count=1):
     c = hosts.conn(0)
     with c.cd(base(c)):
         for i in range(count):
-            c.run('echo {} | bin/kafka-console-producer.sh {} --topic {}'.format(message, local.brok_list, topic))
+            c.run('echo {} | bin/kafka-console-producer.sh {} --topic {}'.format(message, local.brok_list, topic), pty=True)
 
 
 @task
@@ -147,13 +147,13 @@ def consume(c, topic=local.topic, group=local.group, touch=False):
     c = hosts.conn(0)
     with c.cd(base(c)):
         c.run('bin/kafka-console-consumer.sh {} --topic {} --consumer-property group.id={} {} {}'
-              .format(local.boot_list, topic, group, '--from-beginning', '--max-messages 1' if touch else ''))
+              .format(local.boot_list, topic, group, '--from-beginning', '--max-messages 1' if touch else ''), pty=True)
 
 @task
 def group(c, type='desc', group=local.group):
     c = hosts.conn(0)
     with c.cd(base(c)):
         if type == 'desc':
-            c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group))
+            c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group), pty=True)
         else:
-            c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list))
+            c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
