@@ -26,8 +26,11 @@ data_file_directories:
 listen_address: 192.168.10.1
 
 
+num.io.threads=8
+/mnt/abc
 
 # set broadcast_rpc_address to a value other than 0.0.0.0.
+#   num.io.threads=8
 #
 # For security reasons, you should not expose this port to the internet.  Firewall it if needed.
 # broadcast_rpc_address: 1.2.3.4

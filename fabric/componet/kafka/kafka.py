@@ -1,9 +1,9 @@
 # coding=utf-8
-import os
 
-from fabric import Connection, SerialGroup as Group, Config
+import sys, os
+sys.path.append(os.path.join(os.getcwd(), "../.."))
+
 from invoke import task
-
 from common.init import *
 from common.pack import *
 
@@ -17,45 +17,143 @@ def base(c):
         c.install.base = os.path.join(parent, 'kafka')
     return c.install.base
 
+
+class KafkaConfig:
+    """ kafka 默认配置
+    """
+    def __init__(self):
+        self.source = 'http://mirror.bit.edu.cn/apache/kafka/2.0.0/kafka_2.11-2.0.0.tgz'
+        self.temp = '/tmp'
+
+        self.port = 9092
+        self.zook_host = hosts.get_item(0, 'host') + ":2181/kafka"
+        self.zook_list = '--zookeeper {}'.format(self.zook_host)
+
+        self.brok_host = ','.join(['{}:{}'.format(host['host'], self.port) for host in hosts.lists(index=False)])
+        self.brok_list = '--broker-list ' + self.brok_host
+        self.boot_list = '--bootstrap-server ' + self.brok_host
+
+        self.group = 'local_group'
+        self.topic = 'test'
+        self.replica = 1
+        self.partition = 1
+
+        self.message = 'it is a message'
+
+
+""" 提供个默认参数
+    
+    该变量定义在头部，这样在函数的默认参数中，也可以使用了
+"""
+local = KafkaConfig()
+
 @task
 def install(c):
-    source = 'http://mirror.bit.edu.cn/apache/kafka/2.0.0/kafka_2.11-2.0.0.tgz'
-    temp = '/tmp'
-
     c = hosts.one()
-    download(c, "kafka", source=source)
-    copy_pack(c, dest=temp, async=True)
+    download(c, "kafka", source=local.source)
+    copy_pack(c, dest=local.temp, async=True)
 
-    hosts.execute('rm -rf /opt/*kafka*')
+    prepare(c)
+    hosts.execute('sudo rm -rf /opt/*kafka*')
+
     for index in hosts.lists():
-        unpack(hosts.conn(index), 'kafka', path=package(temp))
+        unpack(hosts.conn(index), 'kafka', path=package(local.temp))
 
     configure(c)
 
 
-def configure(c):
+def prepare(c):
+    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', other=True, hide=None)
 
+
+def configure(c):
     file = os.path.join(base(c), "config/server.properties")
+
     for index in hosts.lists():
         c = hosts.conn(index)
-        sed.update(c, "log.dirs", hosts.get_item(index, 'disk', ','), sep='=', file=file)
+        sed.update(c, "log.dirs", hosts.get_item(index, 'disk', ','), sep='=', more_sep=False, file=file)
         sed.update(c, "broker.id", str(int(index) + 1), sep='=', file=file)
-        sed.update(c, "zookeeper.connect", hosts.get_item(0, 'host') + ":2181", sep='=', more_sep=False, file=file)
+        sed.update(c, "zookeeper.connect", local.zook_host, sep='=', more_sep=False, file=file)
 
-        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:9092'.format(hosts.get_item(index, 'host')),
+        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.get_item(index, 'host'), local.port),
                    sep='=', more_sep=False, file=file)
         sed.append(c, key='^group.initial.rebalance.delay.ms', data='auto.create.topics.enable=false', file=file)
 
-@task()
+        for disk in hosts.get_item(index, 'disk', ',').split(','):
+            c.run("sudo mkdir -p {}".format(disk))
+
+@task
 def start(c):
     c = hosts.conn(0)
-    with c.cd(base(c)):
-        c.run('bin//start-cluster.sh'.format(), pty=True)
+    c.run('cd {}; nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>zookeeper.log 2>&1 &'.format(base(c)))
+
+    hosts.execute('cd {}; nohup bin/kafka-server-start.sh config/server.properties 1>/dev/null 2>&1 &'.format(base(c)))
+
+@task
+def stop(c):
+    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(base(c)), hide=None)
 
 @task
 def clean(c):
-    hosts.execute('''rm -rf /opt/flink''', hide=None)
+    # hosts.execute('killall -9 java', hide=None)
+    hosts.execute('sudo rm -rf /opt/kafka', hide=None)
+
+    for index in hosts.lists():
+        c = hosts.conn(index)
+
+        for disk in hosts.get_item(index, 'disk', ',').split(','):
+            c.run("sudo rm -rf {}/*".format(disk))
 
 
-c = hosts.one()
-configure(c)
+""" fab kafka.topic -t desc
+    fab kafka.topic -t create -o test1 -r 3 -p 10
+    fab kafka.topic -t delete -o test1
+"""
+@task
+def topic(c, type='desc', topic=local.topic, replica=local.replica, partition=local.partition):
+    c = hosts.conn(0)
+    with c.cd(base(c)):
+        if type == 'create':
+            c.run('''bin/kafka-topics.sh {} --create --topic {} --replication-factor {} --partitions {} '''
+                  .format(local.zook_list, topic, replica, partition))
+
+        elif type == 'delete':
+            c.run('''bin/kafka-topics.sh {} --delete --topic {}'''
+                  .format(local.zook_list, topic))
+        else:
+            # type == 'desc':
+            c.run('bin/kafka-topics.sh {} --describe'.format(local.zook_list))
+
+@task
+def stat(c, control=False):
+    c = hosts.conn(0)
+    shell = 'bin/zookeeper-shell.sh {}'.format(local.zook_host)
+    if control:
+        c.run("cd {base}; echo 'get /controller' | {shell}".format(base=base(c), shell=shell))
+    else:
+        c.run("cd {base}; echo 'ls /brokers/ids' | {shell}".format(base=base(c), shell=shell))
+
+
+@task
+def produce(c, message=local.message, topic=local.topic, count=1):
+    c = hosts.conn(0)
+    with c.cd(base(c)):
+        for i in range(count):
+            c.run('echo {} | bin/kafka-console-producer.sh {} --topic {}'.format(message, local.brok_list, topic))
+
+
+@task
+def consume(c, topic=local.topic, group=local.group, touch=False):
+    c = hosts.conn(0)
+    with c.cd(base(c)):
+        c.run('bin/kafka-console-consumer.sh {} --topic {} --consumer-property group.id={} {} {}'
+              .format(local.boot_list, topic, group, '--from-beginning', '--max-messages 1' if touch else ''))
+
+@task
+def group(c, type='desc', group=local.group):
+    c = hosts.conn(0)
+    with c.cd(base(c)):
+        if type == 'desc':
+            c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group))
+        else:
+            c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list))

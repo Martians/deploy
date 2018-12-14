@@ -238,6 +238,10 @@ def lists(index=True, other=False):
             if not other or not is_master(host)]
 
 
+def conns(other=False):
+    return [conn(index) for index in lists(other=other)]
+
+
 def group(thread=True, other=False):
     name = 'thread_group' if thread else 'group'
     if name not in host_local:

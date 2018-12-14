@@ -47,4 +47,10 @@ Todo
     pip install fabric
 
 
+
+屏幕回显消失，配置默认#    pty: true，似乎也不起效果
+如果远端不是主动关闭的，那么就会丢失回显
+
+help complete
+
 """

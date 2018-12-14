@@ -454,7 +454,7 @@ if 1:
 
         if new_file:
             # 将共享目录之外的文件，复制进来，便于测试检查结果
-            c.run("\cp {temp} conf.properties -rf".format(temp=temp_file))
+            c.run("\cp {temp} conf_file -rf".format(temp=temp_file))
 
         dump_change(c)
         print("success")

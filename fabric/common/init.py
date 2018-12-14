@@ -4,6 +4,13 @@ import os
 from fabric import Connection, Config
 import common.hosts as hosts
 
+# import sys, os
+# sys.path.append(os.path.dirname(os.getcwd()))
+# sys.path.append(os.path.join(os.getcwd(), "../.."))
+# sys.path.append(os.path.join(os.getcwd(), "../../.."))
+
+# sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
+
 
 def copy_config():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
