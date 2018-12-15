@@ -63,7 +63,7 @@ def install(c):
 
 
 def prepare(c):
-    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', other=True, hide=None, pty=True)
+    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None, pty=True)
 
 
 def configure(c):
@@ -102,7 +102,7 @@ def clean(c):
         c = hosts.conn(index)
 
         for disk in hosts.get_item(index, 'disk', ',').split(','):
-            c.run("sudo rm -rf {}/*".format(disk))
+            c.run("sudo rm -rf {}/*".format(disk), pty=True)
 
 
 """ fab kafka.topic -t desc

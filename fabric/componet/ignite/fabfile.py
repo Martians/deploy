@@ -1,21 +1,16 @@
 # coding=utf-8
 
-
 import sys, os
+sys.path.append(os.path.join(os.getcwd(), "../.."))
 
-from invoke import Collection
+from invoke import task, Collection, Config
 
-sys.path.append(os.path.dirname(os.getcwd()))
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
-# print(sys.path)
-
-from fabric import task
-from common.hosts import *
+from common.init import *
 from componet.ignite import ignite
 
 @task
 def config(c):
     print(Config())
 
-ns = Collection(ignite, config)
+ns = Collection(ignite)
 
