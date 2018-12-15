@@ -22,22 +22,8 @@ hosts:
           user: root
           pass: '111111'
           type: control
-        - host: 192.168.127.10
-#        - host: 192.168.127.11
+        - host: 192.168.127.11
 #        - host: 192.168.127.12
 #        - host: 192.168.127.13
     disk:
         - /mnt/kafka
-
-install:
-  abc: 1
-
-flink:
-    parallelism: 2
-    jobmanager:
-      heap: 512m
-
-    taskmanager:
-      heap: 512m
-      slot: 2
-    disk: /mnt/disk1

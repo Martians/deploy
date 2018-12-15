@@ -16,9 +16,10 @@ connect_kwargs:
 hosts:
     list:
         - name: local
-          host: 192.168.0.80
+          host: 192.168.127.10
           user: root
           pass: '111111'
+          type: control
         - host: 192.168.127.11
 #        - host: 192.168.0.81
 #        - host: 192.168.0.82
@@ -26,5 +27,3 @@ hosts:
     disk:
         - /mnt/disk1
         - /mnt/disk2
-
-install:

@@ -65,6 +65,17 @@ def init_config():
     pass
 
 
+def base(name):
+    if 'path' not in default_config['install']:
+        c = Config()
+        if 'install' in c and 'parent' in c.install:
+            parent = c.install.parent
+        else:
+            parent = default_config['install']['parent']
+
+        default_config['install']['path'] = os.path.join(parent, name)
+    return default_config['install']['path']
+
 if 1:
     copy_config()
 

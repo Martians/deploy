@@ -14,26 +14,21 @@ import common.sed as sed
 
 
 class IgniteConfig:
-    """ kafka 默认配置
+    """ 默认配置
     """
     def __init__(self):
         self.source = 'https://archive.apache.org/dist/ignite/2.6.0/apache-ignite-fabric-2.6.0-bin.zip'
         self.temp = '/tmp'
 
+
 local = IgniteConfig()
-
-
-def base(c):
-    if 'base' not in c.install:
-        parent = c.install.parent if 'parent' in c.install else default_config['install']['parent']
-        c.install.base = os.path.join(parent, 'ignite')
-    return c.install.base
+name = 'ignite'
 
 @task
 def prepare(c):
     hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None)
     # sed.append(c, 'export IGNITE_HOME=/opt/ignite', '', '/etc/profile')
-    hosts.execute('''sudo echo export IGNITE_HOME={} >> /etc/profile'''.format(base(c)))
+    hosts.execute('''sudo echo export IGNITE_HOME={} >> /etc/profile'''.format(base(name)))
 
 @task
 def install(c):
