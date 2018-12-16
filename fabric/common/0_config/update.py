@@ -13,19 +13,22 @@ import os
 
 
 class Update:
-    config = os.getcwd() + '/conf_file'
+    file = 'conf_file'
     test = True
+
+    path = os.path.join(os.getcwd(), file)
+    cache = ''
 
     # conn = 0
 
     def conn(self, c):
         return c if c else self.conn
 
-    def file(self, file):
-        return file if file else self.config
+    def path(self, file):
+        return file if file else self.path
 
     def init(self, c, file):
-        return self.conn(c), self.file(file)
+        return self.conn(c), self.path(file)
 
     def run():
         return {'warn': True, 'hide': True}
@@ -78,16 +81,32 @@ def grep_line(c, data=None, file=None, **kwargs):
     else:
         return -1, 0
 
-def sed(command, file):
+
+def sed(c, name, command, file):
     if update.test:
-        result = c.run('cat {file} | sed {command}'.format(command=command, file=file), **run)
-        update.cache = result.stdout
+        print("[{name}]: sed {command} {file}".format(name=name, command=command, file=update.file))
+        command = 'cat {file} | sed {command}'.format(command=command, file=file)
+        result = c.run(command, **run)
+        update.output = result.stdout
         return result
     else:
         return c.run('sed -i {command} {file}'.format(command=command, file=file), **run)
 
 
-def appand(c, data, locate=None, pos=0, file=None, **kwargs):
+def dump(c, key, search, line=0):
+    if line == 0:
+        result = c.run("echo {cache} | grep -{type} {count} '{search}' "
+                   .format(cache=update.cache, type='A' if line > 0 else 'B',
+                           search=search, count=abs(line)), **run)
+    else:
+        print("----------- {key}, line: {line}".format(key=key, line=line))
+        result = c.run("echo {cache} | grep -{type} {count} '{search}' "
+              .format(cache=update.cache, type='A' if line > 0 else 'B', count=abs(line), search=search))
+    update.recent = result.stdout
+    return result.stdout
+
+
+def appand(c, data, locate=None, file=None, pos=0, **kwargs):
     """ data: 要插入的完整数据
         locate：data插入的位置
     """
@@ -95,13 +114,13 @@ def appand(c, data, locate=None, pos=0, file=None, **kwargs):
 
     """ 要添加的数据已经存在
     """
-    index = grep_line(c, data, file, kwargs)
+    index = grep_line(c, data, file, **kwargs)[0]
     if index != -1:
         """ 检查是否在指定的位置
         """
         spos = 1 if pos == 0 else pos
 
-        key_line = grep_line(c, locate, file)
+        key_line = grep_line(c, locate, file, **kwargs)[0]
         if key_line + spos == index:
             print("appand: [{data}] already exist, line: {index}".format(data=data, index=index))
             return False, None
@@ -111,16 +130,15 @@ def appand(c, data, locate=None, pos=0, file=None, **kwargs):
 
     """ 找到locate所在的行
     """
-    index = grep_line(c, locate, file)
+    index = grep_line(c, locate, file, **kwargs)[0]
     if index == -1:
         index = grep_line(file)[0]
     else:
         index += pos if pos <= 0 else pos - 1
 
-    command = "sed {option} '{index}a\{data}' {file}".format(option=update.sed(), file=file, index=index, data=data)
-    print("[append]: {command}".format(command=command))
-
-    result = c.run(command, **run)
+    command = "'{index}a\{data}'".format(index=index, data=data)
+    result = sed(c, 'append', command, file=file)
+    dump(c, data, 0)
     return result.ok, result
 
 
@@ -153,7 +171,7 @@ if __name__ == '__main__':
 
 
     def test_append():
-        pass
+        appand(c, 'append_line', 'LOCAL_JMX=yes')
 
     # test_grep_line()
     test_append()
