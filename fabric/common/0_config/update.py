@@ -16,19 +16,22 @@ class Update:
     file = 'conf_file'
     test = True
 
+    if test:
+        # 监测到erro是否退出
+        err_exit = False
+
     path = os.path.join(os.getcwd(), file)
     cache = ''
+    conn = 0
 
-    # conn = 0
-
-    def conn(self, c):
+    def _conn(self, c):
         return c if c else self.conn
 
-    def path(self, file):
+    def _path(self, file):
         return file if file else self.path
 
     def init(self, c, file):
-        return self.conn(c), self.path(file)
+        return self._conn(c), self._path(file)
 
     def run():
         return {'warn': True, 'hide': True}
@@ -42,6 +45,10 @@ run = {'warn': True, 'hide': True}
 def arg(kwargs, name):
     return kwargs[name] if name in kwargs else ''
 
+
+""" sed
+        sed -n '/.*LOCAL_JMX/p' conf_file 
+"""
 
 def grep_line(c, data=None, file=None, **kwargs):
     """ kwargs：
@@ -70,7 +77,7 @@ def grep_line(c, data=None, file=None, **kwargs):
     result = c.run(command, **run)
     output = result.stdout.strip()
 
-    print("grep_line: {command}, line: {index}".format(command=command, index=output.replace('\n', ' ')))
+    print("grep_line: {command}, line: [{index}]".format(command=command, index=output.replace('\n', ' ')))
     if len(output):
         """ 返回值：
                 grep: line:text, 需要再次 split
@@ -93,53 +100,71 @@ def sed(c, name, command, file):
         return c.run('sed -i {command} {file}'.format(command=command, file=file), **run)
 
 
-def dump(c, key, search, line=0):
-    if line == 0:
-        result = c.run("echo {cache} | grep -{type} {count} '{search}' "
-                   .format(cache=update.cache, type='A' if line > 0 else 'B',
-                           search=search, count=abs(line)), **run)
-    else:
-        print("----------- {key}, line: {line}".format(key=key, line=line))
-        result = c.run("echo {cache} | grep -{type} {count} '{search}' "
-              .format(cache=update.cache, type='A' if line > 0 else 'B', count=abs(line), search=search))
+def dump(c, key, search, count=0):
+    print("----------- {key}, output: {count}".format(key=key, count=abs(count)))
+    result = c.run('''echo '{cache}' | grep -{type} {count} '{search}' '''
+          .format(cache=update.output, type='A' if count >= 0 else 'B', count=abs(count), search=search), **run)
+
     update.recent = result.stdout
+    print("[debug]:\n{}".format(update.recent))
     return result.stdout
 
 
 def appand(c, data, locate=None, file=None, pos=0, **kwargs):
-    """ data: 要插入的完整数据
-        locate：data插入的位置
+    """ 参数：
+            data: 要插入的完整数据
+            locate：data插入的位置
+
+        说明：
+            1. data 存在多个匹配，不进行处理
+            2.
     """
     c, file = update.init(c, file)
 
     """ 要添加的数据已经存在
+            1. 在指定位置出现：与locate的位置进行比较
+            2. locate不存在：不需要再检查是否进行插入
+            3. locate存在，但相对位置不匹配，继续执行
     """
-    index = grep_line(c, data, file, **kwargs)[0]
-    if index != -1:
-        """ 检查是否在指定的位置
-        """
+    index, count = grep_line(c, data, file, **kwargs)
+    if count > 1:
+        print("append: data [{}] exist multi [{}]".format(data, count))
+        return exit(-1) if update.err_exit else False
+
+    elif index != -1:
         spos = 1 if pos == 0 else pos
 
-        key_line = grep_line(c, locate, file, **kwargs)[0]
-        if key_line + spos == index:
-            print("appand: [{data}] already exist, line: {index}".format(data=data, index=index))
-            return False, None
-        elif key_line == -1:
-            print("appand: [{data}] already exist, line: {index}, locate not exist".format(data=data, index=index))
-            return False, None
+        if locate:
+            key_line, count = grep_line(c, locate, file, **kwargs)
+            if count > 1:
+                print("append: data exist [{}], not append".format(count))
+                return exit(-1) if update.err_exit else False
 
-    """ 找到locate所在的行
+            if key_line + spos == index:
+                print("appand: [{data}] already exist, line: {index}".format(data=data, index=index))
+                return False
+            elif key_line == -1:
+                print("appand: [{data}] already exist, line: {index}, locate not exist".format(data=data, index=index))
+                return False
+        else:
+            print("append: [{data}] already exist, locate none, success".format(data=data))
+            return True
+    """ 定位到要插入数据的位置
     """
-    index = grep_line(c, locate, file, **kwargs)[0]
-    if index == -1:
-        index = grep_line(file)[0]
+    index, count = grep_line(c, locate, file, **kwargs)
+    if count > 1:
+        print("grep_line: locate exist [{}]".format(count))
+        return exit(-1) if update.err_exit else False
+    elif index == -1:
+        index = grep_line(c, file)[0]
     else:
         index += pos if pos <= 0 else pos - 1
 
     command = "'{index}a\{data}'".format(index=index, data=data)
     result = sed(c, 'append', command, file=file)
-    dump(c, data, 0)
-    return result.ok, result
+
+    dump(c, data, data, -(1 if pos == 0 else pos))
+    return result.ok
 
 
 if __name__ == '__main__':
@@ -151,7 +176,13 @@ if __name__ == '__main__':
         print("======================== {info}:".format(info=info))
 
     def check(v1, v2):
-        assert(v1 == v2)
+        if v1 != v2:
+            c.run('''echo '{}' > /tmp/v1; echo '{}' > /tmp/v2'''.format(v1, v2))
+            c.run('diff /tmp/v1 /tmp/v2', warn=True)
+            exit(-1)
+
+    def match(v):
+        check(v.strip('\n'), update.recent.strip('\n'))
 
     def test_grep_line():
         """ 找到所有数据
@@ -171,7 +202,57 @@ if __name__ == '__main__':
 
 
     def test_append():
-        appand(c, 'append_line', 'LOCAL_JMX=yes')
+        if 1:
+            """ 数据不存在
+            """
+#             check(appand(c, 'append_line', 'LOCAL_JMX=yes'), True)
+#             match('''
+#     LOCAL_JMX=yes
+# append_line''')
 
-    # test_grep_line()
+            """ 数据已经存在
+                    1. 存在多个
+                            不进行处理：可以增加数定位的精确度
+            """
+            check(appand(c, 'LOCAL_JMX'), False)
+
+            """     2. 存在一个，none locate
+                            为了从多个中精确定位一个，grep时使用prefix
+            """
+            check(appand(c, 'LOCAL_JMX', prefix='$'), True)
+
+            """     3. 存在一个，有 locate
+                        
+            """cd 
+            # check(appand(c, 'LOCAL_JMX=no'), False)
+
+        # 插入到尾部：给出了locate，但没找到
+        # check(appand(c, 'append_line', 'not_exit_line'), True)
+
+        # # 插入到尾部：未给出locate
+        # check(appand(c, 'append_line', 'not_exit_line'), True)
+
+        # if 1:
+#             """ locate 有多个匹配
+#             """
+#             check(appand(c, 'append_line', 'LOCAL_JMX'), False)
+#
+#             """ 增加locate的匹配前缀
+#             """
+#             check(appand(c, 'append_line', '^LOCAL_JMX', grep=True), True)
+#             match('''
+# LOCAL_JMX=no
+# append_line''')
+
+
+        # 插入到某行之上的第三行
+        # check(appand(c, 'append_line', 'LOCAL_JMX=yes', -3), True)
+
+        # 数据已经存在，不需要插入
+
+        # 数据已经存在，但是不符合与locate的位置关系
+
+        # 数据已经存在，符合与locate的位置关系
+
+# test_grep_line()
     test_append()

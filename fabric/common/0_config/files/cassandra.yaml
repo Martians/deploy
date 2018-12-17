@@ -24,7 +24,7 @@ cluster_name: 'Test Cluster'
 # multiple tokens per node, see http://wiki.apache.org/cassandra/Operations
 num_tokens: 256
 
-# Triggers autobench allocation of num_tokens tokens for this node. The allocation
+# Triggers auto allocation of num_tokens tokens for this node. The allocation
 # algorithm attempts to choose tokens in a way that optimizes replicated load over
 # the nodes in the datacenter for the replication strategy used by the specified
 # keyspace.

@@ -4,24 +4,26 @@ run:
 ##    warn: true
     echo: true
 #    hide: false
+#    pty: true
+
+tasks:
+    collection_name: auto
 
 # 默认用户名密码
 user: root
 connect_kwargs:
     password: '111111'
 
+
 hosts:
     list:
         - name: local
-          host: 192.168.0.80
+          host: 192.168.127.10
           user: root
           pass: '111111'
-        - host: 192.168.0.81
-        - host: 192.168.0.82
-        - host: 192.168.0.83
+          type: control
+        - host: 192.168.127.11
+#        - host: 192.168.127.12
+#        - host: 192.168.127.13
     disk:
-        - /mnt/disk1
-        - /mnt/disk2
-
-install:
-    work: /mnt/disk/work/benchmark
+        - /mnt/kafka
