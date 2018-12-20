@@ -53,7 +53,7 @@ def multi(c, commands, go_on=False, hide=None):
         print("\nmulti command, total {}\n".format(len(commands)))
 
 
-def group(group, command, err=True, out=False, **kwargs):
+def group(group, command, err=True, out=False, go_on=False, **kwargs):
     """ group
         1. stderr：命令执行过程中不抛出异常（warn=True），执行完成后手动打印出来
         2. stdout：根据默认配置，决定是否输出
@@ -83,7 +83,10 @@ def group(group, command, err=True, out=False, **kwargs):
             if item.failed:
                 output_result(item, prefix="\t".format())
         print()
-        exit(-1)
+        if go_on:
+            print("continue")
+        else:
+            exit(-1)
     else:
         print("\nexecute [{}] success".format(command))
 

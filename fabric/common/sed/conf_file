@@ -12,7 +12,7 @@ cluster_name: my_cluster
 
 local parameters:
     # seeds is actually a comma-delimited list of addresses.
-    # Ex: "<ip1>,<ip2>,<ip3>"
+    # Ex: "<ip1>,<ip2>,<ip3>"LOCAL_JMX=yes
     - seeds: 192.168.10.1
 
 data_file_directories: 
@@ -27,6 +27,8 @@ listen_address: 192.168.10.1
 
 #####################################################################################################
 #########################################################################################   grep_line
+listen_address: 192.168.10.1
+
 num.io.threads=8
 /mnt/abc
 
@@ -41,7 +43,7 @@ rpc_address: 192.168.10.11
 
 if [ "x$LOCAL_JMX" = "x" ]; then
 bbc=3
- d   LOCAL_JMX=yes
+    LOCAL_JMX=yes
 fi
 LOCAL_JMX=no
 cc_address: 192.168.10.11

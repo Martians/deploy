@@ -250,7 +250,8 @@ def group(thread=True, other=False):
     return host_local.name
 
 
-def execute(command, thread=True, err=True, out=False, hide=True, other=False, **kwargs):
+def execute(command, thread=True, err=True, out=False, hide=True, other=False,
+            gon_one=False,**kwargs):
     import common.execute as execute
     return execute.group(group(thread=thread, other=other),
                          command, err=err, out=out, hide=hide, **kwargs)

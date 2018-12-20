@@ -84,19 +84,21 @@ def start(c):
 
 @task
 def stop(c):
-    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(base(name)), hide=None)
+    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(base(name)), hide=None, go_on=True)
+    hosts.execute('cd {}; bin/zookeeper-server-stop.sh'.format(base(name)), hide=None, go_on=True)
 
 @task
 def clean(c):
+    stop(c)
     # hosts.execute('killall -9 java', hide=None)
     hosts.execute('sudo rm -rf /opt/kafka', hide=None)
+    hosts.execute('sudo rm -rf /tmp/zookeeper', hide=None)
 
     for index in hosts.lists():
         c = hosts.conn(index)
 
         for disk in hosts.get_item(index, 'disk', ',').split(','):
             c.run("sudo rm -rf {}/*".format(disk), pty=True)
-
 
 """ fab kafka.topic -t desc
     fab kafka.topic -t create -o test1 -r 3 -p 10
