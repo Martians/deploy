@@ -8,7 +8,9 @@ grep：使用grep进行搜索，不需要进行转义
             sed： =、/ 需要转义
 """
 class Local:
-    exit_on_err = True
+    test = True
+
+
 
     grep_update = {'raw': '',      # 传递给grep命令本身
                    'sed': False,   # 使用sed替换grep
@@ -19,24 +21,30 @@ class Local:
                    'head': '',
                    }
     grep_append = {'sed': True}
-
-    temp = grep_update.copy()
-    temp .update(grep_append)
-    grep_append = temp
-
     update_check = {'pre': True, 'post': True}
 
-    test = True
-    if test:
-        debug = False   # 显示更多测试信息
-        cache = ''      # 测试数据
-        result = ''     # 测试结果
-        exit_on_err = False
+    """ 初始化工作
+    """
+    def __init__(self):
+        # 提供执行grep、sed时的，command执行模式
+        self.run = {'warn': True, 'hide': True}
 
+        self.multi = 'NNN'
 
-    _file = 'conf_file'
-    path = os.path.join(os.getcwd(), _file)
-    multi = 'NNN'
+        temp = self.grep_update.copy()
+        temp.update(self.grep_append)
+        self.grep_append = temp
+
+        if self.test:
+            self.debug = False  # 显示更多测试信息
+            self.cache = ''     # 测试数据
+            self.result = ''    # 测试结果
+            self.exit_on_err = False
+
+            self._file = 'conf_file'
+            self.path = os.path.join(os.getcwd(), self._file)
+        else:
+            self.exit_on_err = True
 
     def _path(self, file):
         return file if file else self.path
@@ -44,6 +52,17 @@ class Local:
     def init(self, c, file):
         return c, self._path(file)
 
+    def file(self, path):
+        """ 显示时方便查看，截短
+        """
+        return path.split('/')[-1]
+
+    def initial(self, cache):
+        """ 设置test时的数据源
+        """
+        self.cache = cache.strip('\n')
+
+    ########################################################################################
     def grep_option(self, **kwargs):
         """ 提取参数中的grep选项，并提供默认值
 
@@ -73,21 +92,6 @@ class Local:
         if option:
             current.update(option)
         return current
-
-    def file(self, path):
-        """ 显示时方便查看，截短
-        """
-        return path.split('/')[-1]
-
-    def run(self):
-        """ 提供执行grep、sed时的，command执行模式
-        """
-        return {'warn': True, 'hide': True}
-
-    def initial(self, cache):
-        """ 设置test时的数据源
-        """
-        self.cache = cache.strip('\n')
 
 
 local = Local()
@@ -127,7 +131,7 @@ def grep(c, name, command, file, options):
             command = '{head}grep {command}'.format(head=arg(options, 'head', True), command=command)
 
         print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
-        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run())
+        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
         return result, command
 
 
@@ -135,12 +139,12 @@ def sed(c, name, command, file):
     if local.test:
         command = 'sed {}'.format(command)
         print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
-        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run())
+        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
         local.output = result.stdout
         # print(update.output)
         return result
     else:
-        return c.run('sed -i {command} {file}'.format(command=command, file=file), **local.run())
+        return c.run('sed -i {command} {file}'.format(command=command, file=file), **local.run)
 
 
 def grep_line(c, data=None, file=None, **kwargs):
@@ -192,7 +196,7 @@ def dump(c, key, search=None, count=0):
     command = '''echo '{cache}' | grep {show}'{search}' '''\
         .format(cache=local.output, show=local.show_option(count), search=search)
     # print(command)
-    result = c.run(command, **local.run())
+    result = c.run(command, **local.run)
 
     local.result = result.stdout
     print("[debug]:\n{}".format(local.result))
