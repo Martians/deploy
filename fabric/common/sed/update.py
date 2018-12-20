@@ -127,4 +127,5 @@ data_file_directories:
 
             output("data exist, ignore")
 
-    test_grep_data()
+    # test_grep_data()
+    test_update()
