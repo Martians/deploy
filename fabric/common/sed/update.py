@@ -9,16 +9,20 @@ def grep_data(c, key, data=None, file=None, **kwargs):
     """ 多行处理时，将\n转换为其他字符
     """
     def multi(data):
-        more = ''
+        head = ''
         if data and data.count('\n'):
             data = data.replace('\n', local.multi)
-            more = "sed ':a; N; s/\\n/{}/g; ta;' | ".format(local.multi)
-        return data, more
-    data, more = multi(data)
+            head = "sed ':a; N; s/\\n/{}/g; ta;' |".format(local.multi)
+        return data, head
+    data, head = multi(data)
 
-    command = grep_param(key, data, **kwargs)
+    # 传入的grep新选项，覆盖默认选项
+    options = local.grep_option(**kwargs)
+    options['head'] = head
 
-    result, command = grep(c, 'grep_data', command, file, more=more)
+    command = grep_param(key, data, options)
+    result, command = grep(c, 'grep_data', command, file, options)
+
     output = result.stdout.strip('\n')
     print("[grep_data]: {command} {file}, line: [{output}]".format(command=command, file=local.file(file), output=output))
     return True if len(output) else False
@@ -35,7 +39,7 @@ def update(c, key, data, file,
 
     if check.get("pre") and \
        grep_data(c, key, **kwargs):
-        print("update, item {} already exist".format(grep_param(key, data, **kwargs)))
+        print("update, item [{}] already exist".format(grep_param(key, data, **kwargs)))
         return 1
 
     command = sed_param(key, data, **kwargs)

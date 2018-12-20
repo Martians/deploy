@@ -10,7 +10,20 @@ grep：使用grep进行搜索，不需要进行转义
 class Local:
     exit_on_err = True
 
-    grep_default = {'prefix': '[^#]*', 'suffix': '', 'sep': ' ', 'more': '', 'option': ''}
+    grep_update = {'raw': '',      # 传递给grep命令本身
+                   'sed': False,   # 使用sed替换grep
+                   'prefix': '[^#]*',
+                   'suffix': '',
+                   'sep': ' ',
+                   'more': '',     # grep时，添加到sep后边，允许多个sep重复
+                   'head': '',
+                   }
+    grep_append = {'sed': True}
+
+    temp = grep_update.copy()
+    temp .update(grep_append)
+    grep_append = temp
+
     update_check = {'pre': True, 'post': True}
 
     test = True
@@ -31,15 +44,21 @@ class Local:
     def init(self, c, file):
         return c, self._path(file)
 
-    def grep(self, option):
+    def grep_option(self, **kwargs):
         """ 用新传入的配置，覆盖默认配置后返回
+                for_append: 用于append时操作
         """
-        current = self.grep_default.copy()
+        option = kwargs.get('grep')
+        if kwargs.get('for_append'):
+            current = self.grep_append.copy()
+        else:
+            current = self.grep_update.copy()
+
         if option:
             current.update(option)
         return current
 
-    def show(self, count):
+    def show_option(self, count):
         """ grep时，显示的行数选项
         """
         if count:
@@ -72,41 +91,39 @@ class Local:
 local = Local()
 
 
-def arg(kwargs, name):
+def arg(kwargs, name, blank=False):
     """ 工具函数
+            blank：存在而且不为空，添加' '后缀
     """
-    return kwargs[name] if name in kwargs else ''
-
-
-def sepv(kwargs, name):
-    """ 有值：值的尾部追加 ' '
-        无值：返回 ''
-    """
-    return kwargs[name] + ' ' if kwargs[name] in kwargs else ''
-
-
-def grep_param(key, data, **kwargs):
-    option = local.grep(arg(kwargs, 'grep'))
-    hasdata = '{grep[sep]}{grep[more]}{data}'.format(grep=option, data=data)
-
-    command = "{option}{show}'{grep[prefix]}{key}{grep[suffix]}{data}'".\
-        format(option=sepv(option, 'option'), show=local.show(arg(kwargs, 'show')),
-               grep=option, key=key, data=hasdata if data else '')
-    return command
-
-def sed_param(key, data, **kwargs):
-    # options = local.grep(arg(kwargs, 'sed'))
-    # replace = '{key}{sep}{data}'.format(key=key, sep=)
-    # command = 's|{search}|{replace}|'.format(search=grep_param(key, data, **kwargs),
-    #      )
-    return command
-
-def grep(c, name, command, file, more='', use_grep=True):
-    if local.test:
-        if use_grep:
-            command = '{more}grep {command}'.format(more=more, command=command)
+    if name in kwargs:
+        if blank and kwargs[name]:
+            return kwargs[name] + ' '
         else:
-            command = '{more}sed {command}'.format(more=more, command=command)
+            return kwargs[name]
+    else:
+        return ''
+
+
+def grep_param(key, data, options):
+    hasdata = '{grep[sep]}{grep[more]}{data}'.format(grep=options, data=data)
+    command = "{raw}{show}'{grep[prefix]}{key}{grep[suffix]}{data}'".\
+        format(raw=arg(options, 'raw', True), show=local.show_option(options.get('show')),
+               grep=options, key=key, data=hasdata if data else '')
+    return command
+
+# def sed_param(key, data, **kwargs):
+#     options = local.sed(arg(kwargs, 'sed'))
+#     replace = '{key}{sep}{data}'.format(key=key, sep=1)
+#     command = 's|{search}|{replace}|'.format(search=grep_param(key, data, **kwargs))
+#     return command
+
+def grep(c, name, command, file, options):
+    if local.test:
+        if options.get('sed'):
+            command = '{head}sed {command}'.format(head=arg(options, 'head', True), command=command)
+        else:
+            command = '{head}grep {command}'.format(head=arg(options, 'head', True), command=command)
+
         print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
         result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run())
         return result, command
@@ -129,6 +146,9 @@ def grep_line(c, data=None, file=None, **kwargs):
     """
     c, file = local.init(c, file)
 
+    kwargs['for_append'] = True
+    options = local.grep_option(**kwargs)
+
     if data:
         """ 处理：
                 有数据，查找数据所在行
@@ -138,18 +158,18 @@ def grep_line(c, data=None, file=None, **kwargs):
                 grep -n 'data' file      
                 sed  -n '/data/=' file    /需要转义为\/;     
         """
-        if kwargs.get('grep'):
-            command = "-n '{prefix}{data}'".format(data=data, prefix=arg(kwargs, 'prefix'))
-        else:
+        if options.get('sed'):
             data = data.replace('/', '\/').replace('=', '\=')
-            command = "-n '/{prefix}{data}/='".format(data=data, prefix=arg(kwargs, 'prefix'))
+            command = "-n '/{prefix}{data}/='".format(data=data, prefix=arg(options, 'prefix'))
+        else:
+            command = "-n '{prefix}{data}'".format(data=data, prefix=arg(options, 'prefix'))
     else:
         if kwargs.get('grep'):
             command = '-c'
         else:
             command = "-n '$='".format()
 
-    result, command = grep(c, 'grep_line', command, file, use_grep=kwargs.get('grep'))
+    result, command = grep(c, 'grep_line', command, file, options)
     output = result.stdout.strip()
     print("[grep_line]: {command} {file}, line: [{index}]".
           format(command=command, file=local.file(file), index=output.replace('\n', ' ').split(':')[0]))
@@ -168,14 +188,13 @@ def grep_line(c, data=None, file=None, **kwargs):
 def dump(c, key, search=None, count=0):
     print("----------- {key}, output: {count}".format(key=search if search else key, count=abs(count)))
     command = '''echo '{cache}' | grep {show}'{search}' '''\
-        .format(cache=local.output, show=local.show(count), search=search)
+        .format(cache=local.output, show=local.show_option(count), search=search)
     # print(command)
     result = c.run(command, **local.run())
 
     local.result = result.stdout
     print("[debug]:\n{}".format(local.result))
     return result.stdout
-    return 0
 
 
 def append(c, data, locate=None, file=None, pos=1, **kwargs):
@@ -269,13 +288,13 @@ num.io.threads=8
 #   num.io.threads=8
 """)
         output("search key, exist 2")
-        check(grep_line(c, 'num.io.threads=8', grep=use_grep)[1], 2)
+        check(grep_line(c, 'num.io.threads=8', grep={'sed': use_grep})[1], 2)
 
         output("search key, exist only 1, have special char")
-        check(grep_line(c, '/mnt/abc', grep=use_grep)[1], 1)    # 特殊字符 /，使用sed需要转义
+        check(grep_line(c, '/mnt/abc', grep={'sed': use_grep})[1], 1)    # 特殊字符 /，使用sed需要转义
 
         output("search key, use prefix search, locate only 1")
-        check(grep_line(c, 'num.io.threads=8', prefix='^', grep=use_grep)[1], 1)
+        check(grep_line(c, 'num.io.threads=8', grep={'prefix': '^', 'sed': use_grep})[1], 1)
 
     ###################################################################################################################
     def test_append():
@@ -314,10 +333,10 @@ bbc=3
             check(append(c, 'LOCAL_JMX'), False)
 
             output("data exist, although multi data, but use prefix for grep, no need insert")
-            check(append(c, 'LOCAL_JMX', prefix='$'), True)
+            check(append(c, 'LOCAL_JMX', grep={'prefix': '$'}), True)
 
             output("data exist, location exist, position match")
-            check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11', pos=-1, grep=True), False)
+            check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11', pos=-1, grep={'sed': True}), False)
 
             output("data exist, location exist, position not match, insert again")
             check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11'), True)
