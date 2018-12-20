@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from common.sed.config import *
 from common.sed.append import *
 
 
@@ -28,7 +29,7 @@ def grep_data(c, key, data=None, file=None, **kwargs):
     return True if len(output) else False
 
 
-def update(c, key, data, file,
+def update(c, key, data, file=None,
            check=None, **kwargs):
     """ kwargs:
             grep: grep时相关参数
@@ -37,38 +38,19 @@ def update(c, key, data, file,
     c, file = local.init(c, file)
     check = local.check(check)
 
-    if check.get("pre") and \
-       grep_data(c, key, **kwargs):
-        print("update, item [{}] already exist".format(grep_param(key, data, **kwargs)))
-        return 1
+    # if check.get("pre") and \
+    #    grep_data(c, key, **kwargs):
+    #     print("update, item [{}] already exist".format(grep_param(key, data, **kwargs)))
+    #     return 1
 
-    command = sed_param(key, data, **kwargs)
+    options = local.sed_option(**kwargs)
+    command = sed_param(key, data, options)
+    result, command = sed(c, 'update', command, file, options)
+    return result.ok
+
 
 if __name__ == '__main__':
-    from fabric import Connection
-
-    c = Connection('127.0.0.1')
     enable = False
-
-    def initial(info, cache):
-        local.initial(cache)
-        print("\n########################################################################## {}", format(info))
-
-
-    def output(info):
-        print("\n--------------------------------------------------------------------------- {info}:".format(info=info))
-
-
-    def check(v1, v2):
-        """ 数据写入到文件后用diff比较
-        """
-        if v1 != v2:
-            c.run('''echo '{}' > /tmp/v1; echo '{}' > /tmp/v2'''.format(v1, v2), echo=False)
-            c.run('diff /tmp/v1 /tmp/v2', warn=True)
-            exit(-1)
-
-    def match(v):
-        check(v.strip('\n'), local.result.strip('\n'))
 
     def test_grep_data():
         initial("grep", """
@@ -116,7 +98,10 @@ data_file_directories:
 """)
 
         if enable or True:
+            local.grep(**{'sep': ': '});
+
             output("data not exist")
+            check(update(c, 'listen_address', '100000'))
 
             output("data not exist, need prefix to find only one")
 
@@ -127,5 +112,5 @@ data_file_directories:
 
             output("data exist, ignore")
 
-    test_grep_data()
+    # test_grep_data()
     test_update()
