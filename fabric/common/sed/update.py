@@ -93,10 +93,10 @@ data_file_directories:
     - /mnt/disk3''', grep={'sep': ':'}), True)
 
             output("key value exist, print 1")
-            check(grep_data(c, 'UsePAM', 'yes', show=1), True)
+            check(grep_data(c, 'UsePAM', 'yes', grep={'show': 3}), True)
 
             output("key value exist, print 0")
-            check(grep_data(c, 'UsePAM', 'yes', show=0), True)
+            check(grep_data(c, 'UsePAM', 'yes', grep={'show': 0}), True)
 
     def test_update():
         initial("update", """
@@ -127,5 +127,5 @@ data_file_directories:
 
             output("data exist, ignore")
 
-    # test_grep_data()
+    test_grep_data()
     test_update()

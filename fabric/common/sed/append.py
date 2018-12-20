@@ -45,7 +45,9 @@ class Local:
         return c, self._path(file)
 
     def grep_option(self, **kwargs):
-        """ 用新传入的配置，覆盖默认配置后返回
+        """ 提取参数中的grep选项，并提供默认值
+
+                用新传入的配置，覆盖默认配置后返回
                 for_append: 用于append时操作
         """
         option = kwargs.get('grep')
