@@ -59,17 +59,27 @@ def package(parent=None):
         return path
 
 
-def copy_pack(c, path=None, dest=None, sshpass=False, other=False, async=False):
+def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, async=True):
     path = path if path else package()
+    dest = dest if dest else os.path.dirname(path)
+
+    remote = os.path.join(dest, os.path.basename(path))
+
+    if check:
+        """ 找到hosts, 这些hosts上该包不存在
+        """
+        import common.disk as disk
+        groups = hosts.group_succ(disk._file_exist_command(remote), reverse=True, other=other)
+    else:
+        groups = hosts.group(thread=False, other=other)
 
     if async:
         """ 异步线程方式执行，需要已经设置了免密码登陆
         """
         host = hosts.one(True)
-        command = "scp -r {}@{}:{} {}".format(hosts.get_host_item(host, 'user'), host['host'], path,
-                                              dest if dest else os.path.dirname(path))
+        command = "scp -r {}@{}:{} {}".format(hosts.get_host_item(host, 'user'), host['host'], path, dest)
         sudopass = Responder(pattern=r'.*password:', response=hosts.get_host_item(host, 'pass') + '\n')
-        hosts.execute(command, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
+        hosts.execute(command, groups=groups, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
 
     else:
         """ scp
@@ -79,16 +89,31 @@ def copy_pack(c, path=None, dest=None, sshpass=False, other=False, async=False):
             2. 使用Responder
         """
         for host in hosts.lists(index=False, other=other):
+            ignore = True
+            for conn in groups:
+                """ 如果是需要发送的连接，那么group中执行命令，已经让 host['conn'] 有了值
+                """
+                if 'conn' in host and conn is host['conn']:
+                    ignore = False
+                    break
+            if ignore:
+                print("copy_pack, host [{}] already exist package".format(host['host']))
+                continue
+
             user = hosts.get_host_item(host, "user")
             paww = hosts.get_host_item(host, "pass")
-            command = "scp -r {} {}@{}:{}".format(path, user, host['host'],
-                                                  dest if dest else os.path.dirname(path))
+            command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
+
             if sshpass:
                 c.run("sshpass -p {} {}".format(paww, command))
             else:
                 sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
                 c.run(command, pty=True, watchers=[sudopass])
 
+    if len(groups) == 0:
+        print("\ncopy_pack complete, [{}] already exist on all hosts, ignore".format(remote))
+    else:
+        print("\ncopy_pack complete, copy [{}] to [{}] host".format(remote, len(groups)))
 
 def unpack(c, name, path=None, parent=None):
     parent = parent if parent else default_config['install']['parent']
@@ -144,15 +169,42 @@ if __name__ == '__main__':
         download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz", local='/tmp')
 
     def copy_test(c):
+        print("\n======================== copy package, and set package() value")
         download(c, "redis")
 
-        print("\n======================== copy to all host")
-        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=False)
-        copy_pack(c, package(), '/tmp')
+        if 1:
+            print("\n======================== copy to all host, sync")
+            hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf")
+            copy_pack(c, package(), '/tmp', async=False)
 
-        print("\n======================== copy to slave, async")
-        hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf", other=True)
-        copy_pack(c, package(), '/tmp', async=True)
+            print("\n======================== copy to slave, async")
+            hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf")
+            copy_pack(c, package(), '/tmp', async=True, other=True)
+
+            print("\n======================== copy to all host, sync, not check")
+            copy_pack(c, package(), '/tmp', async=False, check=False)
+
+            print("\n======================== copy to all host, async, not check")
+            copy_pack(c, package(), '/tmp', async=True, check=False)
+
+        if 1:
+            print("\n====== prepare")
+            hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf")
+            copy_pack(c, package(), '/tmp', other=True, async=False)
+            print("\n======================== copy to slave, sync, already exist, no need copy")
+            copy_pack(c, package(), '/tmp', other=True, async=False)
+
+            print("\n====== prepare")
+            hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf")
+            copy_pack(c, package(), '/tmp', other=True)
+            print("\n======================== copy to slave, async, already exist, no need copy")
+            copy_pack(c, package(), '/tmp', other=True)
+
+            print("\n====== prepare")
+            hosts.execute("rm /tmp/redis-5.0.0.tar.gz -rf")
+            copy_pack(c, package(), '/tmp', async=False, other=True)
+            print("\n======================== copy to all, async, slave already have pack, only copy to master")
+            copy_pack(c, package(), '/tmp', async=False)
 
     def unpack_test(c):
         download(c, "redis")
@@ -164,6 +216,6 @@ if __name__ == '__main__':
         print("\n======================== unpack but exist ")
         unpack(c, 'redis')
 
-    download_test(c)
+    # download_test(c)
     copy_test(c)
-    unpack_test(c)
+    # unpack_test(c)

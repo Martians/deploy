@@ -15,13 +15,13 @@ connect_kwargs:
 hosts:
     list:
         - name: local
-          host: 192.168.127.10
+          host: 192.168.0.80
           user: long
           pass: '111111'
           type: control
-        - host: 192.168.127.10
-        - host: 192.168.127.12
-        - host: 192.168.127.13
+        - host: 192.168.0.81
+        - host: 192.168.0.82
+        - host: 192.168.0.83
     disk:
         - /mnt/disk1
         - /mnt/disk2

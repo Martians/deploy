@@ -2,14 +2,19 @@
 
 
 def file_exist(c, path, name=None, dir=False):
+    return c.run(_file_exist_command(path, name, dir), warn=True).ok
+
+
+def _file_exist_command(path, name=None, dir=False):
     """ 模糊名字查找
     """
     flag = 'd' if dir else 'f'
     if name:
         path = '{}/*{}*'.format(path, name)
-    return c.run("[ -{} {} ]".format(flag, path), warn=True).ok
+    return "[ -{} {} ]".format(flag, path)
 
-def file_result(path, name, result):
+
+def _file_result(path, name, result):
     file_list = result.stdout.strip().split('\n')
 
     if len(file_list) == 1:
@@ -29,7 +34,7 @@ def file_actual(c, path, name, dir=False):
     """
     flag = 'd' if dir else '^d'
     result = c.run("ls -l {} | grep ^[{}] | awk '{{print $9}}' | grep {}".format(path, flag, name), warn=True)
-    return file_result(path, name, result)
+    return _file_result(path, name, result)
 
 
 def file_search(c, path, name, suffix=None, dir=False):
@@ -40,7 +45,7 @@ def file_search(c, path, name, suffix=None, dir=False):
 
     for s in suffix.split("|"):
         result = c.run('sudo find {} -follow -type {} -name "*{}*{}"'.format(path, flag, name, s), warn=True)
-        item = file_result(path, name, result)
+        item = _file_result(path, name, result)
         if item: return item
     return None
 

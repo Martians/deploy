@@ -9,7 +9,14 @@ from common.sed.config import *
 """
 
 
-def grep_param(key, data, options, quote=True):
+def grep_param(key, data, options, quote=True, for_sed=False):
+    """ 此处没有进行 grep的参数转换，在外部进行转换
+            1. 可以在此处进行转换，但是在sed_param
+    """
+    if not for_sed:
+        key = local.grep_fix(key)
+        data = local.grep_fix(data)
+
     hasdata = '{grep[sep]}{grep[more]}{data}'.format(grep=options, data=data)
     command = "{raw}{show}{quote}{grep[prefix]}{key}{grep[suffix]}{data}{quote}".\
         format(raw=arg(options, 'raw', True), show=local.show_option(options.get('show')),
@@ -21,10 +28,10 @@ def sed_param(key, data, options):
     """ 1. 与grep不同，这里search时，不使用固定data，而是用.*一类的，这样才能替换掉
         2. data如果包括多行，进行转换；也仅是在此处转换
     """
-    search = '{search}{grep[sep]}{grep[more]}{grep[holder]}'\
-        .format(search=grep_param(key, None, options, quote=False), grep=options)
+    search = local.sed_fix(grep_param(key, None, options, quote=False, for_sed=True))
+    search = '{search}{grep[sep]}{grep[more]}{grep[holder]}'.format(search=search, grep=options)
 
-    result = '{key}{sed[sep]}{data}'.format(key=key, data=data.replace('\n', '\\n'), sed=options)
+    result = '{key}{sed[sep]}{data}'.format(key=key, data=local.sed_fix(data, False), sed=options)
     command = 's{sed[tag]}{search}{sed[tag]}{result}{sed[tag]}{sed[end]}'.format(
                 search=search, result=result, sed=options)
     return command, search, result
@@ -57,7 +64,7 @@ def sed(c, name, command, file, options):
 def dump(c, key, search=None, count=0):
     print("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
     command = '''echo '{cache}' | grep {show}'{search}' '''\
-        .format(cache=local.sed_out, show=local.show_option(count), search=search.replace('-', '\-'))
+        .format(cache=local.sed_out, show=local.show_option(count), search=local.grep_fix(search))
     # print(command)
     result = c.run(command, **local.run)
     if result.failed and len(result.stderr) > 0:
@@ -86,9 +93,10 @@ def grep_line(c, data=None, file=None, **kwargs):
                 sed  -n '/data/=' file    /需要转义为\/;     
         """
         if options.get('sed'):
-            data = data.replace('/', '\/').replace('=', '\=')
+            data = local.sed_fix(data)
             command = "-n '/{prefix}{data}/='".format(data=data, prefix=arg(options, 'prefix'))
         else:
+            data = local.grep_fix(data)
             command = "-n '{prefix}{data}'".format(data=data, prefix=arg(options, 'prefix'))
     else:
         if kwargs.get('grep'):

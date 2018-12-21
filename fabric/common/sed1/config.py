@@ -21,11 +21,11 @@ class Local:
                   'end': 'g',
                   'holder': '.*'}
 
-
     """ 初始化工作
     """
     def __init__(self):
-        # 提供执行grep、sed时的，command执行模式
+        """ 提供执行grep、sed时的，command执行模式
+        """
         self.run = {'warn': True, 'hide': True}
         self.update_check = {'pre': True, 'post': True}
 
@@ -96,6 +96,8 @@ class Local:
         return current
 
     def grep(self, **kwargs):
+        """ 覆盖默认grep选项
+        """
         if kwargs.get('for_append'):
             self._grep_append.update(kwargs)
         else:
@@ -103,6 +105,8 @@ class Local:
         self.init_option()
 
     def sed(self, **kwargs):
+        """ 覆盖默认sed选项
+        """
         self._sed_update.update(kwargs)
 
     def show_option(self, count):
@@ -112,13 +116,18 @@ class Local:
             return '-{type} {count} '.format(type='A' if count >= 0 else 'B', count=abs(count))
         else:
             return ''
+    ########################################################################################
+    def grep_fix(self, command):
+        if command:
+            return command.replace('-', '\-')
+        else:
+            return ''
 
-    def check(self, option):
-        current = self.update_check.copy()
-        if option:
-            current.update(option)
-        return current
-
+    def sed_fix(self, data, for_key=True):
+        if for_key:
+            return data.replace('/', '\/').replace('=', '\=')
+        else:
+            return data.replace('\n', '\\n')
 
 def arg(kwargs, name, blank=False):
     """ 工具函数

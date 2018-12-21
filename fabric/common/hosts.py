@@ -242,20 +242,35 @@ def conns(other=False):
     return [conn(index) for index in lists(other=other)]
 
 
-def group(thread=True, other=False):
-    name = 'thread_group' if thread else 'group'
-    if name not in host_local:
-        host_local.name = ThreadingGroup() if thread else Group()
-        host_local.name.extend([conn(index) for index in lists(other=other)])
-    return host_local.name
+def group(thread=True, other=False, conns=None):
+    if conns:
+        """ 将临时传入的连接列表，组成 Group
+        """
+        host_conns = ThreadingGroup() if thread else Group()
+        host_conns.extend(conns)
+        return host_conns
+    else:
+        name = 'thread_group' if thread else 'group'
+        if name not in host_local:
+            host_local.name = ThreadingGroup() if thread else Group()
+            host_local.name.extend([conn(index) for index in lists(other=other)])
+        return host_local.name
 
 
-def execute(command, thread=True, err=True, out=False, hide=True, other=False,
-            gon_one=False,**kwargs):
+def execute(command, groups=None, thread=True, err=True, out=False, hide=True, other=False, go_on=False,**kwargs):
+    groups = group(thread=thread, other=other, conns=groups)
+
     import common.execute as execute
-    return execute.group(group(thread=thread, other=other),
-                         command, err=err, out=out, hide=hide, **kwargs)
+    return execute.group(groups, command, err=err, out=out, hide=hide, go_on=go_on, **kwargs)
 
+
+def group_succ(command, reverse=False, other=False):
+    results = execute(command, err=False, other=other)
+    list = []
+    for conn, result in results.items():
+        if result.ok ^ reverse:
+            list.append(conn)
+    return list
 #######################################################################################################################
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
@@ -334,10 +349,17 @@ if __name__ == '__main__':
         # print("\nslave:")
         # group(other=True).run("hostname")
 
+    def test_group_succ():
+        import common.disk as disk
+        print(group_succ(disk._file_exist_command('/root/test')))
+
+        print(group_succ(disk._file_exist_command('/root/test'), reverse=True))
+
     # test_host_info()
     # test_host_item()
     # test_get_host()
     # test_get_list()
     # test_get_item()
-    test_group()
+    # test_group()
+    test_group_succ()
 

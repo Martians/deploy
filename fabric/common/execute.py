@@ -98,7 +98,6 @@ def group(group, command, err=True, out=False, go_on=False, **kwargs):
                 output_result(item, prefix='\t')
     return results
 
-
 if __name__ == '__main__':
     from fabric import Config, Connection
     from common.init import *

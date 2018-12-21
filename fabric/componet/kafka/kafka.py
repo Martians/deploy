@@ -58,7 +58,7 @@ def install(c):
 def prepare(c):
     hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None, pty=True)
 
-
+@task
 def configure(c):
     file = os.path.join(base(name), "config/server.properties")
 
