@@ -2,6 +2,8 @@
 
 import os
 
+''' search.replace('-', '\-')
+'''
 class Local:
     test = True
 
@@ -15,7 +17,9 @@ class Local:
                    }
     grep_append = {'sed': True}
 
-    sed_update = {'tag': '|'}
+    sed_update = {'tag': '|',
+                  'end': 'g',
+                  'holder': '.*'}
 
 
     """ 初始化工作
@@ -26,14 +30,7 @@ class Local:
         self.update_check = {'pre': True, 'post': True}
 
         self.multi = 'NNN'
-
-        temp = self.grep_update.copy()
-        temp.update(self.grep_append)
-        self.grep_append = temp
-
-        temp = self.grep_update.copy()
-        temp.update(self.sed_update)
-        self.sed_update = temp
+        self.init_option()
 
         if self.test:
             self.debug = False  # 显示更多测试信息
@@ -63,6 +60,15 @@ class Local:
         self.cache = cache.strip('\n')
 
     ########################################################################################
+    def init_option(self):
+        temp = self.grep_update.copy()
+        temp.update(self.grep_append)
+        self._grep_append = temp
+
+        temp = self.grep_update.copy()
+        temp.update(self.sed_update)
+        self._sed_update = temp
+
     def grep_option(self, **kwargs):
         """ 提取参数中的grep选项，并提供默认值
 
@@ -71,7 +77,7 @@ class Local:
         """
         option = kwargs.get('grep')
         if kwargs.get('for_append'):
-            current = self.grep_append.copy()
+            current = self._grep_append.copy()
         else:
             current = self.grep_update.copy()
 
@@ -83,7 +89,7 @@ class Local:
         """ 默认值中包含了 grep_option 中的选项
         """
         option = kwargs.get('sed')
-        current = self.sed_update.copy()
+        current = self._sed_update.copy()
 
         if option:
             current.update(option)
@@ -91,12 +97,13 @@ class Local:
 
     def grep(self, **kwargs):
         if kwargs.get('for_append'):
-            self.grep_append.update(kwargs)
+            self._grep_append.update(kwargs)
         else:
             self.grep_update.update(kwargs)
+        self.init_option()
 
     def sed(self, **kwargs):
-        self.sed_update.update(kwargs)
+        self._sed_update.update(kwargs)
 
     def show_option(self, count):
         """ grep时，显示的行数选项
@@ -112,6 +119,7 @@ class Local:
             current.update(option)
         return current
 
+
 def arg(kwargs, name, blank=False):
     """ 工具函数
             blank：存在而且不为空，添加' '后缀
@@ -123,6 +131,7 @@ def arg(kwargs, name, blank=False):
             return kwargs[name]
     else:
         return ''
+
 
 if True:
     from fabric import Connection

@@ -18,10 +18,16 @@ def grep_param(key, data, options, quote=True):
 
 
 def sed_param(key, data, options):
-    search = '{search}{grep[sep]}{grep[more]}'.format(search=grep_param(key, None, options, quote=False), grep=options)
-    command = 's{sed[tag]}{search}{sed[tag]}{key}{sed[sep]}{data}{sed[tag]}'.format(
-                key=key, data=data, search=search, sed=options)
-    return command
+    """ 1. 与grep不同，这里search时，不使用固定data，而是用.*一类的，这样才能替换掉
+        2. data如果包括多行，进行转换；也仅是在此处转换
+    """
+    search = '{search}{grep[sep]}{grep[more]}{grep[holder]}'\
+        .format(search=grep_param(key, None, options, quote=False), grep=options)
+
+    result = '{key}{sed[sep]}{data}'.format(key=key, data=data.replace('\n', '\\n'), sed=options)
+    command = 's{sed[tag]}{search}{sed[tag]}{result}{sed[tag]}{sed[end]}'.format(
+                search=search, result=result, sed=options)
+    return command, search, result
 
 
 def grep(c, name, command, file, options):
@@ -41,11 +47,26 @@ def sed(c, name, command, file, options):
         command = '''sed '{}' '''.format(command)
         print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
         result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
-        local.output = result.stdout
+        local.sed_out = result.stdout
         # print(update.output)
-        return result, command
+        return result
     else:
         return c.run('sed -i {command} {file}'.format(command=command, file=file), **local.run)
+
+
+def dump(c, key, search=None, count=0):
+    print("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
+    command = '''echo '{cache}' | grep {show}'{search}' '''\
+        .format(cache=local.sed_out, show=local.show_option(count), search=search.replace('-', '\-'))
+    # print(command)
+    result = c.run(command, **local.run)
+    if result.failed and len(result.stderr) > 0:
+        print("dump sed output failed, command:\n {}\n {}{}"
+              .format(command, result.stdout, result.stderr))
+
+    local.result = result.stdout.strip('\n')
+    print("[debug]:\n{}".format(local.result))
+    return result.stdout
 
 
 def grep_line(c, data=None, file=None, **kwargs):
@@ -60,7 +81,6 @@ def grep_line(c, data=None, file=None, **kwargs):
         """ 处理：
                 有数据，查找数据所在行
                 无数据，查找最后一行
-
             命令：
                 grep -n 'data' file      
                 sed  -n '/data/=' file    /需要转义为\/;     
@@ -90,18 +110,6 @@ def grep_line(c, data=None, file=None, **kwargs):
         return int(find[0].split(':')[0]), len(find)
     else:
         return -1, 0
-
-
-def dump(c, key, search=None, count=0):
-    print("----------- {key}, output: {count}".format(key=search if search else key, count=abs(count)))
-    command = '''echo '{cache}' | grep {show}'{search}' '''\
-        .format(cache=local.output, show=local.show_option(count), search=search)
-    # print(command)
-    result = c.run(command, **local.run)
-
-    local.result = result.stdout
-    print("[debug]:\n{}".format(local.result))
-    return result.stdout
 
 
 def append(c, data, locate=None, file=None, pos=1, **kwargs):
