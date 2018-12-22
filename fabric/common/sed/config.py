@@ -188,9 +188,11 @@ if True:
             """ 是否开启更多的日志
             """
             # local.debug_info()
+            global c    # 在本文件中使用的c，如 check 函数
 
             from fabric import Connection
-            return Connection('127.0.0.1')
+            c = Connection('127.0.0.1')
+            return c
         else:
             return None
 

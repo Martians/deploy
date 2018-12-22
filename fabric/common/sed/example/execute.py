@@ -28,7 +28,20 @@ def kafka_config():
     sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.get_item(index, 'host'), host_port))
     sed.append(c, 'auto.create.topics.enable=false', '^group.initial.rebalance.delay.ms', grep={'prefix': ''})
 
+
+def maven_config():
+    prepare('maven.xml')
+
+    sed.append(c, '''
+    <mirror>
+        <id>alimaven</id>
+        <name>aliyun maven</name>
+        <url>http://maven.aliyun.com/nexus/content/groups/public/</url>;
+        <mirrorOf>central</mirrorOf>
+    </mirror>''', '</mirrors>', pos=-1)
+
 from common.init import *
 c = Connection('127.0.0.1')
 
-kafka_config()
+# kafka_config()
+maven_config()

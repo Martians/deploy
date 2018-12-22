@@ -8,6 +8,15 @@ from common.sed.config import *
             sed： =、/ 需要转义
 """
 
+""" 多行处理时，将\n转换为其他字符
+"""
+def grep_multi(data):
+    head = ''
+    if data and data.count('\n'):
+        data = data.replace('\n', local.multi)
+        head = "sed ':a; N; s/\\n/{}/g; ta;' |".format(local.multi)
+    return data, head
+
 
 def grep_param(key, data, options, quote=True, for_sed=False):
     """ 此处没有进行 grep的参数转换，在外部进行转换
@@ -38,19 +47,27 @@ def sed_param(key, data, options):
 
 
 def do_grep(c, name, command, file, options):
+    head = arg(options, 'head', True)
     if options.get('sed'):
-        command = '{head}sed {command}'.format(head=arg(options, 'head', True), command=command)
+        command = 'sed {command}'.format(command=command)
     else:
-        command = '{head}grep {command}'.format(head=arg(options, 'head', True), command=command)
+        command = 'grep {command}'.format(command=command)
 
     """ 在执行任务之前输出，通常调试时用到
     """
     if local.debug: print("[{name}]: {command} {file}".format(name=name, command=command, file=local.file(file)))
 
     if local.test:
-        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
+        # print('''echo '{}' | {}{}'''.format(local.cache, arg(options, 'head', True), command))
+        result = c.run('''echo '{}' | {}{}'''.format(local.cache, head, command), **local.run)
     else:
-        result = c.run('''{} {}'''.format(command, file), **local.run)
+        if head:
+            """ 多行情况：head的末尾包含了一个 |, 需要去掉
+            """
+            head = head.split('|')[0] # print('''{} {} | {}'''.format(head, file, command))
+            result = c.run('''{} {} | {}'''.format(head, file, command), **local.run)
+        else:
+            result = c.run('''{} {}'''.format(command, file), **local.run)
 
     local.grep_out = result.stdout.strip('\n')
     debug('grep output', local.grep_out)
@@ -107,6 +124,9 @@ def grep_line(c, data=None, file=None, **kwargs):
 
     kwargs['for_append'] = True
     options = local.grep_option(**kwargs)
+
+    data, head = grep_multi(data)
+    options['head'] = head
 
     if data:
         """ 处理：
@@ -178,6 +198,10 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
             elif key_line + pos == index:
                 print("[append]: data [{}] already exist, match with locate [{}], line: {}".format(data, locate, index))
                 return False
+
+            elif index == 1 and data.count('\n'):
+                print("[append]: data [{}]\n  --- is multi line, no need check position, data already exist".format(data))
+                return True
             else:
                 print("[append]: data [{}] already exist, but locate [{}] not match, line: {}".format(data, locate, index))
         else:
@@ -197,7 +221,7 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
     else:
         index += pos - 1 if pos > 0 else pos
 
-    command = "'{index}a\{data}'".format(index=index, data=data)
+    command = "{index}a\{data}".format(index=index, data=local.sed_fix(data, False))
     result = do_sed(c, 'append', command, file=file, options=local.sed_option(**kwargs))
 
     dump(c, data, locate, pos, file)
@@ -215,7 +239,7 @@ if __name__ == '__main__':
     c = test_mode(True)
     enable = False
 
-    def test_grep_line(use_grep):
+    def test_grep_line(use_sed):
         initial('test grep', """
 listen_address: 192.168.10.1
 
@@ -224,15 +248,25 @@ num.io.threads=8
 
 # set broadcast_rpc_address to a value other than 0.0.0.0.
 #   num.io.threads=8
+    - /mnt/disk1
+    - /mnt/disk2
+    - /mnt/disk3
 """)
-        output("search key, exist 2")
-        check(grep_line(c, 'num.io.threads=8', grep={'sed': use_grep})[1], 2)
+        if enable or True:
+            output("search key, exist 2")
+            check(grep_line(c, 'num.io.threads=8', grep={'sed': use_sed})[1], 2)
 
-        output("search key, exist only 1, have special char")
-        check(grep_line(c, '/mnt/abc', grep={'sed': use_grep})[1], 1)    # 特殊字符 /，使用sed需要转义
+            output("search key, exist only 1, have special char")
+            check(grep_line(c, '/mnt/abc', grep={'sed': use_sed})[1], 1)    # 特殊字符 /，使用sed需要转义
 
-        output("search key, use prefix search, locate only 1")
-        check(grep_line(c, 'num.io.threads=8', grep={'prefix': '^', 'sed': use_grep})[1], 1)
+            output("search key, use prefix search, locate only 1")
+            check(grep_line(c, 'num.io.threads=8', grep={'prefix': '^', 'sed': use_sed})[1], 1)
+
+            output("search key, multi line")
+            check(grep_line(c, '''
+    - /mnt/disk1
+    - /mnt/disk2
+    - /mnt/disk3''', grep={'sed': use_sed})[1], 1)
 
     ###################################################################################################################
     def test_append():

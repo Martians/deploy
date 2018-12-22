@@ -6,15 +6,8 @@ from common.sed.append import *
 
 def grep_data(c, key, data=None, file=None, **kwargs):
     c, file = local.init(c, file)
-    """ 多行处理时，将\n转换为其他字符
-    """
-    def multi(data):
-        head = ''
-        if data and data.count('\n'):
-            data = data.replace('\n', local.multi)
-            head = "sed ':a; N; s/\\n/{}/g; ta;' |".format(local.multi)
-        return data, head
-    data, head = multi(data)
+
+    data, head = grep_multi(data)
 
     # 传入的grep新选项，覆盖默认选项
     options = local.grep_option(**kwargs)

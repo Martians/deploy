@@ -10,7 +10,7 @@ from common.pack import *
 import common.hosts as hosts
 import common.sed as sed
 
-class KafkaConfig:
+class LocalConfig:
     """ 默认配置
     """
     def __init__(self):
@@ -37,7 +37,7 @@ class KafkaConfig:
     
     该变量定义在头部，这样在函数的默认参数中，也可以使用了
 """
-local = KafkaConfig()
+local = LocalConfig()
 name = 'kafka'
 
 @task
