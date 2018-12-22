@@ -54,23 +54,23 @@ def install(c):
 
     configure(c)
 
-
 def prepare(c):
     hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None, pty=True)
 
 @task
 def configure(c):
-    file = os.path.join(base(name), "config/server.properties")
+    sed.path(os.path.join(base(name), "config/server.properties"))
+    sed.grep(**{'sep': '='})
 
     for index in hosts.lists():
         c = hosts.conn(index)
-        sed.update(c, "log.dirs", hosts.get_item(index, 'disk', ','), sep='=', more_sep=False, file=file)
-        sed.update(c, "broker.id", str(int(index) + 1), sep='=', file=file)
-        sed.update(c, "zookeeper.connect", local.zook_host, sep='=', more_sep=False, file=file)
 
-        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.get_item(index, 'host'), local.port),
-                   sep='=', more_sep=False, file=file)
-        sed.append(c, key='^group.initial.rebalance.delay.ms', data='auto.create.topics.enable=false', file=file)
+        sed.update(c, "log.dirs", hosts.get_item(0, 'disk', ','))
+        sed.update(c, "broker.id", str(int(index) + 1))
+        sed.update(c, "zookeeper.connect", local.zook_host)
+
+        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.get_item(index, 'host'), local.port))
+        sed.append(c, 'auto.create.topics.enable=false', '^group.initial.rebalance.delay.ms', grep={'prefix': ''})
 
         for disk in hosts.get_item(index, 'disk', ',').split(','):
             c.run("sudo mkdir -p {}".format(disk))

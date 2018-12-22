@@ -69,7 +69,7 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
         """ 找到hosts, 这些hosts上该包不存在
         """
         import common.disk as disk
-        groups = hosts.group_succ(disk._file_exist_command(remote), reverse=True, other=other)
+        groups = hosts.group_filter(disk._file_exist_command(remote), reverse=True, other=other)
     else:
         groups = hosts.group(thread=False, other=other)
 

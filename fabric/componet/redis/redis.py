@@ -118,8 +118,8 @@ def config_master(c):
     sed.update(c, "logfile", "server.log", file=file)
     sed.update(c, "stop-writes-on-bgsave-error", "no", prefix=".*", file=file)
 
-    sed.enable(c, "cluster-enabled", "yes", file=file)
-    sed.enable(c, "cluster-config-file", "nodes.conf", prefix=".*", file=file)
+    sed.enables(c, "cluster-enabled", "yes", file=file)
+    sed.enables(c, "cluster-config-file", "nodes.conf", prefix=".*", file=file)
 
     sed.disable(c, "save", ".*", file=file)
 

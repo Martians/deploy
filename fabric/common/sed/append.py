@@ -29,50 +29,74 @@ def sed_param(key, data, options):
         2. data如果包括多行，进行转换；也仅是在此处转换
     """
     search = local.sed_fix(grep_param(key, None, options, quote=False, for_sed=True))
-    search = '{search}{grep[sep]}{grep[more]}{grep[holder]}'.format(search=search, grep=options)
+    search = '{search}{grep[sep]}{grep[more]}{grep[loc_data]}'.format(search=search, grep=options)
 
-    result = '{key}{sed[sep]}{data}'.format(key=key, data=local.sed_fix(data, False), sed=options)
+    result = '{sed[rep_prefix]}{key}{sed[sep]}{data}'.format(key=key, data=local.sed_fix(data, False), sed=options)
     command = 's{sed[tag]}{search}{sed[tag]}{result}{sed[tag]}{sed[end]}'.format(
                 search=search, result=result, sed=options)
     return command, search, result
 
 
-def grep(c, name, command, file, options):
-    if local.test:
-        if options.get('sed'):
-            command = '{head}sed {command}'.format(head=arg(options, 'head', True), command=command)
-        else:
-            command = '{head}grep {command}'.format(head=arg(options, 'head', True), command=command)
+def do_grep(c, name, command, file, options):
+    if options.get('sed'):
+        command = '{head}sed {command}'.format(head=arg(options, 'head', True), command=command)
+    else:
+        command = '{head}grep {command}'.format(head=arg(options, 'head', True), command=command)
 
-        print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
+    """ 在执行任务之前输出，通常调试时用到
+    """
+    if local.debug: print("[{name}]: {command} {file}".format(name=name, command=command, file=local.file(file)))
+
+    if local.test:
         result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
-        return result, command
+    else:
+        result = c.run('''{} {}'''.format(command, file), **local.run)
+
+    local.grep_out = result.stdout.strip('\n')
+    debug('grep output', local.grep_out)
+    return result, command
 
 
-def sed(c, name, command, file, options):
+def do_sed(c, name, command, file, options):
+    command = '''sed {flag}'{command}' '''.format(flag='' if local.test else '-i ', command=command, file=local.file(file))
+
+    """ 在执行任务之前输出，通常调试时用到
+    """
+    if local.debug: print("[{name}]: {command} {file}".format(name=name, command=command, file=local.file(file)))
+
     if local.test:
-        command = '''sed '{}' '''.format(command)
-        print("[{name}]: {command} {file}".format(name=name, command=command, file=local._file))
         result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
         local.sed_out = result.stdout
-        # print(update.output)
-        return result
+        debug('sed output', local.sed_out)
     else:
-        return c.run('sed -i {command} {file}'.format(command=command, file=file), **local.run)
+        """ 这里使用的是sed -i, 因此没有输出结果，不获取 local.sed_out
+        """
+        result = c.run('{command} {file}'.format(command=command, file=file), **local.run)
+
+    if result.failed:
+        print("do sed, but failed, err: [{}]".format(result.stderr.strip('\n')))
+        exit(-1)
+    return result
 
 
-def dump(c, key, search=None, count=0):
+def dump(c, key, search=None, count=0, file=None):
     print("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
-    command = '''echo '{cache}' | grep {show}'{search}' '''\
-        .format(cache=local.sed_out, show=local.show_option(count), search=local.grep_fix(search))
-    # print(command)
+    command = '''grep {show}'{search}' '''.format(show=local.show_option(count), search=local.grep_fix(search))
+
+    if local.test:
+        command = '''echo '{cache}' | {command} '''.format(cache=local.sed_out, command=command)
+    else:
+        command = '''{command} {file}'''.format(command=command, file=file)
+
     result = c.run(command, **local.run)
     if result.failed and len(result.stderr) > 0:
-        print("dump sed output failed, command:\n {}\n {}{}"
-              .format(command, result.stdout, result.stderr))
+        print("dump sed output failed, command:\n {}\n {}{}".format(command, result.stdout, result.stderr))
 
     local.result = result.stdout.strip('\n')
-    print("[debug]:\n{}".format(local.result))
+
+    """ 此处强制输出，并且另外使用一行
+    """
+    debug('debug', local.result, line=True, force=True, seperate='\n')
     return result.stdout
 
 
@@ -104,7 +128,7 @@ def grep_line(c, data=None, file=None, **kwargs):
         else:
             command = "-n '$='".format()
 
-    result, command = grep(c, 'grep_line', command, file, options)
+    result, command = do_grep(c, 'grep_line', command, file, options)
     output = result.stdout.strip()
     print("[grep_line]: {command} {file}, line: [{index}]".
           format(command=command, file=local.file(file), index=output.replace('\n', ' ').split(':')[0]))
@@ -138,47 +162,57 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
     """
     index, count = grep_line(c, data, file, **kwargs)
     if count > 1:
-        print("append: data [{}] exist multi [{}], failed".format(data, count))
+        print("[append]: data [{}] exist multi [{}], failed".format(data, count))
         return exit(-1) if local.exit_on_err else False
 
     elif index != -1:
         if locate:
             key_line, count = grep_line(c, locate, file, **kwargs)
             if key_line == -1:
-                print("append: data [{data}] already exist, line: {index}, locate not exist".format(data=data, index=index))
+                print("[append]: data [{}] already exist, line: {}, locate [{}] not exist".format(data, index, locate))
                 return False
             elif count > 1:
-                print("append: data [{}] already exist, locate exist count [{}]".format(data, count))
+                print("[append]: data [{}] already exist, locate [{}] exist count [{}]".format(data, locate, count))
                 return exit(-1) if local.exit_on_err else False
 
             elif key_line + pos == index:
-                print("append: data [{data}] already exist, locate match, line: {index}".format(data=data, index=index))
+                print("[append]: data [{}] already exist, match with locate [{}], line: {}".format(data, locate, index))
                 return False
             else:
-                print("append: data [{data}] already exist, but locate not match, line: {index}".format(data=data, index=index))
+                print("[append]: data [{}] already exist, but locate [{}] not match, line: {}".format(data, locate, index))
         else:
-            print("append: data [{data}] already exist, locate none, success".format(data=data))
+            print("[append]: data [{data}] already exist, locate none, success".format(data=data))
             return True
 
     """ 定位到要插入数据的位置
     """
     index, count = grep_line(c, locate, file, **kwargs)
+    on_the_end = False
     if count > 1:
-        print("append: locate exist [{}], failed".format(count))
+        print("[append]: locate [{}] exist [{}], failed".format(locate, count))
         return exit(-1) if local.exit_on_err else False
     elif index == -1:
         index = grep_line(c, None, file)[0]
+        on_the_end = True
     else:
         index += pos - 1 if pos > 0 else pos
 
     command = "'{index}a\{data}'".format(index=index, data=data)
-    result = sed(c, 'append', command, file=file, options=local.sed_option(**kwargs))
+    result = do_sed(c, 'append', command, file=file, options=local.sed_option(**kwargs))
 
-    dump(c, data, locate, pos)
+    dump(c, data, locate, pos, file)
+
+    if on_the_end:
+        print("[append]: add [{data}] on line {index}, the end of the file, [{locate}] not exist"
+              .format(data=data, index=index + 1, locate=locate))
+    else:
+        print("[append]: add [{data}] on line {index}, {pos} {type} [{locate}]"
+              .format(data=data, index=index + 1, pos=abs(pos), type='after' if pos > 0 else 'before', locate=locate))
     return result.ok
 
 
 if __name__ == '__main__':
+    c = test_mode(True)
     enable = False
 
     def test_grep_line(use_grep):
@@ -229,7 +263,7 @@ bbc=3
             output("data not exist, location not find")
             check(append(c, 'append_line', 'not_exist_location'), True)
 
-            output("data not exist, locate not set, appedn to end")
+            output("data not exist, locate not set, append to end")
             check(append(c, 'append_line'), True)
 
             ###########################################################################################################

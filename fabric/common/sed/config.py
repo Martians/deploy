@@ -5,46 +5,70 @@ import os
 ''' search.replace('-', '\-')
 '''
 class Local:
-    test = True
-
-    grep_update = {'raw': '',      # 传递给grep命令本身
-                   'sed': False,   # 使用sed替换grep
+    grep_update = {'raw': '',       # 传递给grep命令本身
+                   'sed': False,    # 使用sed替换grep
                    'prefix': '[^#]*',
                    'suffix': '',
-                   'sep': ' ',
-                   'more': '',     # grep时，添加到sep后边，允许多个sep重复
+                   'sep': ' ',      # key、data之间的分隔符
+                   'more': '',      # grep时，添加到sep后边，这样可以允许多个sep重复
                    'head': '',
                    }
     grep_append = {'sed': True}
 
-    sed_update = {'tag': '|',
-                  'end': 'g',
-                  'holder': '.*'}
+    sed_update = {'tag': '|',       # sed分隔符
+                  'end': 'g',       # sed结尾的选项
+                  'loc_data': '.*',  # locate部分，data的占位符
+                  'rep_prefix': '',  # replace部分的的prefix
+                  }
+
+    """ 内部配置，经常要改动的那些
+    """
+    debug = False   # 显示更多测试信息
 
     """ 初始化工作
     """
     def __init__(self):
         """ 提供执行grep、sed时的，command执行模式
         """
-        self.run = {'warn': True, 'hide': True}
-        self.update_check = {'pre': True, 'post': True}
-
         self.multi = 'NNN'
+        self.run = {'warn': True, 'hide': True}
+
+        self.test = False
+        self.exit_on_err = True
+        self.conf_path = ''     # 默认配置文件
+
+        """ 保存中间结果
+        """
+        self.cache = ''     # 临时测试数据
+        self.grep_out = ''  # grep结果
+        self.sed_out = ''   # sed结果
+        self.result = ''    # 测试结果
+
         self.init_option()
 
-        if self.test:
-            self.debug = False  # 显示更多测试信息
-            self.cache = ''     # 测试数据
-            self.result = ''    # 测试结果
-            self.exit_on_err = False
 
-            self._file = 'conf_file'
-            self.path = os.path.join(os.getcwd(), self._file)
-        else:
-            self.exit_on_err = True
+    def test_mode(self):
+        self.test = True
+        self.exit_on_err = False
+
+        self.conf_path = os.path.join(os.getcwd(), 'conf_file')
+
+    def debug_info(self):
+        self.debug = True
+
+    def initial(self, cache):
+        """ 设置test时的数据源
+        """
+        self.cache = cache.strip('\n')
 
     def _path(self, file):
-        return file if file else self.path
+        return file if file else self.conf_path
+
+    ########################################################################################
+    def path(self, path):
+        """ 设置默认配置文件
+        """
+        self.conf_path = path
 
     def init(self, c, file):
         return c, self._path(file)
@@ -53,11 +77,6 @@ class Local:
         """ 显示时方便查看，截短
         """
         return path.split('/')[-1]
-
-    def initial(self, cache):
-        """ 设置test时的数据源
-        """
-        self.cache = cache.strip('\n')
 
     ########################################################################################
     def init_option(self):
@@ -116,6 +135,7 @@ class Local:
             return '-{type} {count} '.format(type='A' if count >= 0 else 'B', count=abs(count))
         else:
             return ''
+
     ########################################################################################
     def grep_fix(self, command):
         if command:
@@ -128,6 +148,7 @@ class Local:
             return data.replace('/', '\/').replace('=', '\=')
         else:
             return data.replace('\n', '\\n')
+
 
 def arg(kwargs, name, blank=False):
     """ 工具函数
@@ -142,9 +163,36 @@ def arg(kwargs, name, blank=False):
         return ''
 
 
+def grep(**kwargs):
+    local.grep(**kwargs)
+
+
+def path(full):
+    local.path(full)
+
+
+def debug(name, output, line=False, force=False, seperate=''):
+    """ 有数据才输出
+        只有一行，就不使用回车
+    """
+    if force or local.debug and len(output) > 0:
+        if output.count('\n') > 1: line = True
+        print('[{name}]: {line}{output}{seperate}'.format(name=name, output=output, line='\n' if line else '',
+                                                          seperate=seperate))
+
 if True:
-    from fabric import Connection
-    c = Connection('127.0.0.1')
+    def test_mode(set):
+        if set:
+            local.test_mode()
+
+            """ 是否开启更多的日志
+            """
+            # local.debug_info()
+
+            from fabric import Connection
+            return Connection('127.0.0.1')
+        else:
+            return None
 
     def initial(info, cache):
         local.initial(cache)

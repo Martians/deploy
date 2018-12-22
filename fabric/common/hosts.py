@@ -228,6 +228,7 @@ def get_item(index, name, sep=","):
 
 ########################################################################################################################
 
+
 def is_master(host):
     return host['index'] == 0
 
@@ -243,7 +244,7 @@ def conns(other=False):
 
 
 def group(thread=True, other=False, conns=None):
-    if conns:
+    if conns is not None:
         """ 将临时传入的连接列表，组成 Group
         """
         host_conns = ThreadingGroup() if thread else Group()
@@ -264,7 +265,7 @@ def execute(command, groups=None, thread=True, err=True, out=False, hide=True, o
     return execute.group(groups, command, err=err, out=out, hide=hide, go_on=go_on, **kwargs)
 
 
-def group_succ(command, reverse=False, other=False):
+def group_filter(command, reverse=False, other=False):
     results = execute(command, err=False, other=other)
     list = []
     for conn, result in results.items():
@@ -349,11 +350,11 @@ if __name__ == '__main__':
         # print("\nslave:")
         # group(other=True).run("hostname")
 
-    def test_group_succ():
+    def test_group_filter():
         import common.disk as disk
-        print(group_succ(disk._file_exist_command('/root/test')))
+        print(group_filter(disk._file_exist_command('/root/test')))
 
-        print(group_succ(disk._file_exist_command('/root/test'), reverse=True))
+        print(group_filter(disk._file_exist_command('/root/test'), reverse=True))
 
     # test_host_info()
     # test_host_item()
@@ -361,5 +362,5 @@ if __name__ == '__main__':
     # test_get_list()
     # test_get_item()
     # test_group()
-    test_group_succ()
+    test_group_filter()
 

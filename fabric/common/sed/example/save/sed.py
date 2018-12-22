@@ -1,6 +1,6 @@
 # coding=utf-8
 
-import common.config as work
+import common.sed.example.save.config as work
 
 """ 使用方式：
         1. 测试完成后，使用 vimdiff 查看改动是否成功
