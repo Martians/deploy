@@ -2,7 +2,7 @@
 
 from common.sed.config import *
 
-""" sed -n '/.*LOCAL_JMX/p' conf_file
+""" sed -n '/.*LOCAL_JMX/p' config.properties
 
     grep：使用grep进行搜索，不需要进行转义
             sed： =、/ 需要转义

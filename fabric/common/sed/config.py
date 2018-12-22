@@ -51,7 +51,7 @@ class Local:
         self.test = True
         self.exit_on_err = False
 
-        self.conf_path = os.path.join(os.getcwd(), 'conf_file')
+        self.conf_path = os.path.join(os.getcwd(), 'config.properties')
 
     def debug_info(self):
         self.debug = True
