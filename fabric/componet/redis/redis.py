@@ -1,7 +1,7 @@
 # coding=utf-8
 
-import sys, os
-sys.path.append(os.path.join(os.getcwd(), "../.."))
+# import sys, os
+# sys.path.append(os.path.join(os.getcwd(), "../.."))
 
 from invoke import task
 from common.init import *
