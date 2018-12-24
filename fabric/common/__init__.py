@@ -10,14 +10,18 @@
     2. 配置
         1. 基本：
                 1. 每个文件夹有自己的fabric.yaml，必须自动或者手动复制到 ~/或者/etc目录下
-                2. fabric.yaml
+                    1. 为了方便，配置中设置了task.collection_name，因此如果切换了目录，找不到对应的 collection.py，fab 无法工作
+                    2. 切换目录后，比如切换到 kafka 安装脚本中，需要先执行 python kafka.py，将触发更新配置，将工程目录下的配置复制
+
+                2. fabric.yaml 内容
                     1. run：命令执行时的一些默认命令
                     2. task.collection_name: 默认collection，这样就可以访问本地其他名字的 .py直接使用；不需要导入到fabric.py了
                     3. 控制机、宿主机、服务机
 
                 3. python搜索路径
-                    1. 外部设置：lib/python3.6/site-packages/*.pth
+                    1. 外部设置：lib/python3.6/site-packages/*.pth；在任何路径下，执行：python common/prepare.py 即可
                     2. 程序设置：在fabric命令文件中，最头部初添加：sys.path.append(os.path.join(os.getcwd(), "../.."))
+                       见 init.py 头部 ‘搜索路径’ 的说明
 
         2. 策略
                 1. 控制机：发起命令的机器（执行fab的），可以与宿主机一样
@@ -30,7 +34,6 @@
 
                     1. 控制机与宿主机，都是虚拟机
                     2. 控制机是虚拟机，宿主机是服务机
-
     3. 案例：
             1. grep、sed: common/sed
             2. 完整：component/kafka
@@ -78,5 +81,7 @@ Todo
     角色划分：安装点、其他机器（master、slave等）
     在一个 c 内修改的config不生效，不能影响全局？
     help complete
+    将不同的命令，放到不同的文件
+    将不同的阶段，放到不同的文件
 
 """

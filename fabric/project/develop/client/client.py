@@ -9,6 +9,7 @@ from common.pack import *
 
 import common.hosts as hosts
 import common.sed as sed
+import system
 
 class LocalConfig:
     def __init__(self):
@@ -56,9 +57,7 @@ def configure(c):
 
 @task
 def prepare(c):
-    c = hosts.one()
-    c.run('yum install unzip java-1.8.0-openjdk-devel -y', hide=None, pty=True)
-    c.run('yum install git -y', hide=None, pty=True)
+    system.install('java', 'unzip git', c=hosts.one())
 
 @task
 def package(c):

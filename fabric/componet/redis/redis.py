@@ -10,6 +10,7 @@ from common.pack import *
 import common.disk as disk
 import common.hosts as hosts
 import common.sed as sed
+import system
 
 class LocalConfig:
     def __init__(self):
@@ -18,10 +19,7 @@ class LocalConfig:
 
         self.compile = '/tmp/compile'
 
-""" 提供个默认参数
 
-    该变量定义在头部，这样在函数的默认参数中，也可以使用了
-"""
 local = LocalConfig()
 name = 'redis'
 
@@ -51,31 +49,32 @@ def cluster(c):
 
 @task
 def clear(c):
+    c = hosts.conn(0)
     hosts.execute('cd {path}; rm nodes.conf server.log -rf'
-                  .format(path=base(c), base=c.install.cluster.directory))
+                  .format(path=base(name), base=c.install.cluster.directory))
 
     for index in range(1, c.install.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; rm nodes.conf server.log -rf'
-                      .format(path=base(c), base=c.install.cluster.directory, index=index))
+                      .format(path=base(name), base=c.install.cluster.directory, index=index))
     stop(c)
 
 @task
 def clean(c):
     stop(c)
-    hosts.execute('rm {path} -rf'.format(path=base(c)))
+    hosts.execute('rm {path} -rf'.format(path=base(name)))
 
 @task
 def start(c):
-    hosts.execute("cd {path}; redis-server redis.conf".format(path=base(c)))
+    hosts.execute("cd {path}; redis-server redis.conf".format(path=base(name)))
 
     for index in range(1, c.install.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; redis-server redis.conf'
-                      .format(path=base(c), base=c.install.cluster.directory, index=index))
+                      .format(path=base(name), base=c.install.cluster.directory, index=index))
     stat(c)
 
 @task
 def stop(c):
-    hosts.execute("killall -9 redis-server", err=False)
+    system.kill('redis-server')
     stat(c)
 
 @task
@@ -103,20 +102,23 @@ def install_prepare(c):
     download(c, name, source=local.source)
     scp(c, hosts.get_host(0), package(), dest=local.temp)
 
+    """ 安装包依赖
+    """
+    # system.install()
+
 
 def install_master(c):
     c = hosts.conn(0)
+    system.install('compile', c=c)
     unpack(c, name, path=package(local.temp), parent=local.compile)
-    c.run('yum install gcc make -y')
 
     with c.cd(os.path.join(local.compile, 'redis')):
         if not file_exist(c, 'src', 'redis-server'):
             c.run("make MALLOC=libc -j5")
 
-        c.run("mkdir -p {}".format(base(c)))
+        c.run("mkdir -p {}".format(base(name)))
         with c.cd("src"):
-            c.run("sudo \\cp redis-server redis-cli /usr/local/bin".format(""))
-            c.run("sudo \\cp redis-server redis-cli ../redis.conf {}".format(base(c)))
+            c.run("sudo \\cp redis-server redis-cli ../redis.conf {}".format(base(name)))
     configure(c)
 
 
@@ -134,22 +136,22 @@ def configure(c):
 
     sed.disable(c, "save", multi_line=True)
 
+
 def install_slave(c):
-    master_copy(c, base(c))
-    config_slave(c)
+    c = hosts.conn(0)
+    copy_pack(c, base(name), other=True)
 
+    """ 在每个机器，复制到 /usr/bin
+    """
+    hosts.execute("cd {base}; sudo \\cp redis-server redis-cli /usr/local/bin".format(base=base(name)))
 
-def config_slave(c):
-    for index in hosts.lists(other=True):
-        c = hosts.conn(index)
-        with c.cd(base(c)):
-            c.run("sudo \\cp redis-server redis-cli /usr/local/bin".format(""))
 
 ########################################################################################################################
 def cluster_stat(c):
     c = hosts.conn(0)
     c.run("echo CLUSTER NODES | redis-cli -c -p 6379".format())
     c.run("echo CLUSTER INFO | redis-cli -c -p 6379 | grep cluster_size".format())
+
 
 def cluster_master(c):
     # exec.multi(c, '''
@@ -167,6 +169,8 @@ def cluster_master(c):
     # exec.multi(c, '''
     #     wget https://rubygems.org/downloads/redis-4.0.3.gem
     #     gem install -l redis-4.0.3.gem ''')
+
+    c = hosts.conn(0)
     lists = []
     for host in hosts.lists(index=False):
         lists.append("{}:{}".format(host['host'], 6379))
@@ -179,11 +183,11 @@ def cluster_master(c):
 
 
 def create_cluster(c):
-    temp = os.path.join(os.path.dirname(base(c)), "temp")
+    temp = os.path.join(os.path.dirname(base(name)), "temp")
     hosts.execute('''
             mkdir -p {temp}; rm -rf {temp}/*
             mkdir -p {path}; rm -rf {path}/{base}
-            '''.format(path=base(c), temp=temp,
+            '''.format(path=base(name), temp=temp,
                        base=c.install.cluster.directory))
     for index in range(1, c.install.cluster.instance):
         hosts.execute(''' 
@@ -192,12 +196,12 @@ def create_cluster(c):
           
           sudo sed -i "s#\(^port \).*#\\1{port}#g" redis.conf
           sudo sed -i "s#\(^pidfile [^0-9]*\)[0-9]*\([^0-9]\)#\\1{port}\\2#g" redis.conf
-          '''.format(path=base(c), temp=temp,
+          '''.format(path=base(name), temp=temp,
                      base=c.install.cluster.directory, index=index,
                      port=(int(c.install.cluster.portbase) + index)))
     hosts.execute('''
             mv {temp} {path}/{base}
-            '''.format(path=base(c), temp=temp,
+            '''.format(path=base(name), temp=temp,
                        base=c.install.cluster.directory))
 
-configure(hosts.conn(0))
+# install(hosts.one())

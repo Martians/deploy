@@ -102,7 +102,7 @@ def parse_host(hosts):
                 print("parse host, [{}] in {} not valid".format(key, host))
                 exit(-1)
 
-        if 'type' in host and host['type'] == 'control':
+        if host.get('type') == 'control':
             host_one = host
             host['index'] = -1
             add_host_index(host['type'], host)
@@ -184,6 +184,11 @@ def get_host(index):
         if isinstance(index, str):
             if index.isdigit():
                 index = int(index)
+
+            elif index == one(True)['host']:
+                """ 通过 host 地址查找，查找的是control
+                """
+                return one(True)
 
         if isinstance(index, int):
             if index >= 0 and index <= len(host_array):

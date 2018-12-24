@@ -1,7 +1,6 @@
 # coding=utf-8
 
-import sys, os
-sys.path.append(os.path.join(os.getcwd(), "../.."))
+
 
 from invoke import task
 from common.init import *
@@ -9,6 +8,7 @@ from common.pack import *
 
 import common.hosts as hosts
 import common.sed as sed
+import system
 
 class LocalConfig:
     """ 默认配置
@@ -56,7 +56,7 @@ def install(c):
 
 
 def prepare(c):
-    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None, pty=True)
+    system.install('java', 'unzip')
 
 @task
 def configure(c):

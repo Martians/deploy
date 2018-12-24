@@ -4,13 +4,17 @@ import os
 from fabric import Connection, Config
 import common.hosts as hosts
 
-# import sys, os
-# sys.path.append(os.path.dirname(os.getcwd()))
-# sys.path.append(os.path.join(os.getcwd(), "../.."))
-# sys.path.append(os.path.join(os.getcwd(), "../../.."))
-
-# sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
-
+""" 搜索路径：
+    1. 方案1：加入到系统搜索路径，执行 python prepare.py即可
+    
+    2. 方案2：启动时加入，在执行py的头部加入以下类似语句，根据实际路径选择
+        import sys, os
+        sys.path.append(os.path.join(os.getcwd(), "../.."))
+        
+        sys.path.append(os.path.dirname(os.getcwd()))
+        sys.path.append(os.path.join(os.getcwd(), "../../.."))
+        sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))        
+"""
 
 def copy_config():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
