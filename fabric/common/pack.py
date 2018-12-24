@@ -51,6 +51,8 @@ def download(c, name, source=None, local=None, path="/tmp"):
 
 
 def package(parent=None):
+    """ 获得安装包的路径
+    """
     path = default_config['install']['package']
     if parent:
         file = os.path.basename(path)
@@ -100,20 +102,27 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
                 print("copy_pack, host [{}] already exist package".format(host['host']))
                 continue
 
-            user = hosts.get_host_item(host, "user")
-            paww = hosts.get_host_item(host, "pass")
-            command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
-
-            if sshpass:
-                c.run("sshpass -p {} {}".format(paww, command))
-            else:
-                sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
-                c.run(command, pty=True, watchers=[sudopass])
+            scp(c, host, path=path, dest=dest, sshpass=sshpass)
 
     if len(groups) == 0:
         print("\ncopy_pack complete, [{}] already exist on all hosts, ignore".format(remote))
     else:
         print("\ncopy_pack complete, copy [{}] to [{}] host".format(remote, len(groups)))
+
+
+def scp(c, host, path, dest=None, sshpass=False):
+    dest = dest if dest else os.path.dirname(path)
+
+    user = hosts.get_host_item(host, "user")
+    paww = hosts.get_host_item(host, "pass")
+    command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
+
+    if sshpass:
+        c.run("sshpass -p {} {}".format(paww, command))
+    else:
+        sudopass = Responder(pattern=r'.*password:', response=paww + '\n')
+        c.run(command, pty=True, watchers=[sudopass])
+
 
 def unpack(c, name, path=None, parent=None):
     parent = parent if parent else default_config['install']['parent']

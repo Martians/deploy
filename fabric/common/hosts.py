@@ -265,12 +265,15 @@ def execute(command, groups=None, thread=True, err=True, out=False, hide=True, o
     return execute.group(groups, command, err=err, out=out, hide=hide, go_on=go_on, **kwargs)
 
 
-def group_filter(command, reverse=False, other=False):
+def group_filter(command, reverse=False, other=False, conn=True):
     results = execute(command, err=False, other=other)
     list = []
-    for conn, result in results.items():
+    for connect, result in results.items():
         if result.ok ^ reverse:
-            list.append(conn)
+            if conn:
+                list.append(connect)
+            else:
+                list.append(get_host(connect.host))
     return list
 #######################################################################################################################
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup

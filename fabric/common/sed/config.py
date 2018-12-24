@@ -15,15 +15,17 @@ class Local:
                    }
     grep_append = {'sed': True}
 
-    sed_update = {'tag': '|',       # sed分隔符
-                  'end': 'g',       # sed结尾的选项
-                  'loc_data': '.*',  # locate部分，data的占位符
-                  'rep_prefix': '',  # replace部分的的prefix
+    sed_update = {'dump_search': True,  # 最后dump结果时，使用/search/replace/g中的search部分，或者是replace部分
+                  'tag': '|',           # sed分隔符
+                  'end': 'g',           # sed结尾的选项
+                  'loc_data': '.*',     # locate部分，data的占位符
+                  'rep_prefix': '',     # replace部分的的prefix
                   }
 
     """ 内部配置，经常要改动的那些
     """
-    debug = False   # 显示更多测试信息
+    _debug_command = False   # 显示更多测试信息
+    _debug_output = False
 
     """ 初始化工作
     """
@@ -53,8 +55,9 @@ class Local:
 
         self.conf_path = os.path.join(os.getcwd(), 'config.properties')
 
-    def debug_info(self):
-        self.debug = True
+    def debug(self, command=True, output=False):
+        self._debug_command = command
+        self._debug_output = output
 
     def initial(self, cache):
         """ 设置test时的数据源
@@ -63,6 +66,19 @@ class Local:
 
     def _path(self, file):
         return file if file else self.conf_path
+
+    def debug_output(self, name, output, line=False, force=False, seperate=''):
+        """ 有数据才输出
+            只有一行，就不使用回车
+        """
+        if force or self._debug_output and len(output) > 0:
+            if output.count('\n') > 1: line = True
+            print('[{name}]: {line}{output}{seperate}'.format(name=name, output=output, line='\n' if line else '',
+                                                              seperate=seperate))
+
+    def debug_command(self, name, output):
+        if self._debug_command:
+            print("[{}]: {}".format(name, output))
 
     ########################################################################################
     def path(self, path):
@@ -78,6 +94,11 @@ class Local:
         """
         return path.split('/')[-1]
 
+    def exit(self, data):
+        if data:
+            return data
+        else:
+            return exit(-1) if self.exit_on_err else False
     ########################################################################################
     def init_option(self):
         temp = self.grep_update.copy()
@@ -167,18 +188,13 @@ def grep(**kwargs):
     local.grep(**kwargs)
 
 
+def sed(**kwargs):
+    local.sed(**kwargs)
+
+
 def path(full):
     local.path(full)
 
-
-def debug(name, output, line=False, force=False, seperate=''):
-    """ 有数据才输出
-        只有一行，就不使用回车
-    """
-    if force or local.debug and len(output) > 0:
-        if output.count('\n') > 1: line = True
-        print('[{name}]: {line}{output}{seperate}'.format(name=name, output=output, line='\n' if line else '',
-                                                          seperate=seperate))
 
 if True:
     def test_mode(set):
@@ -187,7 +203,7 @@ if True:
 
             """ 是否开启更多的日志
             """
-            # local.debug_info()
+            local.debug(True)
             global c    # 在本文件中使用的c，如 check 函数
 
             from fabric import Connection

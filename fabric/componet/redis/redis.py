@@ -1,20 +1,29 @@
 # coding=utf-8
-import os
 
-from fabric import Connection, SerialGroup as Group, Config, task
+import sys, os
+sys.path.append(os.path.join(os.getcwd(), "../.."))
 
+from invoke import task
 from common.init import *
 from common.pack import *
 
+import common.disk as disk
 import common.hosts as hosts
 import common.sed as sed
 
-def base(c):
-    if 'base' not in c.install:
-        parent = c.install.parent if 'parent' in c.install else default_config['install']['parent']
-        c.install.base = os.path.join(parent, 'redis')
-    return c.install.base
+class LocalConfig:
+    def __init__(self):
+        self.source = 'http://download.redis.io/releases/redis-5.0.0.tar.gz'
+        self.temp = '/tmp'
 
+        self.compile = '/tmp/compile'
+
+""" 提供个默认参数
+
+    该变量定义在头部，这样在函数的默认参数中，也可以使用了
+"""
+local = LocalConfig()
+name = 'redis'
 
 """ 1. 准备 
         安装：fab install && fab cluster
@@ -26,8 +35,7 @@ def base(c):
 """
 @task
 def install(c):
-    c = hosts.conn(0)
-    install_varify(c)
+    install_prepare(c)
     install_master(c)
     install_slave(c)
 
@@ -74,28 +82,34 @@ def stop(c):
 def stat(c):
     hosts.execute("echo redis-server `ps aux | grep redis-server | grep -v 'grep' | wc -l`", out=True, hide=True)
 
+
 ########################################################################################################################
-
-
-def install_varify(c):
+def install_prepare(c):
     """ 如果已经安装，就拒绝
     """
-    lists = []
-    for index in hosts.lists():
-        c = hosts.conn(index)
-        if file_exist(c, base(c), dir=True):
-            lists.append(hosts.get_host(index))
+    command = disk._file_exist_command(base(name), dir=True)
+    lists = hosts.group_filter(command, conn=False)
 
     for host in lists:
-        print("path [{}] already exist on host [{}]".format(base(c), host['host']))
+        print("path [{}] already exist on host [{}]".format(base(name), host['host']))
 
     if len(lists):
-        print("{} host not empty, install failed, please clean first!".format(len(lists)))
+        print("[{}] host not empty, install failed, please clean first!".format(len(lists)))
         exit(-1)
 
+    """ 控制机下载安装包，复制到master
+    """
+    c = hosts.one()
+    download(c, name, source=local.source)
+    scp(c, hosts.get_host(0), package(), dest=local.temp)
 
-def compile_redis(c):
-    with c.cd(os.path.join(c.install.compile, 'redis')):
+
+def install_master(c):
+    c = hosts.conn(0)
+    unpack(c, name, path=package(local.temp), parent=local.compile)
+    c.run('yum install gcc make -y')
+
+    with c.cd(os.path.join(local.compile, 'redis')):
         if not file_exist(c, 'src', 'redis-server'):
             c.run("make MALLOC=libc -j5")
 
@@ -103,26 +117,22 @@ def compile_redis(c):
         with c.cd("src"):
             c.run("sudo \\cp redis-server redis-cli /usr/local/bin".format(""))
             c.run("sudo \\cp redis-server redis-cli ../redis.conf {}".format(base(c)))
+    configure(c)
 
 
-def install_master(c):
-    download(c, "redis", source='http://download.redis.io/releases/redis-5.0.0.tar.gz', parent=c.install.compile)
-    compile_redis(c)
-    config_master(c)
+def configure(c):
+    sed.path(os.path.join(base(name), "redis.conf"))
+    sed.grep(**{'prefix': '^'})
 
+    sed.update(c, "bind", "0.0.0.0")
+    sed.update(c, "daemonize", "yes")
+    sed.update(c, "logfile", "server.log")
+    sed.update(c, "stop-writes-on-bgsave-error", "no")
 
-def config_master(c):
-    file = os.path.join(base(c), "redis.conf")
-    sed.update(c, "bind", "0.0.0.0", file=file)
-    sed.update(c, "daemonize", "yes", file=file)
-    sed.update(c, "logfile", "server.log", file=file)
-    sed.update(c, "stop-writes-on-bgsave-error", "no", prefix=".*", file=file)
+    sed.enable(c, "cluster-enabled", "yes")
+    sed.enable(c, "cluster-config-file", "nodes.conf")
 
-    sed.enables(c, "cluster-enabled", "yes", file=file)
-    sed.enables(c, "cluster-config-file", "nodes.conf", prefix=".*", file=file)
-
-    sed.disable(c, "save", ".*", file=file)
-
+    sed.disable(c, "save", multi_line=True)
 
 def install_slave(c):
     master_copy(c, base(c))
@@ -189,3 +199,5 @@ def create_cluster(c):
             mv {temp} {path}/{base}
             '''.format(path=base(c), temp=temp,
                        base=c.install.cluster.directory))
+
+configure(hosts.conn(0))

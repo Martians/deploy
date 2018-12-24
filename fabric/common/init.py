@@ -66,6 +66,8 @@ def init_config():
 
 
 def base(name):
+    """ 程序安装路径
+    """
     if 'path' not in default_config['install']:
         c = Config()
         if 'install' in c and 'parent' in c.install:

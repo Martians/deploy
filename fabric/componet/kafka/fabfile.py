@@ -12,5 +12,6 @@ from componet.kafka import kafka
 def config(c):
     print(Config())
 
+
 ns = Collection(kafka)
 

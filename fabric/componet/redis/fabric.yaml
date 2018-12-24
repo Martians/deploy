@@ -5,6 +5,9 @@ run:
     echo: true
 #    hide: false
 
+tasks:
+    collection_name: redis
+
 # 默认用户名密码
 user: root
 connect_kwargs:
@@ -17,6 +20,8 @@ hosts:
           host: 192.168.0.80
           user: root
           pass: '111111'
+          type: control
+        - host: 192.168.0.81
         - host: 192.168.0.82
         - host: 192.168.0.83
     disk:
@@ -24,9 +29,6 @@ hosts:
         - /mnt/disk2
 
 install:
-    parent:  /opt
-
-    compile: /tmp/compile
     cluster:
         directory: 'cluster'
         instance: 5

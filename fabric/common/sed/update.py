@@ -41,32 +41,46 @@ def update(c, key, data, file=None, **kwargs):
     (command, search, expect) = sed_param(key, data, options)
     result = do_sed(c, 'update', command, file, options)
 
-    dump(c, key, search, display, file)
+    dump(c, key, search if options.get('dump_search') else expect, display, file)
 
     count = len(local.result.split('\n'))
     if count > display + 1:
-        print('[update]: item [{}], ambiguous count [{}], result:\n{}\n'.format(expect, count, local.result))
-        return False
-    elif count != display + 1:
+        if kwargs.get('multi_line'):
+            print('[update]: item [{}], success, update multi line, count [{}]'.format(expect, count))
+            return True
+        else:
+            print('[update]: item [{}], ambiguous count [{}], result:\n{}\n'.format(expect, count, local.result))
+            return local.exit(False)
+
+    elif count < display + 1:
         print('[update]: item [{}], get line [{}], not match [{}]\n'.format(expect, count, display + 1))
-        return False
+        return local.exit(False)
+
     elif not local.result:
         print('[update]: item [{}] not find, failed\n'.format(expect, local.result))
-        return False
+        return local.exit(False)
+
     else:
         print('[update]: item [{}], success\n'.format(expect, count, local.result))
         return True
 
 
-def disable(c, key, data=None, file=None, **kwargs):
-    grep = {'prefix': '^[#].*'}
-    sed = {'prefix': '^.*', 'rep_prefix': '# '}
+def disable(c, key, data='', file=None, **kwargs):
+    if data:
+        grep = {'prefix': '^[#].*'}
+        sed = {'prefix': '^.*', 'rep_prefix': '# '}
+    else:
+        grep = {'prefix': '^[#] '}
+        sed = {'dump_search': False, 'prefix': '^', 'suffix': '', 'rep_prefix': '# ', 'loc_data': ''}
+
+        grep.update({'sep': ''})
+        sed.update({'sep': ''})
 
     if kwargs.get('grep'):
         grep.update(kwargs.get('grep'))
 
     if kwargs.get('sed'):
-        update(kwargs.get('sed'))
+        sed.update(kwargs.get('sed'))
 
     kwargs['grep'] = grep
     kwargs['sed'] = sed
@@ -153,7 +167,7 @@ data_file_directories:
         """
         local.grep(**{'sep': ': '})
 
-        # enable = False
+        # enables = False
         if enables:
             output("find key")
             check(update(c, 'rpc_address', '192.168.0.1'), True)
@@ -201,6 +215,9 @@ server: daemon
 
 rpc_address: 10.10.10.19
 listen_address: 192.168.10.1
+save 1
+save 2
+save 3
 """)
         """ 修改默认选项
         """
@@ -208,13 +225,25 @@ listen_address: 192.168.10.1
 
         # enables = False
         if enables:
-            output("add comment")
+            output("add comment, use data part")
             check(disable(c, 'server', 'daemon'), True)
+            match("""# server: daemon""")
+
+            output("add comment, only set key, no data")
+            check(disable(c, 'server: daemon'), True)
             match("""# server: daemon""")
 
             output("add comment, already commented")
             check(disable(c, 'log', 'true'), False)
 
+            output("add comment, multi line")
+            check(disable(c, 'save', multi_line=True), True)
+            match("""
+# save 1
+# save 2
+# save 3""")
+
+            #########################################################################################
             output("cancel comment")
             """ grep时，查找是否存在非#开头的：如果找到不需要替换了
                 sed的search时：查找是否存在#开头的，找到后需要替换

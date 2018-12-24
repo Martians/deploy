@@ -43,16 +43,17 @@ name = 'kafka'
 @task
 def install(c):
     c = hosts.one()
-    download(c, "kafka", source=local.source)
+    download(c, name, source=local.source)
     copy_pack(c, dest=local.temp, async=True)
 
     prepare(c)
     hosts.execute('sudo rm -rf /opt/*kafka*')
 
     for index in hosts.lists():
-        unpack(hosts.conn(index), 'kafka', path=package(local.temp))
+        unpack(hosts.conn(index), name, path=package(local.temp))
 
     configure(c)
+
 
 def prepare(c):
     hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None, pty=True)
