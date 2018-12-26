@@ -57,17 +57,17 @@ def configure(c):
 
 @task
 def prepare(c):
-    system.install('java', 'unzip git', c=hosts.one())
+    system.install(hosts.one(), 'java', 'unzip git')
 
 @task
 def package(c):
     c = hosts.one()
     with c.cd(local.home):
-        c.run('mvn package')
+        c.run('mvn source')
 
 @task
 def clean(c):
     c = hosts.one()
     c.run("rm -rf {}".format(local.base))
 
-# install(c)
+# source(c)

@@ -12,7 +12,7 @@ import common.sed as sed
 
 def base(c):
     if 'base' not in c.install:
-        parent = c.install.parent if 'parent' in c.install else default_config['install']['parent']
+        parent = c.install.parent if 'parent' in c.install else default_config['source']['parent']
         c.install.base = os.path.join(parent, 'flink')
     return c.install.base
 
@@ -64,5 +64,5 @@ def clean(c):
     hosts.execute('''rm -rf /opt/flink''', hide=None)
 
 
-# install(c)
-# install(c)f
+# source(c)
+# source(c)f

@@ -170,6 +170,11 @@ class Local:
         else:
             return data.replace('\n', '\\n')
 
+    def check_param(self, file, **kwargs):
+        if not file:
+            print("update config, but file not set")
+            exit(-1)
+
 
 def arg(kwargs, name, blank=False):
     """ 工具函数

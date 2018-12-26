@@ -4,8 +4,8 @@
 ## 使用
     1. 安装
         python3
-        pip install pyYaml
-        pip install fabric
+        pip source pyYaml
+        pip source fabric
 
     2. 配置
         1. 基本：

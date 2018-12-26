@@ -3,25 +3,37 @@
 from common.init import *
 import common.hosts as hosts
 
+class LocalConfig:
+    def __init__(self):
+        # self.hide = 'out'
+        self.hide = None
 
-def package(type='common', single='', centos=True):
-    list = {'common': 'psmisc',
+
+local = LocalConfig()
+
+
+def package(type='', single='', centos=True):
+    list = {'source': 'epel-release',
+            'common': 'psmisc',
             'compile': 'gcc make',
             'java': 'java-1.8.0-openjdk-devel',
     }
+    if  list.get(type):
+        batch = list.get(type)
+    else:
+        batch = type
+
     if centos:
-        return 'yum install -y {} {}'.format(list[type], single)
+        return 'yum install -y {}{}'.format(batch + ' ' if batch else '', single)
     else:
         return ''
 
 
-def install(type='common', single='', c=None, centos=True):
+def install(c, type='', single='', hide=local.hide, centos=True):
     command = package(type=type, single=single, centos=centos)
     if c:
-        c.run(command, hide=None, pty=True)
+        c.run(command, hide=hide, pty=True)
     else:
-        hosts.execute(command, hide=None, pty=True)
-
-
+        hosts.execute(command, hide=hide, pty=True)
 
 

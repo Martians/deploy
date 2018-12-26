@@ -24,7 +24,7 @@ local = LocalConfig()
 name = 'redis'
 
 """ 1. 准备 
-        安装：fab install && fab cluster
+        安装：fab source && fab cluster
         修改：fab clear && fab cluster （增加instance个数等）
         删除：fab clean
     
@@ -93,7 +93,7 @@ def install_prepare(c):
         print("path [{}] already exist on host [{}]".format(base(name), host['host']))
 
     if len(lists):
-        print("[{}] host not empty, install failed, please clean first!".format(len(lists)))
+        print("[{}] host not empty, source failed, please clean first!".format(len(lists)))
         exit(-1)
 
     """ 控制机下载安装包，复制到master
@@ -104,12 +104,12 @@ def install_prepare(c):
 
     """ 安装包依赖
     """
-    # system.install()
+    # system.source()
 
 
 def install_master(c):
     c = hosts.conn(0)
-    system.install('compile', c=c)
+    system.install(c, 'compile')
     unpack(c, name, path=package(local.temp), parent=local.compile)
 
     with c.cd(os.path.join(local.compile, 'redis')):
@@ -155,20 +155,20 @@ def cluster_stat(c):
 
 def cluster_master(c):
     # exec.multi(c, '''
-    #     yum install ruby rubygems -y
+    #     yum source ruby rubygems -y
     #     curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     #     curl -L get.rvm.io | bash -s stable
     #     find / -name rvm -print
     #     source /usr/local/rvm/scripts/rvm
     #     rvm list known
-    #     rvm install 2.4.1
+    #     rvm source 2.4.1
     #     rvm use 2.4.1
     #     rvm use 2.4.1 --default
     #     ruby --version''')
     #
     # exec.multi(c, '''
     #     wget https://rubygems.org/downloads/redis-4.0.3.gem
-    #     gem install -l redis-4.0.3.gem ''')
+    #     gem source -l redis-4.0.3.gem ''')
 
     c = hosts.conn(0)
     lists = []
@@ -204,4 +204,4 @@ def create_cluster(c):
             '''.format(path=base(name), temp=temp,
                        base=c.install.cluster.directory))
 
-# install(hosts.one())
+# source(hosts.one())

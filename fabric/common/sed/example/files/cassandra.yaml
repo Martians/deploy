@@ -1117,7 +1117,7 @@ windows_timer_interval: 1
 # can still (and should!) be in the keystore and will be used on decrypt operations
 # (to handle the case of key rotation).
 #
-# It is strongly recommended to download and install Java Cryptography Extension (JCE)
+# It is strongly recommended to download and source Java Cryptography Extension (JCE)
 # Unlimited Strength Jurisdiction Policy Files for your version of the JDK.
 # (current link: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
 #

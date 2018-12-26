@@ -67,6 +67,7 @@ def do_grep(c, name, command, file, options):
             head = head.split('|')[0] # print('''{} {} | {}'''.format(head, file, command))
             result = c.run('''{} {} | {}'''.format(head, file, command), **local.run)
         else:
+            local.check_param(file)
             result = c.run('''{} {}'''.format(command, file), **local.run)
 
     local.grep_out = result.stdout.strip('\n')
@@ -88,6 +89,7 @@ def do_sed(c, name, command, file, options):
     else:
         """ 这里使用的是sed -i, 因此没有输出结果，不获取 local.sed_out
         """
+        local.check_param(file)
         result = c.run('{command} {file}'.format(command=command, file=file), **local.run)
 
     print('[{name}]: {command} {file}'.format(name=name, command=command, file=local.file(file)))
@@ -200,7 +202,7 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
 
             elif key_line + pos == index:
                 print("[append]: data [{}] already exist, match with locate [{}], line: {}".format(data, locate, index))
-                return local.exit(False)
+                return True
 
             elif index == 1 and data.count('\n'):
                 print("[append]: data [{}]\n  --- is multi line, no need check position, data already exist".format(data))

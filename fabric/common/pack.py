@@ -14,7 +14,7 @@ def download(c, name, source=None, local=None, path="/tmp"):
         local： 优先使用local作为数据源
         source：local不存在则到网上下载
     """
-    local = local if local else default_config['install']['source']
+    local = local if local else default_config['source']['source']
 
     ''' 传入了source，就提取source中的版本号
             查找本地时，也使用该版本号
@@ -47,13 +47,13 @@ def download(c, name, source=None, local=None, path="/tmp"):
         else:
             c.run("wget {} -P {}".format(source, path))
             print("download, http download [{}]".format(file_path))
-    default_config['install']['package'] = file_path
+    default_config['source']['source'] = file_path
 
 
 def package(parent=None):
     """ 获得安装包的路径
     """
-    path = default_config['install']['package']
+    path = default_config['source']['source']
     if parent:
         file = os.path.basename(path)
         return os.path.join(parent, file)
@@ -99,7 +99,7 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
                     ignore = False
                     break
             if ignore:
-                print("copy_pack, host [{}] already exist package".format(host['host']))
+                print("copy_pack, host [{}] already exist source".format(host['host']))
                 continue
 
             scp(c, host, path=path, dest=dest, sshpass=sshpass)
@@ -125,11 +125,11 @@ def scp(c, host, path, dest=None, sshpass=False):
 
 
 def unpack(c, name, path=None, parent=None):
-    parent = parent if parent else default_config['install']['parent']
+    parent = parent if parent else default_config['source']['parent']
     path = path if path else package()
 
     if file_exist(c, parent, name, dir=True):
-        print("unpack, install path [{}/{}] already exist".format(parent, name))
+        print("unpack, source path [{}/{}] already exist".format(parent, name))
         return 1
 
     """ 解压到 path下，名称可能带有版本号
@@ -139,7 +139,7 @@ def unpack(c, name, path=None, parent=None):
 
     c.run("mkdir -p {}".format(parent))
     if not file_actual(c, parent, name, dir=True):
-        print("unpack package [{}] ...".format(path))
+        print("unpack source [{}] ...".format(path))
 
         if path.endswith('zip'):
             c.run("sudo unzip {} -d {} ".format(path, parent))
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     c = hosts.one()
 
     """ 测试方式：
-            修改 init: config.install.source的值为无效值
+            修改 init: config.source.source的值为无效值
     """
     def download_test(c):
         c.run("rm -rf /opt/redis; rm -rf /tmp/*redis*")
@@ -178,7 +178,7 @@ if __name__ == '__main__':
         download(c, "redis", source="http://download.redis.io/releases/redis-5.0.0.tar.gz", local='/tmp')
 
     def copy_test(c):
-        print("\n======================== copy package, and set package() value")
+        print("\n======================== copy source, and set source() value")
         download(c, "redis")
 
         if 1:

@@ -58,7 +58,7 @@ def enable(c, f):
 """ 默认配置内容
 """
 default_config = {
-    'install': {
+    'source': {
         'parent': '/opt',
         'source': '/home/long/source'
     }
@@ -72,15 +72,24 @@ def init_config():
 def base(name):
     """ 程序安装路径
     """
-    if 'path' not in default_config['install']:
+    if 'path' not in default_config['source']:
         c = Config()
-        if 'install' in c and 'parent' in c.install:
+        if 'source' in c and 'parent' in c.install:
             parent = c.install.parent
         else:
-            parent = default_config['install']['parent']
+            parent = default_config['source']['parent']
 
-        default_config['install']['path'] = os.path.join(parent, name)
-    return default_config['install']['path']
+        default_config['source']['path'] = os.path.join(parent, name)
+    return default_config['source']['path']
+
+
+def conn(c):
+    from invoke import Context
+    if isinstance(c, Context):
+        c = hosts.conn(0)
+        print("connection [{}]".format(c.host))
+        return c
+
 
 if 1:
     copy_config()

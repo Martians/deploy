@@ -26,7 +26,7 @@ name = 'ignite'
 
 @task
 def prepare(c):
-    hosts.execute('''yum install unzip java-1.8.0-openjdk-devel -y''', hide=None)
+    hosts.execute('''yum source unzip java-1.8.0-openjdk-devel -y''', hide=None)
     # sed.append(c, 'export IGNITE_HOME=/opt/ignite', '', '/etc/profile')
     hosts.execute('''sudo echo export IGNITE_HOME={} >> /etc/profile'''.format(base(name)))
 
@@ -50,4 +50,4 @@ def clean(c):
 c = hosts.conn(0)
 # clean(c)
 # prepare(c)
-# install(c)
+# source(c)

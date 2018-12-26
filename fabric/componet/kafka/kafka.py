@@ -57,7 +57,7 @@ def install(c):
 
 
 def prepare(c):
-    system.install('java', 'unzip')
+    system.install(0, 'java', 'unzip')
 
 @task
 def configure(c):

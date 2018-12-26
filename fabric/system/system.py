@@ -10,3 +10,8 @@ def kill(name, str=False):
         return command
     else:
         return hosts.execute(command, err=False)
+
+
+def help(c, display, name='help'):
+    display = display.replace('\n        ', '\n    ')
+    c.run('''echo; echo '{name}: {display}' '''.format(name=name, display=display), echo=False)
