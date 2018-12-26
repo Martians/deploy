@@ -25,8 +25,8 @@ hosts:
           pass: '111111'
           type: control
         - host: 192.168.0.81
-        - host: 192.168.0.82
-        - host: 192.168.0.83
+#        - host: 192.168.0.82
+#        - host: 192.168.0.83
     disk:
         - /mnt/sdb
         - /mnt/sdc

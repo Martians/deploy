@@ -34,6 +34,29 @@
 
                     1. 控制机与宿主机，都是虚拟机
                     2. 控制机是虚拟机，宿主机是服务机
+
+        3. 各个lib（使用时命名）
+                例子：service/database、service/source
+
+                1.  所有lib统一使用一个名字：db
+
+                    fabric.yaml:
+                    from service import database
+                    ns.add_collection(database, 'db')
+                    # 或者使用自己的名字：ns.add_collection(database.mysql, 'mysql')
+
+                    __init__.py：
+                    from service.database.mysql import *
+
+                2.  每个lib使用自己的名字
+
+                    fabric.yaml:
+                    from service.database import *
+                    ns.add_collection(mysql)
+
+                    __init__.py：
+                    from service.database import mysql
+
     3. 案例：
             1. grep、sed: common/sed
             2. 完整：component/kafka

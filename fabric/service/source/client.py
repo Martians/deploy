@@ -53,7 +53,7 @@ def use_epel(c):
     """ add epel and so on
 
         yum-fastestmirror
-        
+
         wget -O /etc/yum.repos.d/CentOS-Base-aliyun.repo http://mirrors.aliyun.com/repo/Centos-7.repo
     """
     system.install(c, 'source')

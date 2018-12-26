@@ -81,6 +81,7 @@ echo "create user: $USER"
 mysql -u root -p$ROOT_PASS <<EOF
 CREATE USER '$USER'@'%' identified by '$PASS';
 GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%';
+GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%';
 FLUSH PRIVILEGES;
 
 USE mysql;		-- check result
