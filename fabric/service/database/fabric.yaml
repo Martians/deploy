@@ -24,7 +24,7 @@ hosts:
           user: root
           pass: '111111'
           type: control
-        - host: 192.168.0.81
+        - host: 192.168.0.85
 #        - host: 192.168.0.82
 #        - host: 192.168.0.83
     disk:
