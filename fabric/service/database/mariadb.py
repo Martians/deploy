@@ -4,10 +4,7 @@ import sys, os
 sys.path.append(os.path.join(os.getcwd(), "../../.."))
 
 from invoke import task
-from common.init import *
-
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 import system
 
 

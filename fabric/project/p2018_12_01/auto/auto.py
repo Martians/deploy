@@ -6,11 +6,7 @@ import time
 sys.path.append(os.path.join(os.getcwd(), "../.."))
 
 from invoke import task
-from common.init import *
-from common.pack import *
-
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 
 file = '/tmp/start.sh'
 home = '/home/guijichaxun/SimpleBenchmark_1216'

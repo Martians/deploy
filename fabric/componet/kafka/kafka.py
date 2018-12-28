@@ -4,12 +4,9 @@
 # sys.path.append(os.path.join(os.getcwd(), "../.."))
 
 from invoke import task
-from common.init import *
-from common.pack import *
-
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 import system
+
 
 class LocalConfig:
     """ 默认配置
@@ -154,3 +151,4 @@ def group(c, type='desc', group=local.group):
             c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group), pty=True)
         else:
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
+

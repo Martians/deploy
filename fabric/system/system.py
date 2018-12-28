@@ -1,7 +1,6 @@
 # coding=utf-8
 
-from common.init import *
-import common.hosts as hosts
+from common import *
 
 
 def kill(name, str=False):

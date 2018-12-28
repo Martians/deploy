@@ -6,11 +6,7 @@ sys.path.append(os.path.join(os.getcwd(), "../.."))
 from fabric import Connection, SerialGroup as Group, Config
 from invoke import task
 
-from common.init import *
-from common.pack import *
-
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 
 
 class IgniteConfig:

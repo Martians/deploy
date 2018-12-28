@@ -3,11 +3,7 @@ import os
 
 from fabric import Connection, SerialGroup as Group, Config, task
 
-from common.init import *
-from common.pack import *
-
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 
 
 def base(c):

@@ -110,3 +110,13 @@ Todo
     自动生成范围区间的host
 
 """
+
+from common.init import*
+from common.pack import *
+
+import common.disk
+import common.hosts
+
+import common.execute
+import common.sed
+

@@ -1,10 +1,6 @@
 # coding=utf-8
 
-from invoke import task
-from common.init import *
-
-from service.source.server import *
-import common.hosts as hosts
+from common import *
 import system
 
 

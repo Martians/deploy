@@ -4,12 +4,7 @@
 # sys.path.append(os.path.join(os.getcwd(), "../.."))
 
 from invoke import task
-from common.init import *
-from common.pack import *
-
-import common.disk as disk
-import common.hosts as hosts
-import common.sed as sed
+from common import *
 import system
 
 class LocalConfig:
