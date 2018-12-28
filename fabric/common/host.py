@@ -2,11 +2,8 @@
 
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
+
 class Host(dict):
-    """
-        属性访问访问字典
-        https://www.jianshu.com/p/edfa99a72a02
-    """
     def __init__(self, *args, **kw):
         dict.__init__(self, *args, **kw)
 
@@ -18,44 +15,31 @@ class Host(dict):
 
 
 class Hosts:
-    valid = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
-
-    """ 
-        1. 按照index序号
-        2. 相关字符串索引
-        3. 其他配置内容，主要是host默认配置，如disk等
-        
-    """
-    control = {}
-    array = []
-    index = {}
-    other = {}
-
     """ 解析配置
-    
+
         1. 建立索引：使用下方配置例子中的：192.168.0.80
             1. first  ：'local' => host          字符串
             2. host ip：'192.168.0.80' => host   字符串
             3. last ip：'80' => host             字符串（如果没有冲突时，自动添加为索引）
             4. index  ：'0'  => host、0 => host  字符串、数字
-           
-        2. 配置说明 
+
+        2. 配置说明
             1. 使用方式：
                 1）用户密码
                     默认密码：使用fabric配置 user、connect_kwargs、password
                     单独密码：hosts.list.host['pass']
-                    
+
                 2）服务配置：
                     默认配置：hosts.[name].[item]
                     单独配置：hosts.list.host[item name]
-                    
+
                 3）节点类型：
                     控制节点：type = control; 控制节点也可以是普通host，但需要再写一遍
                     其他节点：
-                    
+
                 4）节点分组：尚未实现
                     每个节点可以属于多个分组
-                
+
         3. 常见错误：
             1. pass设置为数字，而不是字符串
     ---
@@ -66,19 +50,26 @@ class Hosts:
                  user: root
                  pass: '111111'             # 如果都由数字组成，则必须是字符串
                  type: control              # 指定控制节点，该节点不计入index的count
-               
+
                - host: 192.168.0.80         # 控制节点同时也是host之一
-                 
+
                - host: 192.168.0.82
                  disk: /mnt/d1,/mnt/d2      # 获取hosts[1]的disk时，将获得此信息
                  name:                      # value为空，不会建立这个索引
-               
+
                - host: 192.168.0.83
-             
+
              disk:                          # 获得默认 disk时，将array内容合并成字符串
                - /mnt/disk1
                - /mnt/disk2
     """
+    valid = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
+
+    control = {}
+    array = []
+    index = {}
+    other = {}
+
     def parse(self, config, user=None, paww=None):
         self.parse_host(config)
 
@@ -136,7 +127,7 @@ class Hosts:
                     self.control['index'] = index
         else:
             self.control = self.array[0]
-            self.add_iplast()
+            self.add_last()
 
     def add_index(self, name, host):
         if name in self.index:
@@ -144,7 +135,7 @@ class Hosts:
             exit(-1)
         self.index[name] = host
 
-    def add_iplast(self):
+    def add_last(self):
         for host in self.array:
             ip = host.host.split('.')[-1]
             if ip in self.index:
@@ -207,7 +198,7 @@ class Hosts:
                 print("host_info: key {} not exist".format(index))
                 exit(-1)
 
-    def get_host_item(self, host, name, sep=","):
+    def host_item(self, host, name, sep=","):
         if name in host:
             data = host[name]
 
@@ -216,25 +207,25 @@ class Hosts:
 
         else:
             return None
-            """ 对用户名和密码，在初始化时已经进行了设置
-            """
-            # if name in self.host_conf:
-            #     data = self.host_conf[name]
-            #
-            # elif name == 'pass' and 'connect_kwargs' in self.host_conf \
-            #         and 'password' in self.host_conf['connect_kwargs']['password']:
-            #     data = self.host_conf['connect_kwargs']['password']
-            # else:
-            #     return None
+        """ 对用户名和密码，在初始化时已经进行了设置
+        """
+        # if name in self.host_conf:
+        #     data = self.host_conf[name]
+        #
+        # elif name == 'pass' and 'connect_kwargs' in self.host_conf \
+        #         and 'password' in self.host_conf['connect_kwargs']['password']:
+        #     data = self.host_conf['connect_kwargs']['password']
+        # else:
+        #     return None
 
         from _ctypes import Array
         if isinstance(data, Array) or isinstance(data, list):
             data = sep.join(data)
         return data
 
-    def get_item(self, index, name, sep=","):
+    def item(self, index, name, sep=","):
         host = self.get_host(index)
-        return self.get_host_item(host, name, sep)
+        return self.host_item(host, name, sep)
 
     ########################################################################################################################
     def is_master(self, host):
@@ -291,9 +282,9 @@ class Hosts:
         host = self.get_host(data)
 
         if 'conn' not in host:
-            user = self.get_host_item(host, 'user')
-            port = self.get_host_item(host, 'port')
-            passwd = self.get_host_item(host, 'pass')
+            user = self.host_item(host, 'user')
+            port = self.host_item(host, 'port')
+            passwd = self.host_item(host, 'pass')
             kwarg = {'password': passwd} if passwd else None
             host.conn = Connection(host=host.host, user=user, port=port, connect_kwargs=kwarg)
         return host.conn
@@ -312,27 +303,27 @@ if __name__ == '__main__':
         host = hosts.array[1]
 
         # host
-        print(hosts.get_host(host.host)['host'])
+        print(hosts.get_host(host.host).host)
 
         # name
-        print(hosts.get_host("local")['host'])
+        print(hosts.get_host("local").host)
 
         # ip last, '82'
         # last = host.host.split('.')[-1]
-        # print(hosts.get_host(last)['host'])
+        # print(hosts.get_host(last).host)
 
         # index
-        print(hosts.get_host(1)['host'])
+        print(hosts.get_host(1).host)
 
         # index：字符串
-        print(hosts.get_host('1')['host'])
+        print(hosts.get_host('1').host)
 
         # wrong
-        # print(host_info("109")['host'])
+        # print(host_info("109").host)
 
     def test_host_item():
-        print(hosts.get_item(0, "disk", ':'))
-        print(hosts.get_item(1, "disk", ':'))
+        print(hosts.item(0, "disk", ':'))
+        print(hosts.item(1, "disk", ':'))
 
     def test_get_host():
         hosts.conn(0).run("hostname")
@@ -343,9 +334,9 @@ if __name__ == '__main__':
         print(hosts.lists(other=True, index=False))
 
     def test_get_item():
-        print(hosts.get_item('control', 'pass'))
-        print(hosts.get_item(1, 'pass'))
-        print(hosts.get_item(1, 'user'))
+        print(hosts.item('control', 'pass'))
+        print(hosts.item(1, 'pass'))
+        print(hosts.item(1, 'user'))
 
     def test_group():
         print("\nserial:")

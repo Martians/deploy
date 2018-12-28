@@ -16,7 +16,7 @@ class LocalConfig:
         self.temp = '/tmp'
 
         self.port = 9092
-        self.zook_host = hosts.get_item(0, 'host') + ":2181/kafka"
+        self.zook_host = hosts.item(0, 'host') + ":2181/kafka"
         self.zook_list = '--zookeeper {}'.format(self.zook_host)
 
         self.brok_host = ','.join(['{}:{}'.format(host['host'], self.port) for host in hosts.lists(index=False)])
@@ -64,14 +64,14 @@ def configure(c):
     for index in hosts.lists():
         c = hosts.conn(index)
 
-        sed.update(c, "log.dirs", hosts.get_item(0, 'disk', ','))
+        sed.update(c, "log.dirs", hosts.item(0, 'disk', ','))
         sed.update(c, "broker.id", str(int(index) + 1))
         sed.update(c, "zookeeper.connect", local.zook_host)
 
-        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.get_item(index, 'host'), local.port))
+        sed.enable(c, "advertised.listeners", 'PLAINTEXT://{}:{}'.format(hosts.item(index, 'host'), local.port))
         sed.append(c, 'auto.create.topics.enable=false', '^group.initial.rebalance.delay.ms', grep={'prefix': ''})
 
-        for disk in hosts.get_item(index, 'disk', ',').split(','):
+        for disk in hosts.item(index, 'disk', ',').split(','):
             c.run("sudo mkdir -p {}".format(disk))
 
 @task
@@ -96,7 +96,7 @@ def clean(c):
     for index in hosts.lists():
         c = hosts.conn(index)
 
-        for disk in hosts.get_item(index, 'disk', ',').split(','):
+        for disk in hosts.item(index, 'disk', ',').split(','):
             c.run("sudo rm -rf {}/*".format(disk), pty=True)
 
 """ fab kafka.topic -t desc

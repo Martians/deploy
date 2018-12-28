@@ -79,8 +79,8 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
         """ 异步线程方式执行，需要已经设置了免密码登陆
         """
         host = hosts.get_host(c.host)
-        command = "scp -r {}@{}:{} {}".format(hosts.get_host_item(host, 'user'), host['host'], path, dest)
-        sudopass = Responder(pattern=r'.*password:', response=hosts.get_host_item(host, 'pass') + '\n')
+        command = "scp -r {}@{}:{} {}".format(hosts.host_item(host, 'user'), host['host'], path, dest)
+        sudopass = Responder(pattern=r'.*password:', response=hosts.host_item(host, 'pass') + '\n')
         hosts.execute(command, groups=groups, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
 
     else:
@@ -113,8 +113,8 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
 def scp(c, host, path, dest=None, sshpass=False):
     dest = dest if dest else os.path.dirname(path)
 
-    user = hosts.get_host_item(host, "user")
-    paww = hosts.get_host_item(host, "pass")
+    user = hosts.host_item(host, "user")
+    paww = hosts.host_item(host, "pass")
     command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
 
     if sshpass:
