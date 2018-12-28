@@ -1,6 +1,6 @@
 # coding=utf-8
 
-import common.hosts as hosts
+import common.host as hosts
 
 
 def output_result(result, prefix="", work=""):

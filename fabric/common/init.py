@@ -2,7 +2,7 @@
 import os
 
 from fabric import Connection, Config
-import common.hosts as hosts
+from common.host import hosts
 
 """ 搜索路径：
     1. 方案1：加入到系统搜索路径，执行 python prepare.py即可
@@ -97,7 +97,7 @@ if 1:
     """ fabric config
     """
     fabric_config = Config()
-    hosts.parse_info(fabric_config, fabric_config.user, fabric_config.connect_kwargs.password)
+    hosts.parse(fabric_config.get('hosts'), fabric_config.user, fabric_config.connect_kwargs.password)
 
     init_config()
 
@@ -107,4 +107,4 @@ if 1:
 
 
 if __name__ == '__main__':
-    print(config.install.parent)
+    print(fabric_config.install.parent)

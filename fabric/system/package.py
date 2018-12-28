@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from common.init import *
-import common.hosts as hosts
 
 class LocalConfig:
     def __init__(self):

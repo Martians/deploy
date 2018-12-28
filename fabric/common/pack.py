@@ -225,6 +225,6 @@ if __name__ == '__main__':
         print("\n======================== unpack but exist ")
         unpack(c, 'redis')
 
-    # download_test(c)
+    download_test(c)
     copy_test(c)
-    # unpack_test(c)
+    unpack_test(c)

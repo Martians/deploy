@@ -111,11 +111,12 @@ Todo
 
 """
 
-from common.init import*
+from common.init import *
 from common.pack import *
+from common.host import *
 
 import common.disk
-import common.hosts
+
 
 import common.execute
 import common.sed

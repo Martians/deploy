@@ -36,7 +36,7 @@ def config(c):
     list = [host['host'] for host in hosts.lists(index=False, other=False)]
     c.run('echo "{}" > {}/slaves'.format('\n'.join(list), conf))
 
-    sed.update(c, "jobmanager.rpc.address:", hosts.get_host(0)['host'], file=file)
+    sed.update(c, "jobmanager.rpc.address:", host.get_host(0)['host'], file=file)
     sed.update(c, "jobmanager.heap.size:", c.flink.jobmanager.heap, file=file)
 
     sed.update(c, "taskmanager.heap.size:", c.flink.taskmanager.heap, file=file)
