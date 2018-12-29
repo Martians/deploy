@@ -170,6 +170,9 @@ class Local:
         else:
             return data.replace('\n', '\\n')
 
+    def quote(self, command):
+        return '"' if command and command.count("'") else "'"
+
     def check_param(self, file, **kwargs):
         if not file:
             print("update config, but file not set")

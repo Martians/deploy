@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from common import *
+from service.source.server import *
 import system
 
 

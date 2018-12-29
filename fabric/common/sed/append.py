@@ -59,7 +59,8 @@ def do_grep(c, name, command, file, options):
 
     if local.test:
         # print('''echo '{}' | {}{}'''.format(local.cache, arg(options, 'head', True), command))
-        result = c.run('''echo '{}' | {}{}'''.format(local.cache, head, command), **local.run)
+        result = c.run('''echo {quote}{cache}{quote} | {head}{command}'''
+                       .format(cache=local.cache, head=head, command=command, quote=local.quote(local.cache)), **local.run)
     else:
         if head:
             """ 多行情况：head的末尾包含了一个 |, 需要去掉
@@ -76,14 +77,16 @@ def do_grep(c, name, command, file, options):
 
 
 def do_sed(c, name, command, file, options):
-    command = "sed {flag}'{command}'".format(flag='' if local.test else '-i ', command=command, file=local.file(file))
+    command = "sed {flag}{quote}{command}{quote}".format(flag='' if local.test else '-i ', command=command,
+                                                         quote=local.quote(command), file=local.file(file))
 
     """ 在执行任务之前输出，通常调试时用到
     """
     local.debug_command('do_sed', '{command} {file}'.format(name=name, command=command, file=local.file(file)))
 
     if local.test:
-        result = c.run('''echo '{}' | {}'''.format(local.cache, command), **local.run)
+        result = c.run('''echo {quote}{cache}{quote} | {command}'''
+                       .format(cache=local.cache, command=command, quote=local.quote(local.cache)), **local.run)
         local.sed_out = result.stdout
         local.debug_output('sed output', local.sed_out)
     else:
@@ -101,10 +104,10 @@ def do_sed(c, name, command, file, options):
 
 def dump(c, key, search=None, count=0, file=None):
     print("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
-    command = '''grep {show}'{search}' '''.format(show=local.show_option(count), search=local.grep_fix(search))
-
+    command = '''grep {show}{quote}{search}{quote} '''.format(show=local.show_option(count),
+                                                              search=local.grep_fix(search), quote=local.quote(search))
     if local.test:
-        command = '''echo '{cache}' | {command} '''.format(cache=local.sed_out, command=command)
+        command = '''echo {quote}{cache}{quote} | {command} '''.format(cache=local.sed_out, command=command, quote=local.quote(local.sed_out))
     else:
         command = '''{command} {file}'''.format(command=command, file=file)
 
@@ -143,10 +146,10 @@ def grep_line(c, data=None, file=None, **kwargs):
         """
         if options.get('sed'):
             data = local.sed_fix(data)
-            command = "-n '/{prefix}{data}/='".format(data=data, prefix=arg(options, 'prefix'))
+            command = "-n {quote}/{prefix}{data}/={quote}".format(data=data, prefix=arg(options, 'prefix'), quote=local.quote(data))
         else:
             data = local.grep_fix(data)
-            command = "-n '{prefix}{data}'".format(data=data, prefix=arg(options, 'prefix'))
+            command = "-n {quote}{prefix}{data}{quote}".format(data=data, prefix=arg(options, 'prefix'), quote=local.quote(data))
     else:
         if kwargs.get('grep'):
             command = '-c'
@@ -242,7 +245,7 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
 
 if __name__ == '__main__':
     c = test_mode(True)
-    enable = False
+    enable = True
 
     def test_grep_line(use_sed):
         initial('test grep', """
@@ -257,7 +260,8 @@ num.io.threads=8
     - /mnt/disk2
     - /mnt/disk3
 """)
-        if enable or True:
+        # enable = False
+        if enable:
             output("search key, exist 2")
             check(grep_line(c, 'num.io.threads=8', grep={'sed': use_sed})[1], 2)
 
@@ -281,9 +285,11 @@ bbc=3
     LOCAL_JMX=yes
 fi
 LOCAL_JMX=no
-cc_address: 192.168.10.11""")
-
-        if enable or True:
+cc_address: 192.168.10.11
+# listen_addresses = 'localhost'         # what IP address(es)
+""")
+        # enable = False
+        if enable:
             output("data not exist, insert pos = 1")
             check(append(c, 'append_line', 'LOCAL_JMX=yes'), True)
             match('''
@@ -305,6 +311,11 @@ bbc=3
             output("data not exist, locate not set, append to end")
             check(append(c, 'append_line'), True)
 
+            output("data not exist, data contain quote ['] and *")
+            check(append(c, "listen_addresses = '\\*'", '# listen_addresses'), True)
+            match("""
+# listen_addresses = 'localhost'         # what IP address(es)
+listen_addresses = '*'""")
             ###########################################################################################################
             output("data exist, but multi data, not process")
             check(append(c, 'LOCAL_JMX'), False)
@@ -313,7 +324,7 @@ bbc=3
             check(append(c, 'LOCAL_JMX', grep={'prefix': '$'}), True)
 
             output("data exist, location exist, position match")
-            check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11', pos=-1, grep={'sed': True}), False)
+            check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11', pos=-1, grep={'sed': True}), True)
 
             output("data exist, location exist, position not match, insert again")
             check(append(c, 'LOCAL_JMX=no', 'cc_address: 192.168.10.11'), True)

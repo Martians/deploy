@@ -7,7 +7,8 @@ run:
 #    pty: true
 
 tasks:
-    collection_name: mariadb
+#    collection_name: mariadb
+    collection_name: postgres
 
 # 默认用户名密码
 user: root

@@ -16,6 +16,7 @@ from common.host import hosts
         sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))        
 """
 
+
 def copy_config():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
         1. 比较 ./fabric.yaml 和 ~/.fabric.yaml 的差别
@@ -33,6 +34,8 @@ def copy_config():
         src = module
     elif os.path.exists("../" + name):
         src = "../" + name
+    elif os.path.exists("../../" + name):
+        src = "../../" + name
     else:
         print("not find yaml!")
         exit(-1)
