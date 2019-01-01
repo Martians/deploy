@@ -7,8 +7,9 @@ from invoke import task
 from common import *
 import system
 
-class LocalConfig:
+class LocalConfig(LocalBase):
     def __init__(self):
+        LocalBase.__init__(self, 'redis')
         self.source = 'http://download.redis.io/releases/redis-5.0.0.tar.gz'
         self.temp = '/tmp'
 

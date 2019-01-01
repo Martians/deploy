@@ -1,0 +1,31 @@
+
+# 用于进行 common 库的调试
+
+run:
+##    warn: true
+    echo: true
+#    hide: false
+
+# 默认用户名密码
+user: root
+connect_kwargs:
+    password: '111111'
+
+tasks:
+    collection_name: etcd
+
+hosts:
+    list:
+        - name: local
+          host: 192.168.127.10
+          user: long
+          pass: '111111'
+          type: control
+        - host: 192.168.127.11
+          name: ssh-1
+        - host: 192.168.127.12
+          name: ssh-2
+        - host: 192.168.127.13
+          name: ssh-3
+    disk:
+        - /mnt/disk

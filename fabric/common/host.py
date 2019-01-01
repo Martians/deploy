@@ -4,15 +4,43 @@ from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 
 
 class Host(dict):
-    def __init__(self, *args, **kw):
+    def __init__(self, hosts, *args, **kw):
+        self.hosts = hosts
         dict.__init__(self, *args, **kw)
 
     def __setattr__(self, k, v):
         self[k] = v
 
     def __getattr__(self, k):
-        return self.get(k)
+        # return self.get(k)
+        return self.item(k, '')
 
+    @classmethod
+    def __item(cls, host, name):
+        item_dict = {'name' : lambda: host.host.split('.')[-1]}
+        func = item_dict.get(name)
+        return func() if func else None
+
+    def item(self, name, sep=',', defv=''):
+        if name in self:
+            data = self[name]
+
+        elif self.__item(self, name):
+            data = self.__item(self, name)
+
+        elif name in hosts.other:
+            data = hosts.other[name]
+
+        elif defv:
+            data = defv
+        else:
+            return None
+
+        if sep:
+            from _ctypes import Array
+            if isinstance(data, Array) or isinstance(data, list):
+                data = sep.join(data)
+        return data
 
 class Hosts:
     """ 解析配置
@@ -88,7 +116,7 @@ class Hosts:
         index = 0
     
         for item in hosts['list']:
-            host = Host(item.copy())
+            host = Host(self, item.copy())
             if 'host' not in host:
                 print("parse host, [host] not in {}".format(host))
                 exit(-1)
@@ -99,7 +127,7 @@ class Hosts:
                 '''
                 if key == 'name' and item[key]:
                     self.add_index(item[key], host)
-                    del host[key]
+                    # del host[key]
 
                 elif key not in self.valid:
                     print("parse host, [{}] in {} not valid".format(key, host))
@@ -169,6 +197,11 @@ class Hosts:
         print()
 
     def get_host(self, index):
+        if isinstance(index, Host):
+            return index
+        elif isinstance(index, Connection):
+            index = index.host
+
         """ 根据任何索引，获取host
 
             1. key 为字符串：name、host、ip last
@@ -198,43 +231,19 @@ class Hosts:
                 print("host_info: key {} not exist".format(index))
                 exit(-1)
 
-    def host_item(self, host, name, sep=","):
-        if name in host:
-            data = host[name]
-
-        elif name in self.other:
-            data = self.other[name]
-
-        else:
-            return None
-        """ 对用户名和密码，在初始化时已经进行了设置
-        """
-        # if name in self.host_conf:
-        #     data = self.host_conf[name]
-        #
-        # elif name == 'pass' and 'connect_kwargs' in self.host_conf \
-        #         and 'password' in self.host_conf['connect_kwargs']['password']:
-        #     data = self.host_conf['connect_kwargs']['password']
-        # else:
-        #     return None
-
-        from _ctypes import Array
-        if isinstance(data, Array) or isinstance(data, list):
-            data = sep.join(data)
-        return data
-
-    def item(self, index, name, sep=","):
+    def item(self, index, name, sep=",", defv=''):
         host = self.get_host(index)
-        return self.host_item(host, name, sep)
+        return host.item(name, sep, defv)
 
     ########################################################################################################################
     def is_master(self, host):
         return host.index == 0
 
-    def lists(self, index=True, other=False):
+    def lists(self, index=True, other=False, count=0):
         return [host.index if index else host
                 for host in self.array
-                if not other or not self.is_master(host)]
+                if not other or not self.is_master(host)
+                if count == 0 or host.index < count]
 
     def conns(self, other=False):
         return [self.conn(index) for index in self.lists(other=other)]
@@ -282,11 +291,9 @@ class Hosts:
         host = self.get_host(data)
 
         if 'conn' not in host:
-            user = self.host_item(host, 'user')
-            port = self.host_item(host, 'port')
-            passwd = self.host_item(host, 'pass')
+            passwd = host.item('pass')
             kwarg = {'password': passwd} if passwd else None
-            host.conn = Connection(host=host.host, user=user, port=port, connect_kwargs=kwarg)
+            host.conn = Connection(host=host.host, user=host.user, port=host.port, connect_kwargs=kwarg)
         return host.conn
 
 
