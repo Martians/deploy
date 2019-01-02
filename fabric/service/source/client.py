@@ -26,6 +26,7 @@ EOF'''.format(file=file, name=name, type='file' if path.startswith('/') else 'ht
 def use_file(c, path=local.repo):
     """ fab -H 192.168.0.81 source.use_file --path /home/repo
     """
+    c = conn(c)
     use_repo(c, 'file.repo', local.file_repo, path)
 
 
@@ -33,12 +34,14 @@ def use_file(c, path=local.repo):
 def use_http(c, url):
     """ fab -H 192.168.0.81 source.use_http --url 192.168.0.81
     """
+    c = conn(c)
     use_repo(c, 'http.repo', local.http_repo, url)
 
 @task
 def use_help(c):
     """ fab -H 192.168.0.81 source.use_help
     """
+    c = conn(c)
     system.help(c, '''
         yum --disablerepo="*" --enablerepo="{name}" list available
         yum --disablerepo="*" --enablerepo="{name}" install -y python36u
@@ -52,6 +55,7 @@ def use_epel(c):
 
         wget -O /etc/yum.repos.d/CentOS-Base-aliyun.repo http://mirrors.aliyun.com/repo/Centos-7.repo
     """
+    c = conn(c)
     system.install(c, 'source')
 
 @task
@@ -60,6 +64,7 @@ def use_proxy(c, url, add=True):
 
         yum makecache 有时要多执行几次
     """
+    c = conn(c)
     sed.path('/etc/yum.conf')
     sed.grep(**{'sep': '='})
     sed.append(c, 'proxy=http://{url}:3142'.format(url=url))

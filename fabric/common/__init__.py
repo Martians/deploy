@@ -99,6 +99,9 @@
             2. 输出所有内容：echo = True, hide = False
             3. pty=True 需要输入密码的部分
 
+## 错误
+    1. 如果函数的 docstring 为空，那么 fab -l 将无法执行
+
 Todo
     将配置文件分离出来
     角色划分：安装点、其他机器（master、slave等）

@@ -17,8 +17,6 @@ local = LocalConfig()
 
 @task
 def install(c):
-    """
-    """
     c = conn(c)
 
     system.install(c, 'postgresql95-server.x86_64 postgresql95-contrib.x86_64')
@@ -88,3 +86,6 @@ def remove(c):
     c = conn(c)
     c.run('yum remove -y postgresql95-server.x86_64 postgresql95-contrib.x86_64')
     c.run("rm -rf {data}".format(data=local.data))
+
+    """ psql -U user -d dbname
+    """
