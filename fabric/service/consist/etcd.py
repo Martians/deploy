@@ -86,4 +86,4 @@ def stop(c):
         c.run(system.kill('etcd', True), warn=True)
 
 # install(hosts.one())
-start(hosts.conn(0))
+# start(hosts.conn(0))

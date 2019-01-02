@@ -361,6 +361,12 @@ if __name__ == '__main__':
 
         print(hosts.group_filter(disk._file_exist_command('/root/test'), reverse=True))
 
+    def test_file():
+        import yaml
+        with open('hosts.yaml', 'r') as f:
+            hosts = yaml.load(f)
+            print(hosts)
+
     test_host_info()
     test_host_item()
     test_get_host()
@@ -368,4 +374,5 @@ if __name__ == '__main__':
     test_get_item()
     test_group()
     test_group_filter()
+    test_file()
 

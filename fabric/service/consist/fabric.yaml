@@ -17,15 +17,15 @@ tasks:
 hosts:
     list:
         - name: local
-          host: 192.168.127.10
+          host: 192.168.0.80
           user: long
           pass: '111111'
           type: control
-        - host: 192.168.127.11
+        - host: 192.168.0.81
           name: ssh-1
-        - host: 192.168.127.12
+        - host: 192.168.0.82
           name: ssh-2
-        - host: 192.168.127.13
+        - host: 192.168.0.83
           name: ssh-3
     disk:
         - /mnt/disk
