@@ -78,25 +78,23 @@ def start(c):
     c = hosts.conn(0)
     c.run('cd {}; nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>zookeeper.log 2>&1 &'.format(local.base))
 
-    hosts.execute('cd {}; nohup bin/kafka-server-start.sh config/server.properties 1>/dev/null 2>&1 &'.format(local.base))
+    system.start('kafka.Kafka', 'cd {}; nohup bin/kafka-server-start.sh config/server.properties 1>/dev/null 2>&1 &'.format(local.base))
 
 @task
-def stop(c):
-    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(local.base), hide=None, go_on=True)
-    hosts.execute('cd {}; bin/zookeeper-server-stop.sh'.format(local.base), hide=None, go_on=True)
+def stop(c, force=False):
+    c = hosts.conn(0)
+    c.run('cd {}; bin/zookeeper-server-stop.sh'.format(local.base), hide=None, warn=True)
+
+    system.stop('kafka', dir=local.base, exec='bin/kafka-server-stop.sh')
+
+    if force:
+        system.stop('kafka.Kafka', pkill=False)
 
 @task
 def clean(c):
     stop(c)
-    # hosts.execute('killall -9 java', hide=None)
-    hosts.execute('sudo rm -rf /opt/kafka', hide=None)
-    hosts.execute('sudo rm -rf /tmp/zookeeper', hide=None)
 
-    for index in hosts.lists():
-        c = hosts.conn(index)
-
-        for disk in hosts.item(index, 'disk', ',').split(','):
-            c.run("sudo rm -rf {}/*".format(disk), pty=True)
+    system.clean('/opt/kafka, /tmp/zookeeper')
 
 """ fab kafka.topic -t desc
     fab kafka.topic -t create -o test1 -r 3 -p 10
@@ -152,3 +150,6 @@ def group(c, type='desc', group=local.group):
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
 
 # install(hosts.conn(0))
+# start(hosts.conn(0))fab
+# stop(hosts.conn(0))
+# clean(hosts.conn(0))

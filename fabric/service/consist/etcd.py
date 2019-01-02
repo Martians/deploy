@@ -13,7 +13,7 @@ class LocalConfig(LocalBase):
         LocalBase.__init__(self, 'etcd')
         self.source = 'https://github.com/etcd-io/etcd/releases/download/v3.3.10/etcd-v3.3.10-linux-amd64.tar.gz'
 
-        self.count = 3
+        self.count = 2
         self.conf = '/etc/etcd.yml'
         self.path = '/var/lib/etcd'
         self.logs = '/var/log/etcd.log'
@@ -62,9 +62,9 @@ initial-cluster-state: new' > {conf}'''
         c.run("cat {conf}".format(conf=local.conf))
 
 @task
-def start(c):
+def start(c, force=False):
     system.start('etcd', 'nohup /opt/etcd/etcd --config-file={conf} >> {log} 2>&1 &'
-                  .format(conf=local.conf, log=local.logs), count=local.count)
+                  .format(conf=local.conf, log=local.logs), force=force, count=local.count)
 @task
 def stop(c):
     system.stop(local.name, count=local.count)

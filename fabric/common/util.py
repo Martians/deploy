@@ -15,7 +15,7 @@ def args_fil(list, kwargs):
     dict = {}
     for item in list.split(','):
         item = item.strip(' ')
-        if item and kwargs.get(item):
+        if item and item in kwargs:
             dict[item] = kwargs.pop(item)
     return dict
 

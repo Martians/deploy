@@ -62,7 +62,7 @@ def start(name, command, force=False, **kwargs):
 def stop(name, exec='', dir='', **kwargs):
     if exec:
         dir = 'cd {}; '.format(dir) if dir else ''
-        hosts.execute('{dir}{exec}'.format(dir=dir, exec=exec), **kwargs)
+        group('{dir}{exec}'.format(dir=dir, exec=exec), **kwargs)
     else:
         kill(name, **kwargs)
 
@@ -74,7 +74,7 @@ def stat(name, **kwargs):
 def clean(dirs='', disk=True, **kwargs):
     remove = ''
     for dir in dirs.split(','):
-        remove = sep(remove, dir, ' ')
+        remove = sep(remove, dir.strip(' '), ' ')
 
     if remove:
         hosts.execute('sudo rm -rf {}'.format(remove), hide=None, **kwargs)

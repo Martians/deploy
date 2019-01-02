@@ -11,10 +11,13 @@ def output_result(result, prefix="", work="", output=None):
     """
     if output:
         print("{0}<{1.connection.host}> {2}".format(prefix, result, output(result)))
-    elif result.failed:
+    elif result.failed or result.stderr:
         failed = result.stderr.strip()
-        failed = failed if failed else 'err: {}'.format(result.exited)
-        print("{0}<{1.connection.host}> {2}{1.stdout} {3}".format(prefix, result, work, failed))
+        if result.stdout or result.stderr:
+            failed = '{} {}'.format(result.stdout.strip("\n"), failed)
+        else:
+            failed = 'err: {}'.format(result.exited)
+        print("{0}<{1.connection.host}> {2}{3}".format(prefix, result, work, failed))
     else:
         output = result.stdout.strip()
         print("{0}<{1.connection.host}> {2}{3}".format(prefix, result, work, output))
@@ -84,13 +87,15 @@ def group(group, command, err=True, go_on=False, out=False, handle=None, output=
             if handle:
                 if not handle(item):
                     count += 1
-            elif item.failed:
+            elif item.failed or item.stderr:
+                """ 有时候，failed 为false，但是仍然是出错了
+                """
                 count += 1
 
     if count:
         print("\nexecute [{}], failed {}/{}:".format(command, count, total))
         for connection, item in results.items():
-            if item.failed:
+            if item.failed or item.stderr:
                 output_result(item, prefix="\t".format(), output=output)
         print()
         if go_on:

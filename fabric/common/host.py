@@ -249,7 +249,7 @@ class Hosts:
         return [self.conn(index) for index in self.lists(**kwarg)]
 
     def conns_filter(self, command, handle=None, reverse=False, conn=True, **kwargs):
-        results = self.execute(command, err=False, mute=True, **kwargs)
+        results = self.execute(command, **args_def(kwargs, err=False, mute=True))
         list = []
         for connect, result in results.items():
             if handle:
