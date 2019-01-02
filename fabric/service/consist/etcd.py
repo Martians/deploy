@@ -13,7 +13,7 @@ class LocalConfig(LocalBase):
         LocalBase.__init__(self, 'etcd')
         self.source = 'https://github.com/etcd-io/etcd/releases/download/v3.3.10/etcd-v3.3.10-linux-amd64.tar.gz'
 
-        self.count = 2
+        self.count = 1
         self.conf = '/etc/etcd.yml'
         self.path = '/var/lib/etcd'
         self.logs = '/var/log/etcd.log'
@@ -43,7 +43,11 @@ def install(c):
 
     for host in hosts.lists(index=False, count=local.count):
         c = hosts.conn(host)
+
         unpack(c, local.name, path=package(local.temp))
+        c.run('rm -rf {link}; ln -s {base}/etcdctl /usr/bin/'.format(base=local.base, link='/usr/bin/etcdctl'))
+
+        sed.append(c, 'export ETCDCTL_API=3', file='/root/.bashrc')
 
         c.run('''echo '
 name: {name}
@@ -61,6 +65,7 @@ initial-cluster-state: new' > {conf}'''
                       peer_port=local.peer_port, cluster=local.cluster, token=local.token, conf=local.conf), echo=False)
         c.run("cat {conf}".format(conf=local.conf))
 
+
 @task
 def start(c, force=False):
     system.start('etcd', 'nohup /opt/etcd/etcd --config-file={conf} >> {log} 2>&1 &'
@@ -70,8 +75,8 @@ def stop(c):
     system.stop(local.name, count=local.count)
 
 @task
-def stat(c):
-    system.stat(local.name, count=local.count)
+def proc(c):
+    system.process(local.name, count=local.count)
 
 @task
 def clean(c):
@@ -79,7 +84,12 @@ def clean(c):
     system.clean(local.base, count=local.count)
 
 
+""" etcdctl member list
+    etcdctl cluster-health    
+"""
+
 # system.grep("etcd")
 # install(hosts.one())
 # start(hosts.conn(0))
 # stop(hosts.conn(0))
+# stat(hosts.conn(0))

@@ -59,6 +59,17 @@ def multi(c, commands, go_on=False, hide=None):
         print("\nmulti command, total {}\n".format(len(commands)))
 
 
+def group_fail(result, handle):
+    if handle:
+        if not handle(result):
+            return True
+    elif result.failed or result.stderr:
+        """ 有时候，failed 为false，但是仍然是出错了
+        """
+        return True
+    return False
+
+
 def group(group, command, err=True, go_on=False, out=False, handle=None, output=None, mute=False, **kwargs):
     """ group
         1. stderr：命令执行过程中不抛出异常（warn=True），执行完成后手动打印出来
@@ -84,18 +95,13 @@ def group(group, command, err=True, go_on=False, out=False, handle=None, output=
     '''
     if err:
         for connection, item in results.items():
-            if handle:
-                if not handle(item):
-                    count += 1
-            elif item.failed or item.stderr:
-                """ 有时候，failed 为false，但是仍然是出错了
-                """
+            if group_fail(item, handle):
                 count += 1
 
     if count:
         print("\nexecute [{}], failed {}/{}:".format(command, count, total))
         for connection, item in results.items():
-            if item.failed or item.stderr:
+            if group_fail(item, handle):
                 output_result(item, prefix="\t".format(), output=output)
         print()
         if go_on:
@@ -110,7 +116,7 @@ def group(group, command, err=True, go_on=False, out=False, handle=None, output=
     '''
     if out:
         for connection, item in results.items():
-            if not item.failed:
+            if not group_fail(item, handle):
                 output_result(item, prefix='\t', output=output)
     return results
 

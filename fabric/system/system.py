@@ -67,7 +67,7 @@ def stop(name, exec='', dir='', **kwargs):
         kill(name, **kwargs)
 
 
-def stat(name, **kwargs):
+def process(name, **kwargs):
     grep(name, out=True, output=grep_output, **kwargs)
 
 
