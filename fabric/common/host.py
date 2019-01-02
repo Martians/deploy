@@ -263,8 +263,8 @@ class Hosts:
                 self.other[name].extend([self.conn(index) for index in self.lists(other=other)])
             return self.other[name]
 
-    def execute(self, command, groups=None, thread=True, err=True, out=False, hide=True, other=False, go_on=False,**kwargs):
-        groups = self.group(thread=thread, other=other, conns=groups)
+    def execute(self, command, conns=None, thread=True, err=True, out=False, hide=True, other=False, go_on=False, **kwargs):
+        groups = self.group(thread=thread, other=other, conns=conns)
 
         import common.execute as execute
         return execute.group(groups, command, err=err, out=out, hide=hide, go_on=go_on, **kwargs)
@@ -277,7 +277,7 @@ class Hosts:
                 if conn:
                     list.append(connect)
                 else:
-                    list.append(get_host(connect.host))
+                    list.append(self.get_host(connect.host))
         return list
     #######################################################################################################################
 

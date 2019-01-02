@@ -81,7 +81,7 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
         host = hosts.get_host(c.host)
         command = "scp -r {}@{}:{} {}".format(host.user, host['host'], path, dest)
         sudopass = Responder(pattern=r'.*password:', response=host.item('pass') + '\n')
-        hosts.execute(command, groups=groups, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
+        hosts.execute(command, conns=groups, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
 
     else:
         """ scp
@@ -113,8 +113,8 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
 def scp(c, host, path, dest=None, sshpass=False):
     dest = dest if dest else os.path.dirname(path)
 
-    user = hosts.host_item(host, "user")
-    paww = hosts.host_item(host, "pass")
+    user = host.user
+    paww = host.item('passyes')
     command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
 
     if sshpass:
@@ -225,6 +225,6 @@ if __name__ == '__main__':
         print("\n======================== unpack but exist ")
         unpack(c, 'redis')
 
-    download_test(c)
+    # download_test(c)
     copy_test(c)
     unpack_test(c)

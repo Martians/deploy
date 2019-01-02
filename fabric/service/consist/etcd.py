@@ -20,7 +20,6 @@ class LocalConfig(LocalBase):
 
         self.peer_port = 2380
         self.client_port = 2379
-
         self.token = 'etcd-cluster'
 
         self.cluster = ''
@@ -30,13 +29,14 @@ class LocalConfig(LocalBase):
 
 local = LocalConfig()
 
+""" https://github.com/etcd-io/etcd/blob/master/Documentation/docs.md
+
+https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/clustering.md
+        https://blog.csdn.net/god_wot/article/details/77854093
+        
+"""
 @task
 def install(c):
-    """ install etcd
-
-        https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/clustering.md
-        https://blog.csdn.net/god_wot/article/details/77854093
-    """
     c = hosts.one()
     download(c, local.name, source=local.source)
     copy_pack(c, dest=local.temp, async=True)
@@ -85,5 +85,5 @@ def stop(c):
         c = hosts.conn(host)
         c.run(system.kill('etcd', True), warn=True)
 
-# install(hosts.one())
+install(hosts.one())
 # start(hosts.conn(0))
