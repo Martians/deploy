@@ -68,6 +68,15 @@ default_config = {
 }
 
 
+class LocalBase:
+    def __init__(self, name=''):
+        self.name = name
+        self.temp = '/tmp'
+
+    def base(self):
+        return base(self.name)
+
+
 def init_config():
     pass
 
@@ -88,10 +97,11 @@ def base(name):
 
 def conn(c):
     from invoke import Context
-    if isinstance(c, Context):
+    # if isinstance(c, Context):
+    if not hasattr(c, 'host'):
         c = hosts.conn(0)
         print("connection [{}]".format(c.host))
-        return c
+    return c
 
 
 if 1:

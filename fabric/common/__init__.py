@@ -117,10 +117,9 @@ Todo
 from common.init import *
 from common.pack import *
 from common.host import *
-
-import common.disk
-
+from common.util import *
 
 import common.execute
+import common.disk
 import common.sed
 

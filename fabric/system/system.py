@@ -4,7 +4,7 @@ from common import *
 
 
 def kill(name, str=False):
-    command = "ps aux | grep redis | grep -v grep |awk '{{print $2}}'| xargs kill -9".format(name)
+    command = "ps aux | grep {name} | grep -v grep | awk '{{print $2}}' | xargs kill -9".format(name=name)
     if str:
         return command
     else:
