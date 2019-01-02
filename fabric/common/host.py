@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
-
+from common.util import *
 
 class Host(dict):
     def __init__(self, hosts, *args, **kw):
@@ -196,7 +196,7 @@ class Hosts:
             pp.pprint(self.other)
         print()
 
-    def get_host(self, index):
+    def get(self, index):
         if isinstance(index, Host):
             return index
         elif isinstance(index, Connection):
@@ -232,7 +232,7 @@ class Hosts:
                 exit(-1)
 
     def item(self, index, name, sep=",", defv=''):
-        host = self.get_host(index)
+        host = self.get(index)
         return host.item(name, sep, defv)
 
     ########################################################################################################################
@@ -245,50 +245,47 @@ class Hosts:
                 if not other or not self.is_master(host)
                 if count == 0 or host.index < count]
 
-    def conns(self, other=False):
-        return [self.conn(index) for index in self.lists(other=other)]
+    def conns(self, **kwarg):
+        return [self.conn(index) for index in self.lists(**kwarg)]
 
-    def group(self, thread=True, other=False, conns=None):
-
-        if conns is not None:
-            """ 将临时传入的连接列表，组成 Group
-            """
-            host_conns = ThreadingGroup() if thread else Group()
-            host_conns.extend(conns)
-            return host_conns
-        else:
-            name = 'thread_group' if thread else 'group'
-            if name not in self.other:
-                self.other[name] = ThreadingGroup() if thread else Group()
-                self.other[name].extend([self.conn(index) for index in self.lists(other=other)])
-            return self.other[name]
-
-    def execute(self, command, conns=None, thread=True, err=True, out=False, hide=True, other=False, go_on=False, **kwargs):
-        groups = self.group(thread=thread, other=other, conns=conns)
-
-        import common.execute as execute
-        return execute.group(groups, command, err=err, out=out, hide=hide, go_on=go_on, **kwargs)
-
-    def group_filter(self, command, reverse=False, other=False, conn=True):
-        results = self.execute(command, err=False, other=other)
+    def conns_filter(self, command, handle=None, reverse=False, conn=True, **kwargs):
+        results = self.execute(command, err=False, mute=True, **kwargs)
         list = []
         for connect, result in results.items():
-            if result.ok ^ reverse:
+            if handle:
+                succ = handle(result)
+            else:
+                succ = result.ok
+            if succ ^ reverse:
                 if conn:
                     list.append(connect)
                 else:
-                    list.append(self.get_host(connect.host))
+                    list.append(self.get(connect.host))
         return list
+
+    def group(self, thread=True, conns=None, **kwargs):
+        group = ThreadingGroup() if thread else Group()
+        if conns is not None:
+            group.extend(conns)
+        else:
+            group.extend(self.conns(**kwargs))
+        return group
+
+    def execute(self, command, **kwargs):
+        groups = self.group(**args_fil('thread, other, conns, count', kwargs))
+
+        import common.execute as execute
+        return execute.group(groups, command, **args_def(kwargs, hide=True))
     #######################################################################################################################
 
     def one(self, host=False):
-        return self.get_host('control') if host else self.conn('control')
+        return self.get('control') if host else self.conn('control')
 
     def conn(self, data):
         """ 建立到某个host的连接，并保存下来
                 可以指定 ip最后一位、name、host、index等
         """
-        host = self.get_host(data)
+        host = self.get(data)
 
         if 'conn' not in host:
             passwd = host.item('pass')
@@ -310,20 +307,20 @@ if __name__ == '__main__':
         host = hosts.array[1]
 
         # host
-        print(hosts.get_host(host.host).host)
+        print(hosts.get(host.host).host)
 
         # name
-        print(hosts.get_host("local").host)
+        print(hosts.get("local").host)
 
         # ip last, '82'
         # last = host.host.split('.')[-1]
         # print(hosts.get_host(last).host)
 
         # index
-        print(hosts.get_host(1).host)
+        print(hosts.get(1).host)
 
         # index：字符串
-        print(hosts.get_host('1').host)
+        print(hosts.get('1').host)
 
         # wrong
         # print(host_info("109").host)
@@ -357,9 +354,9 @@ if __name__ == '__main__':
 
     def test_group_filter():
         import common.disk as disk
-        print(hosts.group_filter(disk._file_exist_command('/root/test')))
+        print(hosts.conns_filter(disk._file_exist_command('/root/test')))
 
-        print(hosts.group_filter(disk._file_exist_command('/root/test'), reverse=True))
+        print(hosts.conns_filter(disk._file_exist_command('/root/test'), reverse=True))
 
     def test_file():
         import yaml

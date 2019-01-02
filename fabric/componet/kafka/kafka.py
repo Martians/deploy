@@ -57,7 +57,7 @@ def prepare(c):
 
 @task
 def configure(c):
-    sed.path(os.path.join(local.base(), "config/server.properties"))
+    sed.path(os.path.join(local.base, "config/server.properties"))
     sed.grep(**{'sep': '='})
 
     for index in hosts.lists():
@@ -76,14 +76,14 @@ def configure(c):
 @task
 def start(c):
     c = hosts.conn(0)
-    c.run('cd {}; nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>zookeeper.log 2>&1 &'.format(local.base()))
+    c.run('cd {}; nohup bin/zookeeper-server-start.sh config/zookeeper.properties 1>zookeeper.log 2>&1 &'.format(local.base))
 
-    hosts.execute('cd {}; nohup bin/kafka-server-start.sh config/server.properties 1>/dev/null 2>&1 &'.format(local.base()))
+    hosts.execute('cd {}; nohup bin/kafka-server-start.sh config/server.properties 1>/dev/null 2>&1 &'.format(local.base))
 
 @task
 def stop(c):
-    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(local.base()), hide=None, go_on=True)
-    hosts.execute('cd {}; bin/zookeeper-server-stop.sh'.format(local.base()), hide=None, go_on=True)
+    hosts.execute('cd {}; bin/kafka-server-stop.sh'.format(local.base), hide=None, go_on=True)
+    hosts.execute('cd {}; bin/zookeeper-server-stop.sh'.format(local.base), hide=None, go_on=True)
 
 @task
 def clean(c):
@@ -105,7 +105,7 @@ def clean(c):
 @task
 def topic(c, type='desc', topic=local.topic, replica=local.replica, partition=local.partition):
     c = hosts.conn(0)
-    with c.cd(local.base()):
+    with c.cd(local.base):
         if type == 'create':
             c.run('''bin/kafka-topics.sh {} --create --topic {} --replication-factor {} --partitions {} '''
                   .format(local.zook_list, topic, replica, partition), pty=True)
@@ -122,15 +122,15 @@ def stat(c, control=False):
     c = hosts.conn(0)
     shell = 'bin/zookeeper-shell.sh {}'.format(local.zook_host)
     if control:
-        c.run("cd {base}; echo 'get /controller' | {shell}".format(base=local.base(), shell=shell), pty=True)
+        c.run("cd {base}; echo 'get /controller' | {shell}".format(base=local.base, shell=shell), pty=True)
     else:
-        c.run("cd {base}; echo 'ls /brokers/ids' | {shell}".format(base=local.base(), shell=shell), pty=True)
+        c.run("cd {base}; echo 'ls /brokers/ids' | {shell}".format(base=local.base, shell=shell), pty=True)
 
 
 @task
 def produce(c, message=local.message, topic=local.topic, count=1):
     c = hosts.conn(0)
-    with c.cd(local.base()):
+    with c.cd(local.base):
         for i in range(count):
             c.run('echo {} | bin/kafka-console-producer.sh {} --topic {}'.format(message, local.brok_list, topic), pty=True)
 
@@ -138,16 +138,17 @@ def produce(c, message=local.message, topic=local.topic, count=1):
 @task
 def consume(c, topic=local.topic, group=local.group, touch=False):
     c = hosts.conn(0)
-    with c.cd(local.base()):
+    with c.cd(local.base):
         c.run('bin/kafka-console-consumer.sh {} --topic {} --consumer-property group.id={} {} {}'
               .format(local.boot_list, topic, group, '--from-beginning', '--max-messages 1' if touch else ''), pty=True)
 
 @task
 def group(c, type='desc', group=local.group):
     c = hosts.conn(0)
-    with c.cd(local.base()):
+    with c.cd(local.base):
         if type == 'desc':
             c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group), pty=True)
         else:
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
 
+# install(hosts.conn(0))

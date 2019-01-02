@@ -72,9 +72,7 @@ class LocalBase:
     def __init__(self, name=''):
         self.name = name
         self.temp = '/tmp'
-
-    def base(self):
-        return base(self.name)
+        self.base = base(self.name)
 
 
 def init_config():

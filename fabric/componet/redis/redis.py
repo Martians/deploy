@@ -83,7 +83,7 @@ def install_prepare(c):
     """ 如果已经安装，就拒绝
     """
     command = disk._file_exist_command(base(name), dir=True)
-    lists = host.group_filter(command, conn=False)
+    lists = hosts.conns_filter(command, conn=False)
 
     for host in lists:
         print("path [{}] already exist on host [{}]".format(base(name), host['host']))
@@ -94,9 +94,9 @@ def install_prepare(c):
 
     """ 控制机下载安装包，复制到master
     """
-    c = host.one()
+    c = hosts.one()
     download(c, name, source=local.source)
-    scp(c, host.get_host(0), package(), dest=local.temp)
+    scp(c, hosts.get(0), package(), dest=local.temp)
 
     """ 安装包依赖
     """
@@ -166,9 +166,9 @@ def cluster_master(c):
     #     wget https://rubygems.org/downloads/redis-4.0.3.gem
     #     gem source -l redis-4.0.3.gem ''')
 
-    c = host.conn(0)
+    c = hosts.conn(0)
     lists = []
-    for host in host.lists(index=False):
+    for host in hosts.lists(index=False):
         lists.append("{}:{}".format(host['host'], 6379))
 
         for index in range(1, c.install.cluster.instance):
@@ -200,4 +200,4 @@ def create_cluster(c):
             '''.format(path=base(name), temp=temp,
                        base=c.install.cluster.directory))
 
-# source(hosts.one())
+# install(hosts.conn(0))

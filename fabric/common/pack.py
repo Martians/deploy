@@ -71,17 +71,17 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
         """ 找到hosts, 这些hosts上该包不存在
         """
         import common.disk as disk
-        groups = hosts.group_filter(disk._file_exist_command(remote), reverse=True, other=other)
+        conns = hosts.conns_filter(disk._file_exist_command(remote), reverse=True, other=other)
     else:
-        groups = hosts.group(thread=False, other=other)
+        conns = hosts.conns(other=other)
 
     if async:
         """ 异步线程方式执行，需要已经设置了免密码登陆
         """
-        host = hosts.get_host(c.host)
+        host = hosts.get(c.host)
         command = "scp -r {}@{}:{} {}".format(host.user, host['host'], path, dest)
         sudopass = Responder(pattern=r'.*password:', response=host.item('pass') + '\n')
-        hosts.execute(command, conns=groups, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
+        hosts.execute(command, conns=conns, thread=True, other=other, out=True, hide=None, pty=True, watchers=[sudopass])
 
     else:
         """ scp
@@ -92,7 +92,7 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
         """
         for host in hosts.lists(index=False, other=other):
             ignore = True
-            for conn in groups:
+            for conn in conns:
                 """ 如果是需要发送的连接，那么group中执行命令，已经让 host['conn'] 有了值
                 """
                 if 'conn' in host and conn is host['conn']:
@@ -104,17 +104,17 @@ def copy_pack(c, path=None, dest=None, check=True, sshpass=False, other=False, a
 
             scp(c, host, path=path, dest=dest, sshpass=sshpass)
 
-    if len(groups) == 0:
+    if len(conns) == 0:
         print("\ncopy_pack complete, [{}] already exist on all hosts, ignore".format(remote))
     else:
-        print("\ncopy_pack complete, copy [{}] to [{}] host".format(remote, len(groups)))
+        print("\ncopy_pack complete, copy [{}] to [{}] host".format(remote, len(conns)))
 
 
 def scp(c, host, path, dest=None, sshpass=False):
     dest = dest if dest else os.path.dirname(path)
 
     user = host.user
-    paww = host.item('passyes')
+    paww = host.item('pass')
     command = "scp -r {} {}@{}:{}".format(path, user, host['host'], dest)
 
     if sshpass:

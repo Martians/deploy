@@ -29,3 +29,4 @@ hosts:
           name: ssh-3
     disk:
         - /mnt/disk
+        - /mnt/sdd

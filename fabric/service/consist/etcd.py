@@ -31,8 +31,8 @@ local = LocalConfig()
 
 """ https://github.com/etcd-io/etcd/blob/master/Documentation/docs.md
 
-https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/clustering.md
-        https://blog.csdn.net/god_wot/article/details/77854093
+    https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/clustering.md
+    https://blog.csdn.net/god_wot/article/details/77854093
         
 """
 @task
@@ -62,28 +62,24 @@ initial-cluster-state: new' > {conf}'''
         c.run("cat {conf}".format(conf=local.conf))
 
 @task
-def clean(c):
-    stop(c)
-
-    for host in hosts.lists(index=False, count=local.count):
-        c = hosts.conn(host)
-        c.run("rm -rf {}".format(host.disk))
-
-@task
 def start(c):
-    c = conn(c)
-
-    for host in hosts.lists(index=False, count=local.count):
-        c = hosts.conn(host)
-        c.run('nohup /opt/etcd/etcd --config-file={conf} >> {log} 2>&1 &'
-              .format(name=host.name, conf=local.conf, log=local.logs))
-
+    system.start('etcd', 'nohup /opt/etcd/etcd --config-file={conf} >> {log} 2>&1 &'
+                  .format(conf=local.conf, log=local.logs), count=local.count)
 @task
 def stop(c):
-    c = conn(c)
-    for host in hosts.lists(index=False, count=local.count):
-        c = hosts.conn(host)
-        c.run(system.kill('etcd', True), warn=True)
+    system.stop(local.name, count=local.count)
 
-install(hosts.one())
+@task
+def stat(c):
+    system.stat(local.name, count=local.count)
+
+@task
+def clean(c):
+    stop(c)
+    system.clean(local.base, count=local.count)
+
+
+# system.grep("etcd")
+# install(hosts.one())
 # start(hosts.conn(0))
+# stop(hosts.conn(0))

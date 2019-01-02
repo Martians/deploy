@@ -1,16 +1,19 @@
 # coding=utf-8
 
 import common.host as hosts
+import os
 
 
-def output_result(result, prefix="", work=""):
+def output_result(result, prefix="", work="", output=None):
     """ 输出执行结果
 
         对stdout、stderr进行输出调整
     """
-    if result.failed:
+    if output:
+        print("{0}<{1.connection.host}> {2}".format(prefix, result, output(result)))
+    elif result.failed:
         failed = result.stderr.strip()
-        failed = failed if failed else ""
+        failed = failed if failed else 'err: {}'.format(result.exited)
         print("{0}<{1.connection.host}> {2}{1.stdout} {3}".format(prefix, result, work, failed))
     else:
         output = result.stdout.strip()
@@ -53,7 +56,7 @@ def multi(c, commands, go_on=False, hide=None):
         print("\nmulti command, total {}\n".format(len(commands)))
 
 
-def group(group, command, err=True, out=False, go_on=False, **kwargs):
+def group(group, command, err=True, go_on=False, out=False, handle=None, output=None, mute=False, **kwargs):
     """ group
         1. stderr：命令执行过程中不抛出异常（warn=True），执行完成后手动打印出来
         2. stdout：根据默认配置，决定是否输出
@@ -61,6 +64,7 @@ def group(group, command, err=True, out=False, go_on=False, **kwargs):
         选项：
         1. err：是否允许err、以及是否输出执行错误内容
         2. out：是否在执行完成后，聚合输出 stdout
+        3. go_on: 出错后是否继续
 
         设计：
         1. group方式，并执行多行命令
@@ -69,34 +73,42 @@ def group(group, command, err=True, out=False, go_on=False, **kwargs):
     """
     command = command.strip()
     results = group.run(command, warn=True, **kwargs)
+
     count = 0
+    total = len(results.items())
 
     ''' 输出错误的结果
     '''
     if err:
         for connection, item in results.items():
-            if item.failed: count += 1
+            if handle:
+                if not handle(item):
+                    count += 1
+            elif item.failed:
+                count += 1
 
     if count:
-        print("\nexecute [{}], failed {}:".format(command, count))
+        print("\nexecute [{}], failed {}/{}:".format(command, count, total))
         for connection, item in results.items():
             if item.failed:
-                output_result(item, prefix="\t".format())
+                output_result(item, prefix="\t".format(), output=output)
         print()
         if go_on:
             print("continue")
         else:
             exit(-1)
     else:
-        print("\nexecute [{}] success".format(command))
+        if not mute:
+            print("\nexecute [{}], success [{}]".format(command, total))
 
     ''' 正确的执行结果也输出
     '''
     if out:
         for connection, item in results.items():
             if not item.failed:
-                output_result(item, prefix='\t')
+                output_result(item, prefix='\t', output=output)
     return results
+
 
 if __name__ == '__main__':
     from fabric import Config, Connection
