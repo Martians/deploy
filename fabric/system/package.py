@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from common.init import *
+from common import *
 
 class LocalConfig:
     def __init__(self):
