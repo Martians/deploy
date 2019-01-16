@@ -149,7 +149,48 @@ def group(c, type='desc', group=local.group):
         else:
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
 
+def maker(c):
+    """ cluster copy
+    ## config
+    cp config/consumer.properties source.properties
+    cp config/producer.properties target.properties
+
+
+    # consumer
+    # echo 'shallow.iterator.enable=false' >> source.properties
+    group.id=mirror
+
+
+    # producer
+    echo '
+#queue.enqueueTimeout.ms=-1
+max.block.ms=600000
+retries=10
+' >> target.properties
+
+    ## broker
+    auto.create.topics.enable=true
+
+    ## command
+    bin/kafka-mirror-maker.sh --consumer.config source.properties --producer.config target.properties --num.streams 2 --whitelist=".*"
+
+    ## 步骤
+    source.properties：修改源集群的bootstrap.servers
+    target.properties：修改目的集群的bootstrap.servers
+    确保目的集群的配置，auto.create.topics.enable=true
+
+    ## 执行
+    设置--num.streams 为 consumer的线程数
+    bin/kafka-mirror-maker.sh --consumer.config source.properties --producer.config target.properties --num.streams 2 --whitelist=".*"
+
+    ## 查看
+    设置为源集群的bootstrap-server
+    bin/kafka-consumer-groups.sh --bootstrap-server 192.168.0.81:9092 --describe --group mirror
+
+"""
+
 # install(hosts.conn(0))
 # start(hosts.conn(0))fab
 # stop(hosts.conn(0))
 # clean(hosts.conn(0))
+
