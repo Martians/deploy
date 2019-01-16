@@ -1,3 +1,3 @@
 from system.process import *
 from system.package import *
-from system.install import *
+from system.installs import *

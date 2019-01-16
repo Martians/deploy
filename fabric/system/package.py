@@ -2,6 +2,7 @@
 
 from common import *
 
+
 class LocalConfig:
     def __init__(self):
         # self.hide = 'out'
