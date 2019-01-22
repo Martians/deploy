@@ -11,7 +11,7 @@
         1. 基本：
                 1. 每个文件夹有自己的fabric.yaml，必须自动或者手动复制到 ~/或者/etc目录下
                     1. 为了方便，配置中设置了task.collection_name，因此如果切换了目录，找不到对应的 collection.py，fab 无法工作
-                    2. 切换目录后，比如切换到 kafka 安装脚本中，需要先执行 python kafka.py，将触发更新配置，将工程目录下的配置复制
+                    2. 切换目录后，比如切换到 kafka 安装脚本中，需要先执行 python grafana.py，将触发更新配置，将工程目录下的配置复制
 
                 2. fabric.yaml 内容
                     1. run：命令执行时的一些默认命令

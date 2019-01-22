@@ -1,0 +1,10 @@
+[
+  {
+    "labels": {
+      "type": "node"
+    },
+    "targets": [
+      "localhost:9200"
+    ]
+  }
+]

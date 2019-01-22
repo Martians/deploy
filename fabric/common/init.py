@@ -82,18 +82,24 @@ def init_config():
 def base(name):
     """ 程序安装路径
     """
-    if 'path' not in default_config['source']:
-        c = Config()
-        if 'source' in c and 'parent' in c.install:
-            parent = c.install.parent
-        else:
-            parent = default_config['source']['parent']
+    # if 'path' not in default_config['source']:
 
-        default_config['source']['path'] = os.path.join(parent, name)
-    return default_config['source']['path']
+    c = Config()
+    """ 如果配置文件中已经设置了路径，就使用
+    """
+    if 'source' in c and 'parent' in c.install:
+        parent = c.install.parent
+    else:
+        parent = default_config['source']['parent']
+    return os.path.join(parent, name)
+
+    # default_config['source']['path'] = os.path.join(parent, name)
+    # return default_config['source']['path']
 
 
 def conn(c, one=False):
+    """ 确保传入的是connect，不是local的context
+    """
     if not hasattr(c, 'host'):
         c = hosts.one() if one else hosts.conn(0)
         print("connection [{}]".format(c.host))

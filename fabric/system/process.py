@@ -27,16 +27,25 @@ def grep(name, string=False, output=None, **kwargs):
         return group(command, handle=grep_handle, output=output, **kwargs)
 
 
-def kill(name, string=False, pkill=True, **kwargs):
+def kill(name, string=False, pkill=False, **kwargs):
     if pkill:
         command = 'pkill -9 {name}'.format(name=name)
     else:
-        command = "ps aux | grep {name} | grep -v grep | awk '{{print $2}}' | xargs kill -9".format(name=name)
+        command = "ps aux | grep {name} | grep -v grep | awk '{{print $2}}' | xargs --no-run-if-empty kill -9".format(name=name)
 
     if string:
         return command
     else:
         return group(command, **kwargs)
+
+
+def nohup(command, log='server.log', sleep=0.3):
+    """ fabric 直接执行 nohup 无法成功，会过早关闭连接的 Session
+
+        https://blog.csdn.net/mayifan0/article/details/79699900
+    """
+    return '({command} 1>{log} 2>&1 &) && sleep {sleep}'\
+        .format(command=command, log=log, sleep=sleep)
 
 
 def help(c, display, name='help'):

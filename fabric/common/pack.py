@@ -47,13 +47,21 @@ def download(c, name, source=None, local=None, path="/tmp"):
         else:
             c.run("wget {} -P {}".format(source, path))
             print("download, http download [{}]".format(file_path))
+
+    """ 下载完成后，将安装包的位置记录在这里，后续执行package、copy_pack时使用
+       
+        注意：如果需要安装多个软件
+                1. 需要依次完全安装完成，不再访问之前软件的packge()位置；否则无法获取到该值，会被最后一个值覆盖
+                2. 或者 default_config['source'][name] = file_path，每次都用name来访问
+    """
     default_config['source']['source'] = file_path
 
 
-def package(parent=None):
+def package(parent=None, name=None):
     """ 获得安装包的路径
     """
-    path = default_config['source']['source']
+    name = name if name else 'source'
+    path = default_config['source'][name]
     if parent:
         file = os.path.basename(path)
         return os.path.join(parent, file)

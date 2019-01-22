@@ -40,6 +40,27 @@ def maven_config():
         <mirrorOf>central</mirrorOf>
     </mirror>''', '</mirrors>', pos=-1)
 
+
+def promethues_config():
+    """ 仅仅是说明，没有执行实际例子：
+            如果append多行，第一个位置是空行
+    """
+
+    """ 方式1：手动添加空行
+    """
+    sed.append(c, '\t    \t')  # 确保该模式不会再原配置文件中出现
+
+    """ 方式2：字符串最开头的\n之前，加一些空格等字符
+            注意：第一行是 空格 + \n
+    """
+    file_sd_node = """ 
+      - job_name: 'node'
+        file_sd_configs:
+        - files:
+          - 'node.yaml'
+    """
+
+
 from common.init import *
 c = Connection('127.0.0.1')
 
