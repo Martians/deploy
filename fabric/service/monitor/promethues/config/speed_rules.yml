@@ -1,0 +1,38 @@
+groups:
+  - name: throughput
+    interval: 5s
+    rules:
+    - record: server:test_counter_bytes:sum
+      # sum only used for limit output label
+      expr: sum(irate(test_counter_bytes[5m])) by (server)
+      labels:
+
+  - name: total_throughput
+    interval: 5s
+    rules:
+    - record: job:test_counter_bytes:sum
+      expr: sum(server:test_counter_bytes:sum)
+
+#  - name: speed
+#    interval: 5s
+#    rules:
+#    - record: server:test_counter_bytes:ratio5m
+#      expr: sum(irate(test_counter_bytes[5m])) by(server) / sum(irate(test_counter_latency[5m])) by(server)
+#
+#  - name: total_speed
+#    interval: 5s
+#    rules:
+#    - record: job:test_counter_bytes:ratio5m
+#      expr: sum(server:test_counter_bytes:ratio5m)
+
+  - name: ipos
+    interval: 5s
+    rules:
+    - record: server:test_counter_iops:ratio5m
+      expr: sum(irate(test_counter_iops[5m])) by(server)
+
+  - name: total_iops
+    interval: 5s
+    rules:
+    - record: job:test_counter_iops:ratio5m
+      expr: sum(server:test_counter_iops:ratio5m)

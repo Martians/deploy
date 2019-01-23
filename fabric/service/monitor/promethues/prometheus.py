@@ -66,6 +66,7 @@ def config_server(c):
 
     sed.append(c, file_sd_node)
     sed.append(c, file_sd_client)
+    sed.append(c, '  - "*_rules.yml"', 'rule_files:')
 
     """ file service discovery
     """

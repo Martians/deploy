@@ -41,4 +41,4 @@ def install(c):
 def configure(c):
     c.run('sudo grafana-cli plugins install grafana-piechart-panel')
 
-install(hosts.conn(0))
+# install(hosts.conn(0))
