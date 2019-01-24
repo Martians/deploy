@@ -39,7 +39,7 @@ def kill(name, string=False, pkill=False, **kwargs):
         return group(command, **kwargs)
 
 
-def nohup(command, log='server.log', sleep=0.3):
+def nohup(command, log='server.log', sleep=0.5):
     """ fabric 直接执行 nohup 无法成功，会过早关闭连接的 Session
 
         https://blog.csdn.net/mayifan0/article/details/79699900

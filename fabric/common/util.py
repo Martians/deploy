@@ -1,6 +1,14 @@
 # coding=utf-8
 
 
+class Dict(dict):
+    def __setattr__(self, k, v):
+        self[k] = v
+
+    def __getattr__(self, k):
+        return self.get(k)
+
+
 def sep(full, data, sep=','):
     if not full:
         full = data
@@ -24,6 +32,6 @@ def args_def(kwargs, **update):
     """ 如果参数中未设置，就增加默认值配置
     """
     for (d, v) in update.items():
-        if not kwargs.get(d):
+        if d not in kwargs:
             kwargs[d] = v
     return kwargs

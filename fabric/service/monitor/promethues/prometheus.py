@@ -33,6 +33,12 @@ class LocalConfig(LocalBase):
 """
 local = LocalConfig()
 
+""" fab install-server
+    fab install-node
+    
+    fab start-server
+    fab start-node
+"""
 @task
 def install_server(c):
     c = hosts.one()
@@ -83,6 +89,13 @@ def config_server(c):
 
   targets:' > {client}""".format(client=local.client_config))
 
+@task
+def help(c):
+    c = conn(c)
+    system.help(c, '''
+        monitor node:   {base}/{node}
+        monitor client: {base}/{client}
+        monitor rules;  {base}/*_rules.yaml\n'''.format(base=local.base, node=local.node_config, client=local.client_config), 'config')
 
 @task
 def install_node(c):

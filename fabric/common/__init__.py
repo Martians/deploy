@@ -9,19 +9,40 @@
 
     2. 配置
         1. 基本：
-                1. 每个文件夹有自己的fabric.yaml，必须自动或者手动复制到 ~/或者/etc目录下
-                    1. 为了方便，配置中设置了task.collection_name，因此如果切换了目录，找不到对应的 collection.py，fab 无法工作
-                    2. 切换目录后，比如切换到 kafka 安装脚本中，需要先执行 python grafana.py，将触发更新配置，将工程目录下的配置复制
+            fabric相关配置在 fabric.yaml中，host相关配置在 hosts1.yaml 中
 
-                2. fabric.yaml 内容
-                    1. run：命令执行时的一些默认命令
-                    2. task.collection_name: 默认collection，这样就可以访问本地其他名字的 .py直接使用；不需要导入到fabric.py了
-                    3. 控制机、宿主机、服务机
+                1. 每个文件夹不再使用自己的fabric.yaml，而是统一使用工程跟目录下，将自动复制到 ~/或者/etc目录下
 
-                3. python搜索路径
+                2. 每个server的配置方式说明，拿kafka举例说明
+                    1）为了让kafka的操作，不仅仅使用 fab 执行，也可以当做库被其他的工程调用，使用的是 kafka.py
+
+                    2）为了能够在kafka目录执行请求，需要放置一个 fabric.py 文件，在该文件中引入 kafka.py，fabric.py内容如下
+                            from componet.kafka import kafka
+                            ns = Collection(kafka)
+
+                            此时所有的命令都要带前缀：fab kafka.install
+
+                    3） 为了在每个server下使用fab命令时，不需要带子空间前缀
+                        方式 1）设置 fabric.yaml 中 tasks.collection_name 为当前文件夹的服务名字为 kafka;
+                               这种情况下，fabric.py 文件本身都可以不需要了
+
+                        方式 2）在fabric.py中导入所有内容，修改fabric.py内容如下
+                            from componet.kafka.kafka import *
+                            此时，相当于在 fabric.py 中定义了所有 @task的函数，因此可以直接使用
+
+                3. 配置内容：
+                    fabric.yaml:
+                        run：命令执行时的一些默认命令
+                        task.collection_name: 默认collection，这样就可以访问本地其他名字的 .py直接使用；不需要导入到fabric.py了
+
+                    hosts1.yaml
+                        控制机、宿主机、服务机
+
+                4. python搜索路径
                     1. 外部设置：lib/python3.6/site-packages/*.pth；在任何路径下，执行：python common/prepare.py 即可
                     2. 程序设置：在fabric命令文件中，最头部初添加：sys.path.append(os.path.join(os.getcwd(), "../.."))
                        见 init.py 头部 ‘搜索路径’ 的说明
+
 
         2. 策略
                 1. 控制机：发起命令的机器（执行fab的），可以与宿主机一样

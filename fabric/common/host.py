@@ -3,21 +3,20 @@
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 from common.util import *
 
-class Host(dict):
+
+class Host(Dict):
     def __init__(self, hosts, *args, **kw):
         self.hosts = hosts
         dict.__init__(self, *args, **kw)
 
-    def __setattr__(self, k, v):
-        self[k] = v
-
     def __getattr__(self, k):
-        # return self.get(k)
         return self.item(k, '')
 
     @classmethod
     def __item(cls, host, name):
-        item_dict = {'name' : lambda: host.host.split('.')[-1]}
+        item_dict = {'name': lambda: host.host.split('.')[-1]}
+                     # 'user': lambda: hosts.glob.get('user'),
+                     # 'pass': lambda: hosts.glob.get('pass')}
         func = item_dict.get(name)
         return func() if func else None
 
@@ -28,8 +27,8 @@ class Host(dict):
         elif self.__item(self, name):
             data = self.__item(self, name)
 
-        elif name in hosts.other:
-            data = hosts.other[name]
+        elif name in hosts.glob:
+            data = hosts.glob.get(name)
 
         elif defv:
             data = defv
@@ -41,6 +40,7 @@ class Host(dict):
             if isinstance(data, Array) or isinstance(data, list):
                 data = sep.join(data)
         return data
+
 
 class Hosts:
     """ 解析配置
@@ -71,46 +71,47 @@ class Hosts:
         3. 常见错误：
             1. pass设置为数字，而不是字符串
     ---
-         hosts:
-             list:
-               - name: local
-                 host: 192.168.0.80
-                 user: root
-                 pass: '111111'             # 如果都由数字组成，则必须是字符串
-                 type: control              # 指定控制节点，该节点不计入index的count
+         list:
+           - name: local
+             host: 192.168.0.80
+             user: root
+             pass: '111111'             # 如果都由数字组成，则必须是字符串，需要加引号
+             type: control              # 指定控制节点，该节点不计入index的count
 
-               - host: 192.168.0.80         # 控制节点同时也是host之一
+           - host: 192.168.0.80         # 控制节点同时也是host之一
 
-               - host: 192.168.0.82
-                 disk: /mnt/d1,/mnt/d2      # 获取hosts[1]的disk时，将获得此信息
-                 name:                      # value为空，不会建立这个索引
+           - host: 192.168.0.82
+             disk: /mnt/d1,/mnt/d2      # 获取hosts[1]的disk时，将获得此信息
+             name:                      # value为空，不会建立这个索引
 
-               - host: 192.168.0.83
+           - host: 192.168.0.83
 
-             disk:                          # 获得默认 disk时，将array内容合并成字符串
-               - /mnt/disk1
-               - /mnt/disk2
+         disk:                          # 获得默认 disk时，将array内容合并成字符串
+           - /mnt/disk1
+           - /mnt/disk2
     """
     valid = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
 
     control = {}
     array = []
     index = {}
-    other = {}
+    glob = {}
 
     def parse(self, config, user=None, paww=None):
-        self.parse_host(config)
+        import yaml
+        with open(config, 'r') as f:
+            config = Dict(yaml.load(f))
+            self.parse_host(config)
 
         """ 获取配置中lists之外的部分
         """
-        import copy
-        self.other = copy.copy(config)
-        del self.other['list']
+        self.glob = config.glob
 
-        """ 保存默认账号、密码
+        """ 如果默认配有配置，就使用传入进来的账号、密码
         """
-        if user: self.other['user'] = user
-        if paww: self.other['pass'] = paww
+        conn = config.conn if config.conn else {}
+        self.glob['user'] = conn.get('user') if conn.get('user') else user
+        self.glob['pass'] = conn.get('pass') if conn.get('pass') else paww
 
     def parse_host(self, hosts):
         index = 0
@@ -193,7 +194,7 @@ class Hosts:
 
         if other:
             print("\nhost info:")
-            pp.pprint(self.other)
+            pp.pprint(self.glob)
         print()
 
     def get(self, index):
@@ -298,9 +299,9 @@ hosts = Hosts()
 
 
 if __name__ == '__main__':
-    config = Config()
-    hosts.parse(config.hosts, config.user, config.connect_kwargs.password)
-    # import common.init
+    """ 为了测试成功，需要开启 index 为 0、1的两个host，需要连接上去测试
+    """
+    hosts.parse('../hosts.yaml')
     hosts.dump()
 
     def test_host_info():
@@ -358,12 +359,6 @@ if __name__ == '__main__':
 
         print(hosts.conns_filter(disk._file_exist_command('/root/test'), reverse=True))
 
-    def test_file():
-        import yaml
-        with open('hosts.yaml', 'r') as f:
-            hosts = yaml.load(f)
-            print(hosts)
-
     test_host_info()
     test_host_item()
     test_get_host()
@@ -371,5 +366,4 @@ if __name__ == '__main__':
     test_get_item()
     test_group()
     test_group_filter()
-    test_file()
 

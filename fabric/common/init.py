@@ -17,28 +17,52 @@ from common.host import hosts
 """
 
 
-def copy_config():
+def search_config(name):
+    """ 当前目录 yaml
+    """
+    origin = os.path.join(os.getcwd(), name)
+
+    """ 全局目录
+    """
+    global1 = '~/{}'.format(name)
+    global2 = '/etc/{}'.format(name)
+
+    """ 顶层目录 yaml
+    """
+    module = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+    module = os.path.join(os.path.abspath(module), name)
+
+    if os.path.exists(origin):
+        src = origin
+
+    elif os.path.exists(global1):
+        src = global1
+    elif os.path.exists(global2):
+        src = global2
+
+    elif os.path.exists(module):
+        src = module
+    else:
+        print('not find {}!'.format(name))
+        exit(-1)
+
+    return src
+
+
+def hosts_config():
+    name = 'hosts.yaml'
+    return search_config(name)
+
+
+def config_fabric():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
         1. 比较 ./fabric.yaml 和 ~/.fabric.yaml 的差别
         2. 需要时，将./fabric.yaml 复制到 ~/.fabric.yaml
     """
     c = Connection("127.0.0.1")
 
-    name = "fabric.yaml"
-    origin = os.path.join(os.getcwd(), name)
-    module = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
-
-    if os.path.exists(origin):
-        src = origin
-    elif os.path.exists(module):
-        src = module
-    elif os.path.exists("../" + name):
-        src = "../" + name
-    elif os.path.exists("../../" + name):
-        src = "../../" + name
-    else:
-        print("not find yaml!")
-        exit(-1)
+    name = 'fabric.yaml'
+    src = search_config(name)
 
     dst = '~/.' + name
     if c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
@@ -106,13 +130,19 @@ def conn(c, one=False):
     return c
 
 
-if 1:
-    copy_config()
+def parse_argv():
+    import sys
+    print(sys.argv[1:])
 
-    """ fabric config
+
+if 1:
+    """ 更新 fabric 配置文件，
     """
+    config_fabric()
     fabric_config = Config()
-    hosts.parse(fabric_config.get('hosts'), fabric_config.user, fabric_config.connect_kwargs.password)
+
+    user, paww = fabric_config.user, fabric_config.connect_kwargs.password
+    hosts.parse(hosts_config(), user=user, paww=paww)
 
     init_config()
 
@@ -120,6 +150,4 @@ if 1:
 # 输出所有host信息
 # hosts.dump()
 
-
-if __name__ == '__main__':
-    print(fabric_config.install.parent)
+# if __name__ == '__main__':

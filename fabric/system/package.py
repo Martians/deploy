@@ -36,4 +36,4 @@ def install(c, type='', single='', hide=local.hide, centos=True):
     else:
         hosts.execute(command, hide=hide, pty=True)
 
-
+# install(hosts.conn(0), "java")

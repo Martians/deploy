@@ -1,0 +1,20 @@
+
+conn:
+    user: root
+    pass: '111111'
+
+list:
+    - name: local
+      host: 192.168.0.80
+      user: root
+      pass: '111111'
+      type: control
+    - host: 192.168.0.81
+    - host: 192.168.0.82
+    - host: 192.168.0.83
+
+glob:
+    disk:
+    - /mnt/sdb
+    - /mnt/sdc
+    - /mnt/sdd
