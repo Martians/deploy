@@ -30,6 +30,23 @@
                             from componet.kafka.kafka import *
                             此时，相当于在 fabric.py 中定义了所有 @task的函数，因此可以直接使用
 
+                    4) 为了支持动态导入（这样每个文件夹下的 fabfile.py 都可以一样了）
+                            需要扫描当前文件夹下的所有py文件，然后拼凑成 package.name的格式
+
+                        方式1）：from componet.kafka.kafka import *       同3）
+
+                        方式2）：exec('from componet.kafka.kafka import *')
+
+                        方式3）：__import__('componet.kafka.kafka', fromlist=['*'])
+
+                                import importlib
+                                importlib.import_module(componet.kafka.kafka')
+
+                                验证：1）print(sys.modules.get('componet.kafka.kafka'))
+                                     2）在kafka.py中写一个print语句，检查是否import成功
+
+                                这两种方法都无法生效，可以导入模块成功，但是 fabric 无法识别
+
                 3. 配置内容：
                     fabric.yaml:
                         run：命令执行时的一些默认命令
@@ -40,8 +57,9 @@
 
                 4. python搜索路径
                     1. 外部设置：lib/python3.6/site-packages/*.pth；在任何路径下，执行：python common/prepare.py 即可
-                    2. 程序设置：在fabric命令文件中，最头部初添加：sys.path.append(os.path.join(os.getcwd(), "../.."))
-                       见 init.py 头部 ‘搜索路径’ 的说明
+                    2. 程序设置：在fabric命令文件 fabric.py 中，最头部处添加：
+                            sys.path.append(os.path.join(os.getcwd(), "../.."))
+                            见 init.py 头部 ‘搜索路径’ 的说明
 
 
         2. 策略
@@ -89,6 +107,8 @@
         2. 一次执行多条命令
             1）复杂命令：分解开并执行，execute.multi
             2）简单命令：一次传入一次性执行，只看最终结果
+
+        3. 所有都支持 fab config 命令，是全局设置的
 
     ## 存在问题：
             1. 模块识别
@@ -139,6 +159,7 @@ from common.init import *
 from common.pack import *
 from common.host import *
 from common.util import *
+from common.previous import *
 
 import common.execute
 import common.disk

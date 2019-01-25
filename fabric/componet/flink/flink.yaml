@@ -1,0 +1,9 @@
+flink:
+    parallelism: 2
+    jobmanager:
+      heap: 512m
+
+    taskmanager:
+      heap: 512m
+      slot: 2
+    disk: /mnt/disk1

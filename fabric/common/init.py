@@ -24,8 +24,8 @@ def search_config(name):
 
     """ 全局目录
     """
-    global1 = '~/{}'.format(name)
-    global2 = '/etc/{}'.format(name)
+    user_home = '{}/{}'.format(os.path.expanduser('~'), name)
+    glob_etc = '/etc/{}'.format(name)
 
     """ 顶层目录 yaml
     """
@@ -33,15 +33,15 @@ def search_config(name):
     module = os.path.join(os.path.abspath(module), name)
 
     if os.path.exists(origin):
-        src = origin
+        src, pos = origin, 'pwd'
 
-    elif os.path.exists(global1):
-        src = global1
-    elif os.path.exists(global2):
-        src = global2
+    elif os.path.exists(user_home):
+        src, pos = user_home, 'user home'
+    elif os.path.exists(glob_etc):
+        src, pos = glob_etc, '/etc'
 
     elif os.path.exists(module):
-        src = module
+        src, pos = module, 'module'
     else:
         print('not find {}!'.format(name))
         exit(-1)

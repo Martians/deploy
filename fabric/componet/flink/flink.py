@@ -1,29 +1,36 @@
 # coding=utf-8
-import os
 
-from fabric import Connection, SerialGroup as Group, Config, task
-
+from invoke import task
 from common import *
+import system
 
 
-def base(c):
-    if 'base' not in c.install:
-        parent = c.install.parent if 'parent' in c.install else default_config['source']['parent']
-        c.install.base = os.path.join(parent, 'flink')
-    return c.install.base
+class LocalConfig(LocalBase):
+    """ 默认配置
+    """
+
+    def __init__(self):
+        LocalBase.__init__(self, 'flink')
+        self.source = 'http://mirror.bit.edu.cn/apache/flink/flink-1.6.2/flink-1.6.2-bin-scala_2.11.tgz'
+
+
+""" 提供个默认参数
+
+    该变量定义在头部，这样在函数的默认参数中，也可以使用了
+"""
+local = LocalConfig()
 
 @task
 def install(c):
-    source = 'http://mirror.bit.edu.cn/apache/flink/flink-1.6.2/flink-1.6.2-bin-scala_2.11.tgz'
-    dest = "/tmp/{}".format(os.path.basename(source))
+    c = hosts.one()
+    download(c, local.name, source=local.source)
+    copy_pack(c, dest=local.temp, async=True)
 
-    c = hosts.conn(0)
-    download(c, "flink", source=source)
-    master_copy(c, dest, async=False)
+    system.install(0, 'java')
+    hosts.execute('sudo rm -rf /opt/*{}*'.format(local.name))
 
-    hosts.execute('rm -rf /opt/*flink*', other=True)
-    for index in hosts.lists(other=True):
-        unpack(hosts.conn(index), 'flink', dest)
+    for index in hosts.lists():
+        unpack(hosts.conn(index), local.name, path=package(local.temp))
 
     config(c)
 
@@ -36,7 +43,7 @@ def config(c):
     list = [host['host'] for host in hosts.lists(index=False, other=False)]
     c.run('echo "{}" > {}/slaves'.format('\n'.join(list), conf))
 
-    sed.update(c, "jobmanager.rpc.address:", host.get(0)['host'], file=file)
+    sed.update(c, "jobmanager.rpc.address:", hosts.get(0)['host'], file=file)
     sed.update(c, "jobmanager.heap.size:", c.flink.jobmanager.heap, file=file)
 
     sed.update(c, "taskmanager.heap.size:", c.flink.taskmanager.heap, file=file)
@@ -59,6 +66,3 @@ def start(c):
 def clean(c):
     hosts.execute('''rm -rf /opt/flink''', hide=None)
 
-
-# source(c)
-# source(c)f

@@ -1,8 +1,5 @@
 # coding=utf-8
 
-# import sys, os
-# sys.path.append(os.path.join(os.getcwd(), "../.."))
-
 from invoke import task
 from common import *
 import system
@@ -44,7 +41,7 @@ def install(c):
     copy_pack(c, dest=local.temp, async=True)
 
     prepare(c)
-    hosts.execute('sudo rm -rf /opt/*kafka*')
+    hosts.execute('sudo rm -rf /opt/*{}*'.format(local.name))
 
     for index in hosts.lists():
         unpack(hosts.conn(index), local.name, path=package(local.temp))
@@ -193,4 +190,3 @@ retries=10
 # start(hosts.conn(0))fab
 # stop(hosts.conn(0))
 # clean(hosts.conn(0))
-
