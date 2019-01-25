@@ -3,6 +3,7 @@ import os
 
 from fabric import Connection, Config
 from common.host import hosts
+from common.util import *
 
 """ 搜索路径：
     1. 方案1：加入到系统搜索路径，执行 python prepare.py即可
@@ -50,14 +51,39 @@ def search_config(name):
 
 
 def hosts_config():
-    name = 'hosts.yaml'
+    name = global_define.config.hosts
     return search_config(name)
 
 
+def config_server(withdraw=True):
+    collect = []
+
+    def traverse(path):
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.find('yaml') != -1 or file.find('yml') != -1:
+                    collect.append(os.path.join(root, file))
+
+            for dir in dirs:
+                if not dir.startswith('_'):
+                    traverse(os.path.join(root, dir))
+            break
+    traverse('.')
+
+    for file in collect:
+        with open(file, 'r') as f:
+            import yaml
+            conf = Dict(yaml.load(f))
+            server.update(conf)
+
+    if withdraw:
+        server.withdraw()
+    return collect
+
 def config_fabric():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
-        1. 比较 ./fabric.yaml 和 ~/.fabric.yaml 的差别
-        2. 需要时，将./fabric.yaml 复制到 ~/.fabric.yaml
+        1. 比较 ./redis.yaml 和 ~/.redis.yaml 的差别
+        2. 需要时，将./redis.yaml 复制到 ~/.redis.yaml
     """
     c = Connection("127.0.0.1")
 
@@ -69,6 +95,13 @@ def config_fabric():
         c.local("\cp {} {}".format(src, dst))
         print("update config, try next time!")
         exit(-1)
+
+
+def config_hosts():
+    fabric_config = Config()
+
+    user, paww = fabric_config.user, fabric_config.connect_kwargs.password
+    hosts.parse(hosts_config(), user=user, paww=paww)
 
 
 def enable(c, f):
@@ -84,12 +117,15 @@ def enable(c, f):
 
 """ 默认配置内容
 """
-default_config = {
+global_define = Dict({
+    'config': {
+        'hosts': 'hosts.yaml'
+    },
     'source': {
         'parent': '/opt',
         'source': '/home/long/source'
     }
-}
+})
 
 
 class LocalBase:
@@ -99,14 +135,10 @@ class LocalBase:
         self.base = base(self.name)
 
 
-def init_config():
-    pass
-
-
 def base(name):
     """ 程序安装路径
     """
-    # if 'path' not in default_config['source']:
+    # if 'path' not in global_define['source']:
 
     c = Config()
     """ 如果配置文件中已经设置了路径，就使用
@@ -114,11 +146,11 @@ def base(name):
     if 'source' in c and 'parent' in c.install:
         parent = c.install.parent
     else:
-        parent = default_config['source']['parent']
+        parent = global_define['source']['parent']
     return os.path.join(parent, name)
 
-    # default_config['source']['path'] = os.path.join(parent, name)
-    # return default_config['source']['path']
+    # global_define['source']['path'] = os.path.join(parent, name)
+    # return global_define['source']['path']
 
 
 def conn(c, one=False):
@@ -136,18 +168,9 @@ def parse_argv():
 
 
 if 1:
-    """ 更新 fabric 配置文件，
-    """
     config_fabric()
-    fabric_config = Config()
 
-    user, paww = fabric_config.user, fabric_config.connect_kwargs.password
-    hosts.parse(hosts_config(), user=user, paww=paww)
+    config_hosts()
 
-    init_config()
+    server = Dict()
 
-
-# 输出所有host信息
-# hosts.dump()
-
-# if __name__ == '__main__':

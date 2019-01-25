@@ -14,7 +14,7 @@ def download(c, name, source=None, local=None, path="/tmp"):
         local： 优先使用local作为数据源
         source：local不存在则到网上下载
     """
-    local = local if local else default_config['source']['source']
+    local = local if local else global_define['source']['source']
 
     ''' 传入了source，就提取source中的版本号
             查找本地时，也使用该版本号
@@ -52,16 +52,16 @@ def download(c, name, source=None, local=None, path="/tmp"):
        
         注意：如果需要安装多个软件
                 1. 需要依次完全安装完成，不再访问之前软件的packge()位置；否则无法获取到该值，会被最后一个值覆盖
-                2. 或者 default_config['source'][name] = file_path，每次都用name来访问
+                2. 或者 global_define['source'][name] = file_path，每次都用name来访问
     """
-    default_config['source']['source'] = file_path
+    global_define['source']['source'] = file_path
 
 
 def package(parent=None, name=None):
     """ 获得安装包的路径
     """
     name = name if name else 'source'
-    path = default_config['source'][name]
+    path = global_define['source'][name]
     if parent:
         file = os.path.basename(path)
         return os.path.join(parent, file)
@@ -133,7 +133,7 @@ def scp(c, host, path, dest=None, sshpass=False):
 
 
 def unpack(c, name, path=None, parent=None):
-    parent = parent if parent else default_config['source']['parent']
+    parent = parent if parent else global_define['source']['parent']
     path = path if path else package()
 
     if file_exist(c, parent, name, dir=True):

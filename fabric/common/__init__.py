@@ -23,7 +23,7 @@
                             此时所有的命令都要带前缀：fab kafka.install
 
                     3） 为了在每个server下使用fab命令时，不需要带子空间前缀
-                        方式 1）设置 fabric.yaml 中 tasks.collection_name 为当前文件夹的服务名字为 kafka;
+                        方式 1）设置 redis.yaml 中 tasks.collection_name 为当前文件夹的服务名字为 kafka;
                                这种情况下，fabric.py 文件本身都可以不需要了
 
                         方式 2）在fabric.py中导入所有内容，修改fabric.py内容如下
@@ -48,12 +48,16 @@
                                 这两种方法都无法生效，可以导入模块成功，但是 fabric 无法识别
 
                 3. 配置内容：
-                    fabric.yaml:
+                    redis.yaml:
                         run：命令执行时的一些默认命令
                         task.collection_name: 默认collection，这样就可以访问本地其他名字的 .py直接使用；不需要导入到fabric.py了
 
-                    hosts1.yaml
+                    hosts.yaml
                         控制机、宿主机、服务机
+
+                    服务配置（重要）：
+                        当前文件夹、子文件夹下的其他 yaml 文件，将被统一聚合到一个 server的 Dict对象中，用于读取当前 server 配置；参考：flink
+
 
                 4. python搜索路径
                     1. 外部设置：lib/python3.6/site-packages/*.pth；在任何路径下，执行：python common/prepare.py 即可
@@ -63,9 +67,9 @@
 
 
         2. 策略
-                1. 控制机：发起命令的机器（执行fab的），可以与宿主机一样
+                1. 控制机：发起命令的机器（执行fab的）；该机器可以不出现在配置中，只是用来执行命令
 
-                2. 宿主机：从该机器发出命令；其他机器从该机器获取安装包
+                2. 宿主机：从该机器发出命令；其他机器从该机器获取安装包；可以与宿主机是同一台机器，但是需要在配置中作为宿主机也添加一行
                     1. 通常情况下，宿主机(hosts.one)即是本地虚拟机；这样就不需要到其他机器配置 python、fabric了
                     2. 宿主机无法通过vpn连接：
                             虚拟机内部添加 NAT 网卡
@@ -79,7 +83,7 @@
 
                 1.  所有lib统一使用一个名字：db
 
-                    fabric.yaml:
+                    redis.yaml:
                     from service import database
                     ns.add_collection(database, 'db')
                     # 或者使用自己的名字：ns.add_collection(database.mysql, 'mysql')
@@ -89,39 +93,46 @@
 
                 2.  每个lib使用自己的名字
 
-                    fabric.yaml:
+                    redis.yaml:
                     from service.database import *
                     ns.add_collection(mysql)
 
                     __init__.py：
                     from service.database import mysql
 
-    3. 案例：
+    3. 使用
+            1. previous.py：
+                所有server文件夹下，fab 中都会包含的命令
+                fab config
+
+    4. 案例：
             1. grep、sed: common/sed
-            2. 完整：component/kafka
+            2. 完整：component/kafka、component/flink
+
 
 ## 开发
-
     ## 功能
         1. group方式，对多个conn同时执行
         2. 一次执行多条命令
             1）复杂命令：分解开并执行，execute.multi
             2）简单命令：一次传入一次性执行，只看最终结果
 
-        3. 所有都支持 fab config 命令，是全局设置的
-
     ## 存在问题：
             1. 模块识别
                 common模块中的内容，使用时要加 common.* 前缀；但是如果是调试common内部模块，此前缀导致相关模块找不到
+                    方案：将common当做一个package进行配置
 
                 IDE下调试路径与执行路径不同，导致找不到module
-                尝试：sudo sh -c 'echo /mnt/hgfs/local/deploy/fabric > /home/long/.pyenv/versions/3.6.5/lib/python3.6/site-packages/fabric_test.pth'
+                    尝试：sudo sh -c 'echo /mnt/hgfs/local/deploy/fabric > /home/long/.pyenv/versions/3.6.5/lib/python3.6/site-packages/fabric_test.pth'
+                    方案：执行 python common/prepare.sh
 
             2. 配置文件识别
-                fabric 不识别本地 fabric.yaml；虽然通过-d选项，能够看到此文件被load过，但是最终的config中没有信息
+                fabric 不识别本地 redis.yaml；虽然通过-d选项，能够看到此文件被load过，但是最终的config中没有信息
                 invoke 直接使用时可以识别的，https://github.com/pyinvoke/invoke/issues/471
 
                 通过执行 init.copy_config 来确保本地的config文件得到使用
+
+                方案：自动将跟目录的 redis.yaml 复制到fabric可以识别的位置中去
 
             3. 屏幕回显丢失
                 如果远端不是主动关闭的（持续方式输出、或者尚未执行完成），此时 control-c 那么就会丢失回显
@@ -140,11 +151,13 @@
             2. 输出所有内容：echo = True, hide = False
             3. pty=True 需要输入密码的部分
 
+    ## 新增功能
+        1. 将配置文件分离出来
+
 ## 错误
     1. 如果函数的 docstring 为空，那么 fab -l 将无法执行
 
 Todo
-    将配置文件分离出来
     角色划分：安装点、其他机器（master、slave等）
     在一个 c 内修改的config不生效，不能影响全局？
     help complete
@@ -152,7 +165,6 @@ Todo
     将不同的阶段，放到不同的文件
 
     自动生成范围区间的host
-
 """
 
 from common.init import *

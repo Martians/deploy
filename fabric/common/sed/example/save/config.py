@@ -20,7 +20,7 @@ from invoke import task, Context
 from fabric import *
 
 # 要修改的、默认配置文件
-default_config = "config_file"
+global_define = "config_file"
 
 # 是否真的修改配置文件，测试模式下不修改
 test_just = None
@@ -71,7 +71,7 @@ def grep_data(c, key, file=None, value=None, sep=' ',
         1. grep：
             需要转义的字符：-
     '''
-    file = file if file else default_config
+    file = file if file else global_define
 
     # 如果是多行
     if value and value.count('\n'):
@@ -152,7 +152,7 @@ def update(c, key, value=None, file=None, sep=' ', show=0, prepare=True, check=T
             1）prepare: 执行前检查对应的项目是否已经存在
             2）check：
     '''
-    file = file if file else default_config
+    file = file if file else global_define
 
     ''' 检查item是否已经存在，并确保操作是幂等的
     '''
@@ -250,7 +250,7 @@ def append(c, file=None, key=None, data=None, pos=0):
     实现：
         通过行数来进行插入操作
     '''
-    file = file if file else default_config
+    file = file if file else global_define
 
     # 对应的data 已经存在了
     index = grep_line_index(c, file, data)[0]
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     # 测试方式 2）
     c = Context()
 
-    default_config = "config_file"
+    global_define = "config_file"
 
     # 生成内容，确保执行命令过程中，可以收集所有的key、value
     test_save = [(0, 0, '-n 0')]
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     def dump_change(c, file=None, clear=False, dump=True):
         ''' debug时显示所有修改的内容
         '''
-        file = file if file else default_config
+        file = file if file else global_define
 
         if dump:
             ''' 输出单行显示的
@@ -415,9 +415,9 @@ if __name__ == '__main__':
             '''
             temp_file = "~/tempfile"
             c.run("rm -rf {temp}".format(temp=temp_file))
-            c.run("if [ ! -f {temp} ]; then cp {config} {temp}; fi".format(temp=temp_file, config=default_config))
+            c.run("if [ ! -f {temp} ]; then cp {config} {temp}; fi".format(temp=temp_file, config=global_define))
 
-            default_config = temp_file
+            global_define = temp_file
             test_just = False
 
         if 1:

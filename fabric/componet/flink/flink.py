@@ -8,7 +8,6 @@ import system
 class LocalConfig(LocalBase):
     """ 默认配置
     """
-
     def __init__(self):
         LocalBase.__init__(self, 'flink')
         self.source = 'http://mirror.bit.edu.cn/apache/flink/flink-1.6.2/flink-1.6.2-bin-scala_2.11.tgz'
@@ -24,7 +23,7 @@ local = LocalConfig()
 def install(c):
     c = hosts.one()
     download(c, local.name, source=local.source)
-    copy_pack(c, dest=local.temp, async=True)
+    copy_pack(c, dest=local.temp)
 
     system.install(0, 'java')
     hosts.execute('sudo rm -rf /opt/*{}*'.format(local.name))
@@ -32,37 +31,52 @@ def install(c):
     for index in hosts.lists():
         unpack(hosts.conn(index), local.name, path=package(local.temp))
 
-    config(c)
+    configure(c)
 
-def config(c):
+
+def configure(c):
     c = hosts.conn(0)
-
-    conf = os.path.join(base(c), "conf")
-    file = os.path.join(conf, "flink-conf.yaml")
+    conf = os.path.join(local.base, "conf")
+    config_server()
 
     list = [host['host'] for host in hosts.lists(index=False, other=False)]
     c.run('echo "{}" > {}/slaves'.format('\n'.join(list), conf))
 
-    sed.update(c, "jobmanager.rpc.address:", hosts.get(0)['host'], file=file)
-    sed.update(c, "jobmanager.heap.size:", c.flink.jobmanager.heap, file=file)
+    sed.path(os.path.join(local.base, os.path.join(conf, "flink-conf.yaml")))
+    sed.update(c, "jobmanager.rpc.address:", hosts.get(0)['host'])
+    sed.update(c, "jobmanager.heap.size:", server.jobmanager.heap)
 
-    sed.update(c, "taskmanager.heap.size:", c.flink.taskmanager.heap, file=file)
-    sed.update(c, "taskmanager.numberOfTaskSlots:", str(c.flink.taskmanager.slot), file=file)
+    sed.update(c, "taskmanager.heap.size:", server.taskmanager.heap)
+    sed.update(c, "taskmanager.numberOfTaskSlots:", str(server.taskmanager.slot))
 
-    sed.update(c, "parallelism.default:", str(c.flink.parallelism), file=file)
+    sed.update(c, "parallelism.default:", str(server.parallelism))
 
     # if 'disk' in c.flink:
-    #     sed.append(c, "taskmanager.tmp.dirs:", 'aabbcc', file=file)
+    #     sed.append(c, "taskmanager.tmp.dirs:", 'aabbcc')
 
-    master_copy(c, conf, async=False)
+    """ 从master复制到slave
+    """
+    copy_pack(c, conf, check=False, other=True)
 
-@task()
+@task
 def start(c):
     c = hosts.conn(0)
-    with c.cd(base(c)):
-        c.run('bin//start-cluster.sh'.format(), pty=True)
+    with c.cd(local.base):
+        c.run(system.nohup('bin/start-cluster.sh'), pty=True)
+
+@task
+def stop(c, force=False):
+    c = hosts.conn(0)
+    with c.cd(local.base):
+        c.run(system.nohup('bin/stop-cluster.sh'), pty=True)
+
+    if force:
+        system.process.kill('kafka')
+        # system.stop('StandaloneSessionClusterEntrypoint')
+        # system.stop('TaskManagerRunner')
 
 @task
 def clean(c):
-    hosts.execute('''rm -rf /opt/flink''', hide=None)
+    stop(c, True)
 
+    system.clean('/opt/{}'.format(local.name))

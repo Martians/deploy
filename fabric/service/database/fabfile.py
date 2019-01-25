@@ -1,19 +1,12 @@
 # coding=utf-8
 
-import sys, os
-sys.path.append(os.path.join(os.getcwd(), "../.."))
-
-from invoke import task, Collection, Config
-
 from common import *
-from service.database import *
-
-@task
-def config(c):
-    print(Config())
+import service.database.mariadb as mariadb
+import service.database.postgres as postgres
 
 ns = Collection(config)
-ns.add_collection(mariadb, 'sql')
+ns.add_collection(mariadb, 'mar')
+ns.add_collection(postgres, 'pos')
 
 
 

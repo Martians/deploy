@@ -6,7 +6,22 @@ class Dict(dict):
         self[k] = v
 
     def __getattr__(self, k):
-        return self.get(k)
+        value = self.get(k)
+        if isinstance(value, dict):
+            value = Dict(value)
+        return value
+
+    def withdraw(self):
+        """ 删除第一级 Key，通常只用于第一级只有一个Key的情况
+        """
+        temp = {}
+        for (key, data) in self.items():
+            if not isinstance(data, dict):
+                continue
+            for (k, v) in data.items():
+                temp[k] = v
+        self.clear()
+        self.update(temp)
 
 
 def sep(full, data, sep=','):

@@ -8,6 +8,9 @@ run:
 #tasks:
 #    collection_name: kafka
 
+timeouts:
+    connect: 1
+
 # 默认用户名密码
 user: root1
 connect_kwargs:

@@ -1,0 +1,7 @@
+
+redis:
+    cluster:
+        directory: 'cluster'
+        instance: 5
+        portbase: 7000
+        replica: 0

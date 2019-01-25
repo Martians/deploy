@@ -1,8 +1,5 @@
 # coding=utf-8
 
-# import sys, os
-# sys.path.append(os.path.join(os.getcwd(), "../.."))
-
 from invoke import task
 from common import *
 import system
@@ -125,7 +122,8 @@ def config_server_node(c):
 @task
 def start_server(c):
     c = hosts.conn(0)
-    c.run(system.nohup('cd {}; nohup ./prometheus --config.file={}'.format(local.base, local.config)), pty=True)
+    c.run(system.nohup('cd {}; nohup ./prometheus --config.file={}'
+                       .format(local.base, local.config), nohup=''), pty=True)
 
 @task
 def stop_server(c):

@@ -38,7 +38,7 @@ local = LocalConfig()
 def install(c):
     c = hosts.one()
     download(c, local.name, source=local.source)
-    copy_pack(c, dest=local.temp, async=True)
+    copy_pack(c, dest=local.temp)
 
     prepare(c)
     hosts.execute('sudo rm -rf /opt/*{}*'.format(local.name))
@@ -85,20 +85,20 @@ def stop(c, force=False):
     system.stop('kafka', dir=local.base, exec='bin/kafka-server-stop.sh')
 
     if force:
-        system.stop('kafka.Kafka', pkill=False)
+        system.stop('kafka.Kafka')
 
 @task
 def clean(c):
-    stop(c)
+    stop(c, True)
 
     system.clean('/opt/kafka, /tmp/zookeeper')
 
-""" fab kafka.topic -t desc
-    fab kafka.topic -t create -o test1 -r 3 -p 10
-    fab kafka.topic -t delete -o test1
-"""
 @task
 def topic(c, type='desc', topic=local.topic, replica=local.replica, partition=local.partition):
+    """ fab kafka.topic -t desc
+        fab kafka.topic -t create -o test1 -r 3 -p 10
+        fab kafka.topic -t delete -o test1
+    """
     c = hosts.conn(0)
     with c.cd(local.base):
         if type == 'create':
@@ -145,6 +145,7 @@ def group(c, type='desc', group=local.group):
             c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group), pty=True)
         else:
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
+
 
 def maker(c):
     """ cluster copy

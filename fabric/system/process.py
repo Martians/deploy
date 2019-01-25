@@ -39,13 +39,13 @@ def kill(name, string=False, pkill=False, **kwargs):
         return group(command, **kwargs)
 
 
-def nohup(command, log='server.log', sleep=0.5):
+def nohup(command, log='server.log', sleep=0.5, nohup='nohup '):
     """ fabric 直接执行 nohup 无法成功，会过早关闭连接的 Session
 
         https://blog.csdn.net/mayifan0/article/details/79699900
     """
-    return '({command} 1>{log} 2>&1 &) && sleep {sleep}'\
-        .format(command=command, log=log, sleep=sleep)
+    return '({nohup}{command} 1>{log} 2>&1 &) && sleep {sleep}'\
+        .format(nohup=nohup, command=command, log=log, sleep=sleep)
 
 
 def help(c, display, name='help'):
@@ -76,7 +76,7 @@ def stop(name, exec='', dir='', **kwargs):
         kill(name, **kwargs)
 
 
-def process(name, **kwargs):
+def proc(name, **kwargs):
     grep(name, out=True, output=grep_output, **kwargs)
 
 

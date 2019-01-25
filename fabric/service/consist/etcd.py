@@ -1,8 +1,5 @@
 # coding=utf-8
 
-import sys, os
-sys.path.append(os.path.join(os.getcwd(), "../../.."))
-
 from invoke import task
 from common import *
 import system
@@ -39,7 +36,7 @@ local = LocalConfig()
 def install(c):
     c = hosts.one()
     download(c, local.name, source=local.source)
-    copy_pack(c, dest=local.temp, async=True)
+    copy_pack(c, dest=local.temp)
 
     for host in hosts.lists(index=False, count=local.count):
         c = hosts.conn(host)
@@ -76,7 +73,7 @@ def stop(c):
 
 @task
 def proc(c):
-    system.process(local.name, count=local.count)
+    system.proc(local.name, count=local.count)
 
 @task
 def clean(c):

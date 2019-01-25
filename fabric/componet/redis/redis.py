@@ -1,11 +1,9 @@
 # coding=utf-8
 
-# import sys, os
-# sys.path.append(os.path.join(os.getcwd(), "../.."))
-
 from invoke import task
 from common import *
 import system
+
 
 class LocalConfig(LocalBase):
     def __init__(self):
@@ -14,13 +12,14 @@ class LocalConfig(LocalBase):
         self.temp = '/tmp'
 
         self.compile = '/tmp/compile'
+        config_server()
 
 
 local = LocalConfig()
 name = 'redis'
 
 """ 1. 准备 
-        安装：fab source && fab cluster
+        安装：fab install && fab cluster
         修改：fab clear && fab cluster （增加instance个数等）
         删除：fab clean
     
@@ -47,11 +46,11 @@ def cluster(c):
 def clear(c):
     c = hosts.conn(0)
     hosts.execute('cd {path}; rm nodes.conf server.log -rf'
-                  .format(path=base(name), base=c.install.cluster.directory))
+                  .format(path=base(name), base=server.cluster.directory))
 
-    for index in range(1, c.install.cluster.instance):
+    for index in range(1, server.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; rm nodes.conf server.log -rf'
-                      .format(path=base(name), base=c.install.cluster.directory, index=index))
+                      .format(path=base(name), base=server.cluster.directory, index=index))
     stop(c)
 
 @task
@@ -63,9 +62,9 @@ def clean(c):
 def start(c):
     hosts.execute("cd {path}; redis-server redis.conf".format(path=base(name)))
 
-    for index in range(1, c.install.cluster.instance):
+    for index in range(1, server.cluster.instance):
         hosts.execute('cd {path}/{base}/{index}; redis-server redis.conf'
-                      .format(path=base(name), base=c.install.cluster.directory, index=index))
+                      .format(path=base(name), base=server.cluster.directory, index=index))
     stat(c)
 
 @task
@@ -171,11 +170,11 @@ def cluster_master(c):
     for host in hosts.lists(index=False):
         lists.append("{}:{}".format(host['host'], 6379))
 
-        for index in range(1, c.install.cluster.instance):
-            lists.append("{}:{}".format(host['host'], (int(c.install.cluster.portbase) + index)))
+        for index in range(1, server.cluster.instance):
+            lists.append("{}:{}".format(host['host'], (int(server.cluster.portbase) + index)))
 
     c.run("redis-cli --cluster create {} --cluster-replicas {}"
-          .format(' '.join(lists), c.install.cluster.replica), pty=True, warn=True)
+          .format(' '.join(lists), server.cluster.replica), pty=True, warn=True)
 
 
 def create_cluster(c):
@@ -184,8 +183,8 @@ def create_cluster(c):
             mkdir -p {temp}; rm -rf {temp}/*
             mkdir -p {path}; rm -rf {path}/{base}
             '''.format(path=base(name), temp=temp,
-                       base=c.install.cluster.directory))
-    for index in range(1, c.install.cluster.instance):
+                       base=server.cluster.directory))
+    for index in range(1, server.cluster.instance):
         hosts.execute(''' 
           mkdir -p {temp}/{index}; cd {temp}/{index}
           cp {path}/redis.conf {temp}/{index}
@@ -193,11 +192,11 @@ def create_cluster(c):
           sudo sed -i "s#\(^port \).*#\\1{port}#g" redis.conf
           sudo sed -i "s#\(^pidfile [^0-9]*\)[0-9]*\([^0-9]\)#\\1{port}\\2#g" redis.conf
           '''.format(path=base(name), temp=temp,
-                     base=c.install.cluster.directory, index=index,
-                     port=(int(c.install.cluster.portbase) + index)))
+                     base=server.cluster.directory, index=index,
+                     port=(int(server.cluster.portbase) + index)))
     hosts.execute('''
             mv {temp} {path}/{base}
             '''.format(path=base(name), temp=temp,
-                       base=c.install.cluster.directory))
+                       base=server.cluster.directory))
 
-# install(hosts.conn(0))
+# cluster(hosts.conn(0))
