@@ -10,7 +10,8 @@ class LocalConfig(LocalBase):
     """
     def __init__(self):
         LocalBase.__init__(self, 'flink')
-        self.source = 'http://mirror.bit.edu.cn/apache/flink/flink-1.6.2/flink-1.6.2-bin-scala_2.11.tgz'
+        # https://flink.apache.org/downloads.html
+        self.source = 'http://mirrors.shu.edu.cn/apache/flink/flink-1.7.1/flink-1.7.1-bin-scala_2.11.tgz'
 
 
 """ 提供个默认参数
