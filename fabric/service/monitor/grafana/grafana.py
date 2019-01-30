@@ -31,11 +31,16 @@ def install(c):
     """ 手动安装：
         plugin: data/plugins
                 使用 grafana-cli plugins install grafana-piechart-panel，安装的位置在 /var/lib/grafana/plugins
-        
     """
 
 
 def configure(c):
     c.run('sudo grafana-cli plugins install grafana-piechart-panel')
+
+@task
+def help(c):
+    c = conn(c)
+    system.help(c, '''
+    only support install now''')
 
 # install(hosts.conn(0))

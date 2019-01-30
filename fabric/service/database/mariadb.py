@@ -97,3 +97,25 @@ EOF'''.format(root_pasw=local.root_pasw, user=local.user, pasw=local.pasw, pty=T
 def remove(c):
     c = conn(c)
     c.run('yum remove -y mariadb')
+
+@task
+def start(c):
+    c = conn(c)
+    c.run('systemctl start mariadb')
+
+@task
+def stop(c):
+    c = conn(c)
+    c.run('systemctl stop mariadb')
+
+@task
+def stat(c):
+    c = conn(c)
+    c.run('systemctl status mariadb')
+
+@task
+def help(c):
+    c = conn(c)
+    system.help(c,'''
+    mysql -u root -p111111
+    mysql -u long -p111111 -h 192.168.0.85 -P3306''')

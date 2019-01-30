@@ -27,7 +27,7 @@ def grep(name, string=False, output=None, **kwargs):
         return group(command, handle=grep_handle, output=output, **kwargs)
 
 
-def kill(name, string=False, pkill=False, **kwargs):
+def kills(name, string=False, pkill=False, **kwargs):
     if pkill:
         command = 'pkill -9 {name}'.format(name=name)
     else:
@@ -73,7 +73,7 @@ def stop(name, exec='', dir='', **kwargs):
         dir = 'cd {}; '.format(dir) if dir else ''
         group('{dir}{exec}'.format(dir=dir, exec=exec), **kwargs)
     else:
-        kill(name, **kwargs)
+        kills(name, **kwargs)
 
 
 def proc(name, **kwargs):

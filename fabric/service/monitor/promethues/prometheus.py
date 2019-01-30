@@ -128,12 +128,12 @@ def start_server(c):
 @task
 def stop_server(c):
     c = hosts.conn(0)
-    c.run('{}'.format(system.kill('prometheus', string=True)))
+    c.run('{}'.format(system.kills('prometheus', string=True)))
 
 @task
 def start_node(c):
     system.start(local.node_name, system.nohup('cd {}; nohup ./node_exporter --web.listen-address=":{}"'
-                                               .format(base(local.node_name), local.node_port)), pty=True)
+                                               .format(base(local.node_name), local.node_port), nohup=''), pty=True)
 
 @task
 def stop_node(c):
@@ -155,6 +155,19 @@ def install_alert(c):
     # for index in hosts.lists():
     #     unpack(hosts.conn(index), local.name, path=package(local.temp))
 
+@task
+def help(c):
+    c = conn(c)
+    system.help(c, '''
+    http://192.168.0.81:9090
+    fab install-server
+    fab start-server
+
+node: 
+    http://192.168.0.81:9100
+    fab install-node
+    fab start-node
+    ''', 'server')
 
 # install_server(conn(0))
 # install_node(conn(0))

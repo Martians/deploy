@@ -72,7 +72,7 @@ def stop(c, force=False):
         c.run(system.nohup('bin/stop-cluster.sh'), pty=True)
 
     if force:
-        system.process.kill('kafka')
+        system.process.kills('kafka')
         # system.stop('StandaloneSessionClusterEntrypoint')
         # system.stop('TaskManagerRunner')
 
@@ -81,3 +81,9 @@ def clean(c):
     stop(c, True)
 
     system.clean('/opt/{}'.format(local.name))
+
+@task
+def help(c):
+    c = conn(c)
+    system.help(c, '''
+    http://192.168.0.81:8081''')

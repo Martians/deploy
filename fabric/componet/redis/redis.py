@@ -69,7 +69,7 @@ def start(c):
 
 @task
 def stop(c):
-    system.kill('redis-server')
+    system.kills('redis-server')
     stat(c)
 
 @task
@@ -199,4 +199,17 @@ def create_cluster(c):
             '''.format(path=base(name), temp=temp,
                        base=server.cluster.directory))
 
+@task
+def help(c):
+    c = conn(c)
+    system.help(c, '''
+    fab install && fab cluster
+    fab stat
+    
+    fab clear && fab cluster
+    fab clean
+    ''')
+
+# install(hosts.conn(0))
+# clean(hosts.conn(0))
 # cluster(hosts.conn(0))

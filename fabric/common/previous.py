@@ -21,5 +21,5 @@ def config(c, fabric=False):
 @task
 def kill(c, name):
     import system
-    system.process.kill(name)
+    system.process.kills(name)
 

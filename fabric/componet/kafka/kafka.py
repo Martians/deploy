@@ -95,9 +95,9 @@ def clean(c):
 
 @task
 def topic(c, type='desc', topic=local.topic, replica=local.replica, partition=local.partition):
-    """ fab kafka.topic -t desc
-        fab kafka.topic -t create -o test1 -r 3 -p 10
-        fab kafka.topic -t delete -o test1
+    """ fab topic -t desc
+        fab topic -t create -o test1 -r 3 -p 10
+        fab topic -t delete -o test1
     """
     c = hosts.conn(0)
     with c.cd(local.base):
@@ -138,14 +138,30 @@ def consume(c, topic=local.topic, group=local.group, touch=False):
               .format(local.boot_list, topic, group, '--from-beginning', '--max-messages 1' if touch else ''), pty=True)
 
 @task
-def group(c, type='desc', group=local.group):
+def group(c, desc=False, group=local.group):
+    """ fab group
+        fab group -d -g local_group
+    """
     c = hosts.conn(0)
     with c.cd(local.base):
-        if type == 'desc':
+        if desc:
             c.run('bin/kafka-consumer-groups.sh {} --describe --group {}'.format(local.boot_list, group), pty=True)
         else:
             c.run('bin/kafka-consumer-groups.sh {} --list'.format(local.boot_list), pty=True)
 
+@task
+def help(c):
+    c = conn(c)
+    system.help(c,'''
+    fab install
+    fab start
+    
+    fab topic -t create -o test1 -r 1 -p 1
+    fab topic -o test1
+    
+    fab produce -t test1 -c 5
+    fab consume -t test1 -g local
+    fab group -d -g local''')
 
 def maker(c):
     """ cluster copy

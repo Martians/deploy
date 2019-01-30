@@ -60,27 +60,6 @@ def configure(c):
     sed.path(os.path.join(local.data, 'pg_hba.conf'))
     sed.append(c, '''host    all             all             0.0.0.0/0               md5''', '# Allow replication', pos=-1)
 
-
-# def initialize(c):
-#     """ 添加用户
-#     """
-#     c = conn(c)
-#     c.run('''mysql -u root -p{root_pasw} << EOF
-# CREATE USER IF NOT EXISTS '{user}'@'%' identified by '{pasw}';
-# GRANT ALL PRIVILEGES ON *.* TO '{user}'@'%';
-# FLUSH PRIVILEGES;
-#
-# USE mysql;		-- check result
-# SELECT host, user, password FROM user;
-# SHOW grants for '{user}'@'%';
-# EOF'''.format(root_pasw=local.root_pasw, user=local.user, pasw=local.pasw, pty=True))
-#
-#     """ 添加测试库
-#     """
-#     c = conn(c)
-#     c.run('''echo "create database {table}; show databases; \q;" | mysql -u root -p{root_pasw}'''
-#           .format(table=local.table, user=local.user, root_pasw=local.root_pasw), pty=True)
-
 @task
 def remove(c):
     c = conn(c)
@@ -89,3 +68,24 @@ def remove(c):
 
     """ psql -U user -d dbname
     """
+@task
+def start(c):
+    c = conn(c)
+    c.run('systemctl start postgresql-9.5.service')
+
+@task
+def stop(c):
+    c = conn(c)
+    c.run('systemctl stop postgresql-9.5.service')
+
+@task
+def stat(c):
+    c = conn(c)
+    c.run('systemctl status postgresql-9.5.service')
+
+@task
+def help(c):
+    c = conn(c)
+    system.help(c,'''
+    psql -U postgres
+    psql -U postgres -h 192.168.0.81 -p5432 [密码：111111]''')
