@@ -88,7 +88,7 @@ def config_server(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
         monitor node:   {base}/{node}
         monitor client: {base}/{client}
@@ -157,7 +157,7 @@ def install_alert(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
     http://192.168.0.81:9090
     fab install-server

@@ -39,7 +39,7 @@ def configure(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
     only support install now''')
 

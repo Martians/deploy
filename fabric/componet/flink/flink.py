@@ -84,6 +84,6 @@ def clean(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
     http://192.168.0.81:8081''')

@@ -201,7 +201,7 @@ def create_cluster(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
     fab install && fab cluster
     fab stat

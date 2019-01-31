@@ -85,7 +85,7 @@ def stat(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c,'''
     psql -U postgres
     psql -U postgres -h 192.168.0.81 -p5432 [密码：111111]''')

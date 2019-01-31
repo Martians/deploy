@@ -41,7 +41,7 @@ def use_http(c, url):
 def use_help(c):
     """ fab -H 192.168.0.81 source.use_help
     """
-    c = conn(c)
+    c = conn(c, True)
     system.help(c, '''
         yum --disablerepo="*" --enablerepo="{name}" list available
         yum --disablerepo="*" --enablerepo="{name}" install -y python36u

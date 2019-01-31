@@ -80,6 +80,7 @@ def config_server(withdraw=True):
         server.withdraw()
     return collect
 
+
 def config_fabric():
     """ fabric 故障修复：确保当前目录下的yaml能够生效
         1. 比较 ./redis.yaml 和 ~/.redis.yaml 的差别
@@ -102,18 +103,6 @@ def config_hosts():
 
     user, paww = fabric_config.user, fabric_config.connect_kwargs.password
     hosts.parse(hosts_config(), user=user, paww=paww)
-
-
-def enable(c, f):
-    """ 程序运行过程中，动态修改配置 run.warn
-
-        全局配置为 run.warn = True；这里将 do work 中的操作，临时设置为 run.warn = False
-        enable(c, 1)
-        do work ...
-        enable(c, 0)
-    """
-    c.config.run.warn = False if f else True
-
 
 """ 默认配置内容
 """

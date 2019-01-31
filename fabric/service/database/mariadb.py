@@ -115,7 +115,7 @@ def stat(c):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c,'''
     mysql -u root -p111111
     mysql -u long -p111111 -h 192.168.0.85 -P3306''')

@@ -151,7 +151,7 @@ def group(c, desc=False, group=local.group):
 
 @task
 def help(c):
-    c = conn(c)
+    c = conn(c, True)
     system.help(c,'''
     fab install
     fab start
