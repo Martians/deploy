@@ -56,6 +56,8 @@ def hosts_config():
 
 
 def config_server(withdraw=True):
+    """ 将本地所有的 yaml 配置文件，聚合起来
+    """
     collect = []
 
     def traverse(path):
@@ -82,9 +84,9 @@ def config_server(withdraw=True):
 
 
 def config_fabric():
-    """ fabric 故障修复：确保当前目录下的yaml能够生效
-        1. 比较 ./redis.yaml 和 ~/.redis.yaml 的差别
-        2. 需要时，将./redis.yaml 复制到 ~/.redis.yaml
+    """ fabric 配置文件：当前目录、用户目录、全局目录、工程目录（默认配置）
+        1. 比较找到的 fabric.yaml 和 ~/.fabric.yaml 的差别
+        2. 需要时，将 fabric.yaml 复制到 ~/.fabric.yaml
     """
     c = Connection("127.0.0.1")
 
@@ -149,6 +151,10 @@ def conn(c, one=False):
         c = hosts.one() if one else hosts.conn(0)
         print("connection [{}]".format(c.host))
     return c
+
+
+def lc(c):
+    return Connection("127.0.0.1")
 
 
 def parse_argv():

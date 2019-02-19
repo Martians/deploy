@@ -4,6 +4,12 @@ import sys, os
 
 
 def search_path():
+    os.system('''
+    pip install --upgrade pip
+    pip install pyyaml
+    pip install fabric
+    ''')
+
     file = 'project.pth'
     pwd = os.path.dirname(os.path.abspath(__file__))
     root = os.path.abspath(os.path.join(pwd, '..'))
