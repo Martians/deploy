@@ -3,39 +3,14 @@
 from invoke import task
 from common import *
 import system
+from docker.image import *
 
 
-class LocalConfig(LocalBase):
-    def __init__(self):
-        LocalBase.__init__(self, 'docker')
-        self.base = ('centos:base', '0_centos')
-        self.sshd = ('centos:server','0_server')
 
-
-local = LocalConfig()
-
-
-def execute(c, cmd):
-    return len(c.run(cmd, echo=False, hide=True).stdout) > 0
-
-
-def color(string, newline=True):
-    print("{newline}\033[1;32;40m{string}\033[0m".format(string=string, newline='\n' if newline else ''))
-
-
-def build_image(c, name, file, exec=''):
-    if execute(c, 'docker images {image} -q'.format(image=name)):
-        print('image [{image}] already exist'.format(image=name))
-    else:
-        c.run('docker build -t {image} -f template/{dockerfile} {exec} .'.
-                format(image=name, dockerfile=file, exec=exec))
-
-def build_base(c):
-    build_image(c, local.base[0], local.base[1])
 
 @task
 def install(c):
-    build_image(c, local.base[0], local.base[1])
+    build_images(c, local.base[0], local.base[1])
 
 @task
 def clean(c, all=False, docker=False, image=False, resource=False):
@@ -44,12 +19,12 @@ def clean(c, all=False, docker=False, image=False, resource=False):
         image=True
         resource=True
 
-    if execute(c, 'docker images -q -f dangling=true'):
+    if stdouted(c, 'docker images -q -f dangling=true'):
         color('clear dangling images!')
         c.run('docker rmi -f $(docker images -q -f dangling=true)')
 
     if docker:
-        if execute(c, 'docker ps -aq'):
+        if stdouted(c, 'docker ps -aq'):
             color('clean docker')
             c.run('docker rm -f  $(docker ps -aq)')
             # c.run('docker ps -a')
@@ -57,7 +32,7 @@ def clean(c, all=False, docker=False, image=False, resource=False):
             color('no docker', False)
 
     if image:
-        if execute(c, 'docker images -aq'):
+        if stdouted(c, 'docker images -aq'):
             color('clean images')
             c.run('docker rmi -f $(docker images -aq)')
             # c.run('docker images -a')
@@ -72,15 +47,28 @@ def clean(c, all=False, docker=False, image=False, resource=False):
         c.run('docker network prune -f')
         # c.run('docker network ls')
         # c.run('docker volume ls')
+#
+# @task
+# def proxy(c):
 
 @task
-def proxy(c):
-
+def help(c):
+    c = conn(c, True)
+    system.help(c, '''
+        docker history centos:base
+        docker images centos:test
+        '''.format())
 
 @task
-def sshd(c):
-    build_base(c)
+def sshd(c, type=-1):
+    start_docker(c, type, 'http', port=80, enter=True)
+
+@task
+def test(c, type=-1, fabirc=True):
+    """ 根据base生成的纯净版本
+    """
+    start_docker(c, type)
 
 
 if __name__ == '__main__':
-    sshd(hosts.conn(0))
+    sshd(hosts.one())

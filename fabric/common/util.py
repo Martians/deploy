@@ -25,15 +25,27 @@ class Dict(dict):
 
 
 def sep(full, data, sep=','):
+    """ 构建full：第一次添加data时，不加sep分隔符
+    """
     if not full:
-        full = data
+        full = str(data)
     else:
-        full = full + sep + data
+        full = full + sep + str(data)
     return full
 
 
+def args(name, prefix='', suffix='', ignore=False):
+    """ name 为空时，返回控制
+        name 有值时，添加前缀后缀后返回
+    """
+    if name:
+        return prefix + ('' if ignore else str(name)) + suffix
+    else:
+        return ''
+
+
 def args_fil(list, kwargs):
-    """ 只保留关注的几个参数, filter
+    """ filter：从kwargs中，提取list中关注的几个参数
     """
     dict = {}
     for item in list.split(','):
@@ -44,9 +56,19 @@ def args_fil(list, kwargs):
 
 
 def args_def(kwargs, **update):
-    """ 如果参数中未设置，就增加默认值配置
+    """ default：如果update中的参数，在kwargs未设置，就添加进去
     """
     for (d, v) in update.items():
         if d not in kwargs:
             kwargs[d] = v
     return kwargs
+
+
+def stdouted(c, cmd):
+    """ 执行命令产生stdout时，则返回 True
+    """
+    return len(c.run(cmd, echo=False, hide=True, warn=True).stdout) > 0
+
+
+def color(string, newline=True):
+    print("{newline}\033[1;32;40m{string}\033[0m".format(string=string, newline='\n' if newline else ''))

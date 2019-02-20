@@ -3,7 +3,6 @@
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 from common.util import *
 
-
 class Host(Dict):
     def __init__(self, hosts, *args, **kw):
         self.hosts = hosts
@@ -283,6 +282,11 @@ class Hosts:
         return self.get('control') if host else self.conn('control')
 
     def conn(self, data):
+        # print(glob_conf.fake)
+        # if glob_conf.fake:
+        #     from invoke import Context
+        #     return Context
+
         """ 建立到某个host的连接，并保存下来
                 可以指定 ip最后一位、name、host、index等
         """

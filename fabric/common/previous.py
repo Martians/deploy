@@ -5,7 +5,7 @@ from common.init import *
 
 @task
 def config(c, fabric=False):
-    name = global_define.config.hosts
+    name = glob_conf.config.hosts
     print('hosts config  ----- [{}]'.format(search_config(name)))
 
     name = config_server()

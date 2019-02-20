@@ -3,12 +3,17 @@
 import sys, os
 
 
-def search_path():
+def search_path(pip='pip'):
+    if len(sys.argv) > 1:
+        pip = sys.argv[1]
+        print('use {pip}'.format(pip=pip))
+
     os.system('''
-    pip install --upgrade pip
-    pip install pyyaml
-    pip install fabric
-    ''')
+    {pip} install --upgrade pip
+    {pip} install pyyaml
+    {pip} install fabric
+    {pip} install cryptography==2.4.2
+    '''.format(pip=pip))
 
     file = 'project.pth'
     pwd = os.path.dirname(os.path.abspath(__file__))

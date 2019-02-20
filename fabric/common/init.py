@@ -30,8 +30,7 @@ def search_config(name):
 
     """ 顶层目录 yaml
     """
-    module = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-    module = os.path.join(os.path.abspath(module), name)
+    module = os.path.join(os.path.abspath(glob_conf.path), name)
 
     if os.path.exists(origin):
         src, pos = origin, 'pwd'
@@ -51,7 +50,7 @@ def search_config(name):
 
 
 def hosts_config():
-    name = global_define.config.hosts
+    name = glob_conf.config.hosts
     return search_config(name)
 
 
@@ -106,18 +105,6 @@ def config_hosts():
     user, paww = fabric_config.user, fabric_config.connect_kwargs.password
     hosts.parse(hosts_config(), user=user, paww=paww)
 
-""" 默认配置内容
-"""
-global_define = Dict({
-    'config': {
-        'hosts': 'hosts.yaml'
-    },
-    'source': {
-        'parent': '/opt',
-        'source': '/home/long/source'
-    }
-})
-
 
 class LocalBase:
     def __init__(self, name=''):
@@ -137,7 +124,7 @@ def base(name):
     if 'source' in c and 'parent' in c.install:
         parent = c.install.parent
     else:
-        parent = global_define['source']['parent']
+        parent = glob_conf['source']['parent']
     return os.path.join(parent, name)
 
     # global_define['source']['path'] = os.path.join(parent, name)
@@ -153,8 +140,23 @@ def conn(c, one=False):
     return c
 
 
-def lc(c):
-    return Connection("127.0.0.1")
+""" 默认配置内容
+"""
+glob_conf = Dict({
+    # 全局路径
+    'path': os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")),
+
+    # 当前在docker中，执行本地任务
+    'fake': False,
+
+    'config': {
+        'hosts': 'hosts.yaml'
+    },
+    'source': {
+        'parent': '/opt',
+        'source': '/home/long/source'
+    }
+})
 
 
 def parse_argv():

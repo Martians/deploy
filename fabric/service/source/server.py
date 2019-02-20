@@ -78,7 +78,6 @@ EOF'''.format(host=local.http_host, path=path, port=port))
     """
     c.run('systemctl restart httpd')
 
-
 @task
 def update(c, init=False):
     c = conn(c)

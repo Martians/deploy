@@ -203,7 +203,8 @@ retries=10
 
 """
 
-# install(hosts.conn(0))
-# start(hosts.conn(0))fab
-# stop(hosts.conn(0))
-# clean(hosts.conn(0))
+if __name__ == '__main__':
+    install(hosts.conn(0))
+    # start(hosts.conn(0))
+    # stop(hosts.conn(0))
+    # clean(hosts.conn(0))

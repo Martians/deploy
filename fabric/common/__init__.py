@@ -45,7 +45,7 @@
                                 验证：1）print(sys.modules.get('componet.kafka.kafka'))
                                      2）在kafka.py中写一个print语句，检查是否import成功
 
-                                这两种方法都无法生效，可以导入模块成功，但是 fabric 无法识别
+                                这两种方法都无法生效：可以导入模块成功，但是 fabric 无法识别
 
                 3. 配置内容：
                     redis.yaml:

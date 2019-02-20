@@ -1,0 +1,9 @@
+
+# 用于构建 image 时进行各种测试
+
+From centos:base
+MAINTAINER long@126.com
+
+RUN $BASE/$INIT
+
+CMD ["/bin/bash"]
