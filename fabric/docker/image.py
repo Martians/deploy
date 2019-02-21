@@ -92,22 +92,22 @@ def prepare_docker(c):
 
 
 def clean_image(c, total=False):
-    ignore = "fabric|centos"
+    list = c.run('''docker images -aq''').stdout.replace('\n', ' ')
 
-    if total:
-        list = c.run('''docker images -aq''').stdout
+    if not total:
+        ignore = "fabric|centos"
+        keep = c.run('''docker images -a | egrep "({ignore})" | awk '{{print $3}}' '''
+                     .format(ignore=ignore)).stdout.replace('\n', ' ')
+
+        for k in keep.split(' '):
+            list = list.replace(k, '')
+
+    if list:
+        color('clean images')
+        c.run('echo {list} | xargs docker rmi -f'.format(list=list))
+        # c.run('docker images -a')
     else:
-        list = c.run('''docker images -a | egrep -v "({ignore})" | awk '{{print $3}}' | sed '1d' '''.format(ignore=ignore)).stdout
-
-    # 回车转换为空格
-    
-    c.run('echo {list} | xargs  -n 1 echo '.format(list=list))
-    # if list:
-    #     color('clean images')
-    #     c.run('docker rmi -f {list}'.format(list=list))
-    #     # c.run('docker images -a')
-    # else:
-    #     color('no image to clean', False)
+        color('no image to clean', False)
 
 ########################################################################################################################
 def start_http(c, type, **kwargs):

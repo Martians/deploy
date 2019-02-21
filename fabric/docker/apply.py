@@ -6,8 +6,6 @@ import system
 from docker.image import *
 
 
-
-
 @task
 def install(c):
     build_images(c, local.base[0], local.base[1])
@@ -81,7 +79,11 @@ def test(c, type=-1, fabirc=True):
     """
     start_docker(c, type)
 
+@task
+def cc(c):
+    clean_image(c)
 
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
-    clean_image(conn(hosts.one()))
+    globing.invoke = True
+    clean_image(conn(hosts.one()), True)

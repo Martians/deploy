@@ -1,4 +1,4 @@
-from fabric import task
+from invoke import task
 from invoke import Context
 
 from common import *

@@ -6,7 +6,7 @@ ARG BASE=fabric
 
 COPY . $BASE
 
-RUN ls fabric; $BASE/docker/template/fabric.sh
+RUN $BASE/docker/template/fabric.sh
 
 CMD ["/bin/bash"]
 # CMD ["/start.sh"]
