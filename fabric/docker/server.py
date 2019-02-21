@@ -25,14 +25,18 @@ def regist_entries(server):
 
     redirect = Dict({'http': Entry('service.source.server', 'http'),
                      'proxy': Entry('service.source.server', 'proxy')})
-    return redirect[server]
+    return redirect.get(server)
 
 
 def install_server():
     options = parse_options()
     entry = regist_entries(options.server)
-    mode = 1
 
+    if not entry:
+        color('install server, not find entry, ignore')
+        exit(0)
+
+    mode = 1
     if mode == 0:
         """ 方式1：通过shell方式，调用fab进行安装
         """

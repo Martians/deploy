@@ -21,8 +21,9 @@ index-url=https://pypi.tuna.tsinghua.edu.cn/simple
 " > ~/.pip/pip.conf
 
 ## 修改locale
-echo 'export LANG=en_GB.utf8' >> /etc/profile
-source /etc/profile
+conf=/etc/bashrc
+echo 'export LANG=en_GB.utf8' >> $conf
+source $conf
 
 ## 安装fabirc
 python3 fabric/common/prepare.py pip3

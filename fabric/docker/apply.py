@@ -73,7 +73,7 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
 
 @task
 def sshd(c, type=-1):
-    start_docker(c, type, 'http', port=80, enter=True)
+    start_docker(c, type, 'sshd', enter=True, exec='/bin/bash')
 
 @task
 def test(c, type=-1, fabirc=True):
@@ -83,4 +83,5 @@ def test(c, type=-1, fabirc=True):
 
 
 if __name__ == '__main__':
-    proxy(hosts.one())
+    # sshd(hosts.one(), 0)
+    clean_image(conn(hosts.one()))

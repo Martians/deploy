@@ -63,17 +63,19 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', **kwargs)
         """
         vlist = ''
         volume = sep(volume, local.volume)
-        for v in volume.split(','):
-            vlist = sep(vlist, '-v {}'.format(v), ' ')
+        if volume:
+            for v in volume.split(','):
+                vlist = sep(vlist, '-v {}'.format(v), ' ')
 
         """ port: 传入逗号分隔的多个：80,100,10:90 ===> -p 80:80 -p 100:100 -p 10:90
         """
         plist = ''
-        for p in str(port).split(','):
-            if p.find(':') != -1:
-                plist = sep(plist, '-p {port}'.format(port=p), ' ')
-            else:
-                plist = sep(plist, '-p {port}:{port}'.format(port=p), ' ')
+        if port:
+            for p in str(port).split(','):
+                if p.find(':') != -1:
+                    plist = sep(plist, '-p {port}'.format(port=p), ' ')
+                else:
+                    plist = sep(plist, '-p {port}:{port}'.format(port=p), ' ')
 
         c.run('docker run -itd --name {name} -h {name}{port}{volume} {image} {exec}'.
               format(image=image, name=name, port=args(plist, ' '), volume=args(vlist, ' '), exec=exec))
@@ -88,6 +90,24 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', **kwargs)
 def prepare_docker(c):
     pass
 
+
+def clean_image(c, total=False):
+    ignore = "fabric|centos"
+
+    if total:
+        list = c.run('''docker images -aq''').stdout
+    else:
+        list = c.run('''docker images -a | egrep -v "({ignore})" | awk '{{print $3}}' | sed '1d' '''.format(ignore=ignore)).stdout
+
+    # 回车转换为空格
+    
+    c.run('echo {list} | xargs  -n 1 echo '.format(list=list))
+    # if list:
+    #     color('clean images')
+    #     c.run('docker rmi -f {list}'.format(list=list))
+    #     # c.run('docker images -a')
+    # else:
+    #     color('no image to clean', False)
 
 ########################################################################################################################
 def start_http(c, type, **kwargs):
