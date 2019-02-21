@@ -96,7 +96,7 @@ def clean_image(c, total=False):
 
     if not total:
         ignore = "fabric|centos"
-        keep = c.run('''docker images -a | egrep "({ignore})" | awk '{{print $3}}' '''
+        keep = c.run('''docker images | egrep "({ignore})" | awk '{{print $3}}' '''
                      .format(ignore=ignore)).stdout.replace('\n', ' ')
 
         for k in keep.split(' '):
