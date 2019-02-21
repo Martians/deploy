@@ -10,8 +10,8 @@ import system
 
 class LocalConfig:
     def __init__(self):
-        self.repo = '/home/repo'
-        self.proxy = '/home/proxy'
+        self.http_path = '/home/repo'
+        self.proxy_path = '/home/proxy'
 
         self.http_home = '/etc/httpd'
         self.http_conf = os.path.join(self.http_home, 'conf/httpd.conf')
@@ -27,7 +27,7 @@ class LocalConfig:
 local = LocalConfig()
 
 @task
-def file(c, path=local.repo):
+def file(c, path=local.http_path):
     """
         fab -H 192.168.0.81 source.file --path /home/repo
     """
@@ -38,7 +38,7 @@ def file(c, path=local.repo):
     c.run('createrepo {}'.format(path))
 
 @task
-def http(c, path=local.repo, port=local.http_port):
+def http(c, path=local.http_path, port=local.http_port):
     """ fab -H 192.168.0.81 source.http --path /home/repo --port 80
     """
     c = conn(c)
@@ -76,7 +76,22 @@ EOF'''.format(host=local.http_host, path=path, port=port))
             root path不要配置在 /tmp下，无法识别
             httpd -t 
     """
-    c.run('systemctl restart httpd')
+
+    if globing.invoke:
+        c.run('''cat << EOF > /start.sh
+#!/bin/bash
+echo "start httpd ... [`date`]"
+
+#mkdir -p /run/httpd
+for count in {1..5}  
+do  
+    echo "start $count"
+    httpd -DFOREGROUND
+    sleep 1
+done
+EOF''')
+    else:
+        c.run('systemctl restart httpd')
 
 @task
 def update(c, init=False):
@@ -98,7 +113,7 @@ def update(c, init=False):
 
 
 @task
-def proxy(c, path=local.proxy):
+def proxy(c, path=local.proxy_path):
     """ fab -H 192.168.0.81 source.proxy --path /home/proxy
 
         yum remove -y apt-cacher-ng
@@ -133,7 +148,16 @@ def proxy(c, path=local.proxy):
 
     """ 启动服务
     """
-    c.run('systemctl restart apt-cacher-ng.service')
+    if globing.invoke:
+        c.run('''cat << EOF > /start.sh
+#!/bin/bash
+
+echo "start proxy"
+/etc/init.d/apt-cacher-ng start
+tail -f /var/log/apt-cacher-ng/*
+EOF''')
+    else:
+        c.run('systemctl restart apt-cacher-ng.service')
 
     system.help(c, '''
         http://{host}:3142

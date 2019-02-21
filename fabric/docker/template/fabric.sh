@@ -11,6 +11,9 @@ yum install python36u python36u-pip -y
 ln -s /bin/python3.6 /bin/python3
 ln -s /bin/pip3.6 /bin/pip3
 
+## 删除python安装源
+yum remote ius-release -y
+
 ## 修改pip源
 mkdir ~/.pip
 echo "[global]
@@ -18,7 +21,8 @@ index-url=https://pypi.tuna.tsinghua.edu.cn/simple
 " > ~/.pip/pip.conf
 
 ## 修改locale
-export LANG=en_GB.utf8
+echo 'export LANG=en_GB.utf8' >> /etc/profile
+source /etc/profile
 
 ## 安装fabirc
 python3 fabric/common/prepare.py pip3

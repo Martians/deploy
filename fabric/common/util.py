@@ -29,7 +29,7 @@ def sep(full, data, sep=','):
     """
     if not full:
         full = str(data)
-    else:
+    elif data:
         full = full + sep + str(data)
     return full
 
@@ -44,7 +44,13 @@ def args(name, prefix='', suffix='', ignore=False):
         return ''
 
 
-def args_fil(list, kwargs):
+def args_def(name, defaults):
+    """ 参数为空，则返回默认值
+    """
+    return name if name else defaults
+
+
+def args_distill(list, kwargs):
     """ filter：从kwargs中，提取list中关注的几个参数
     """
     dict = {}
@@ -55,7 +61,7 @@ def args_fil(list, kwargs):
     return dict
 
 
-def args_def(kwargs, **update):
+def args_insert(kwargs, **update):
     """ default：如果update中的参数，在kwargs未设置，就添加进去
     """
     for (d, v) in update.items():

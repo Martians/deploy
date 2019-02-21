@@ -60,6 +60,18 @@ def help(c):
         '''.format())
 
 @task
+def http(c, type=-1, port=local.http_port, path=local.http_path[0]):
+    """ 单独启动 http，可以指定更多参数
+    """
+    start_http(c, type, port=port, path=path)
+
+@task
+def proxy(c, type=-1, path=local.proxy_path[0]):
+    """ 单独启动 proxy，可以指定更多参数
+    """
+    start_proxy(c, type, path=path)
+
+@task
 def sshd(c, type=-1):
     start_docker(c, type, 'http', port=80, enter=True)
 
@@ -71,4 +83,4 @@ def test(c, type=-1, fabirc=True):
 
 
 if __name__ == '__main__':
-    sshd(hosts.one())
+    proxy(hosts.one())

@@ -23,7 +23,7 @@ EOF'''.format(file=file, name=name, type='file' if path.startswith('/') else 'ht
     {test}\n'''.format(test=test), 'test')
 
 @task
-def use_file(c, path=local.repo):
+def use_file(c, path=local.http_path):
     """ fab -H 192.168.0.81 source.use_file --path /home/repo
     """
     c = conn(c)

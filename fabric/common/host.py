@@ -90,6 +90,7 @@ class Hosts:
            - /mnt/disk2
     """
     valid = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
+    invoke = False  # 不建立连接，而是使用本地 invoke.Context
 
     control = {}
     array = []
@@ -249,7 +250,7 @@ class Hosts:
         return [self.conn(index) for index in self.lists(**kwarg)]
 
     def conns_filter(self, command, handle=None, reverse=False, conn=True, **kwargs):
-        results = self.execute(command, **args_def(kwargs, err=False, mute=True))
+        results = self.execute(command, **args_insert(kwargs, err=False, mute=True))
         list = []
         for connect, result in results.items():
             if handle:
@@ -272,20 +273,19 @@ class Hosts:
         return group
 
     def execute(self, command, **kwargs):
-        groups = self.group(**args_fil('thread, other, conns, count', kwargs))
+        groups = self.group(**args_distill('thread, other, conns, count', kwargs))
 
         import common.execute as execute
-        return execute.group(groups, command, **args_def(kwargs, hide=True))
+        return execute.group(groups, command, **args_insert(kwargs, hide=True))
     #######################################################################################################################
 
     def one(self, host=False):
         return self.get('control') if host else self.conn('control')
 
     def conn(self, data):
-        # print(glob_conf.fake)
-        # if glob_conf.fake:
-        #     from invoke import Context
-        #     return Context
+        if self.invoke:
+            from invoke import Context
+            return Context()
 
         """ 建立到某个host的连接，并保存下来
                 可以指定 ip最后一位、name、host、index等

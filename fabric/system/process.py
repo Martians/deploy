@@ -16,7 +16,7 @@ def grep_output(result):
 
 
 def group(command, **kwargs):
-    return hosts.execute(command, **args_def(kwargs, go_on=True))
+    return hosts.execute(command, **args_insert(kwargs, go_on=True))
 
 
 def grep(name, string=False, output=None, **kwargs):

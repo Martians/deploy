@@ -30,7 +30,7 @@ def search_config(name):
 
     """ 顶层目录 yaml
     """
-    module = os.path.join(os.path.abspath(glob_conf.path), name)
+    module = os.path.join(os.path.abspath(globing.path), name)
 
     if os.path.exists(origin):
         src, pos = origin, 'pwd'
@@ -50,7 +50,7 @@ def search_config(name):
 
 
 def hosts_config():
-    name = glob_conf.config.hosts
+    name = globing.config.hosts
     return search_config(name)
 
 
@@ -124,7 +124,7 @@ def base(name):
     if 'source' in c and 'parent' in c.install:
         parent = c.install.parent
     else:
-        parent = glob_conf['source']['parent']
+        parent = globing['source']['parent']
     return os.path.join(parent, name)
 
     # global_define['source']['path'] = os.path.join(parent, name)
@@ -132,6 +132,12 @@ def base(name):
 
 
 def conn(c, one=False):
+    if globing.invoke:
+        from invoke import Context
+        c = Context(Config())
+        c.host = 'local'
+        return c
+
     """ 确保传入的是connect，不是local的context
     """
     if not hasattr(c, 'host'):
@@ -142,12 +148,12 @@ def conn(c, one=False):
 
 """ 默认配置内容
 """
-glob_conf = Dict({
+globing = Dict({
     # 全局路径
     'path': os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")),
 
     # 当前在docker中，执行本地任务
-    'fake': False,
+    'invoke': False,
 
     'config': {
         'hosts': 'hosts.yaml'
@@ -157,6 +163,11 @@ glob_conf = Dict({
         'source': '/home/long/source'
     }
 })
+
+
+def set_invoke(set):
+    hosts.invoke = set
+    globing.invoke = set
 
 
 def parse_argv():
