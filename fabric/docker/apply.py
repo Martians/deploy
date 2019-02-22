@@ -86,4 +86,4 @@ def cc(c):
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    clean_image(conn(hosts.one()), True)
+    clean_image(conn(hosts.one()))

@@ -92,20 +92,29 @@ def prepare_docker(c):
 
 
 def clean_image(c, total=False):
-    list = c.run('''docker images -aq''').stdout.replace('\n', ' ')
+    """
+        docker images：显示所有image，包括dangling
+        docker images -a：显示所有image，包括其他image所被依赖的
+
+        1. docker rmi -f $(docker images -aq)  删除所有
+        2. docker images | egrep "({ignore})" | awk '{{print $3}}'                  找到无需过滤的那些 image id
+        3. docker images | egrep -v "({ignore})" | awk '{{print $3}}' | sed '1d'    找到需要过滤的那些 image id
+
+        用方法2
+    """
+    list = c.run('''docker images -q''').stdout.replace('\n', ' ')
 
     if not total:
         ignore = "fabric|centos"
         keep = c.run('''docker images | egrep "({ignore})" | awk '{{print $3}}' '''
                      .format(ignore=ignore)).stdout.replace('\n', ' ')
-
         for k in keep.split(' '):
             list = list.replace(k, '')
 
+    list.strip()
     if list:
         color('clean images')
         c.run('echo {list} | xargs docker rmi -f'.format(list=list))
-        # c.run('docker images -a')
     else:
         color('no image to clean', False)
 
