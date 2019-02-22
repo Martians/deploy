@@ -5,8 +5,8 @@ from common import *
 import system
 
 
-def sshd(c, name, host='127.0.0.1', sshd=False):
-    if sshd:
+def sshd(c, name, host='127.0.0.1', info=False):
+    if info:
         color('ssh clean cache [client side]:')
         print('''    rm ~/.ssh/known_hosts -f
 or,
@@ -16,8 +16,9 @@ or,
         """ docker 内部，网卡名称是 eth1
         """
         print('''show host address:''')
-        c.run('docker exec $NAME ip addr show eth1 | grep inet | grep [0-9.].*/ --color')
+        c.run('docker exec {name} ip addr show eth1 | grep inet | grep [0-9.].*/ --color'.format(name=name))
 
-    print('''enter host:
-    docker exec -it {name} /bin/bash
-    ssh root@{host}'''.format(host=host, name=name))
+    else:
+        print('''enter host:
+        docker exec -it {name} /bin/bash
+        ssh root@{host}'''.format(host=host, name=name))

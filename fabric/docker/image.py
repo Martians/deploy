@@ -1,6 +1,7 @@
 # coding=utf-8
 from common import *
-from docker import help
+from docker import helps
+from docker import network as net
 
 
 class LocalConfig(LocalBase):
@@ -35,7 +36,7 @@ class LocalConfig(LocalBase):
         self.proxy_path = ('/mnt/hgfs/proxy', '/home/proxy')
 
         ################################################################################################################
-        self.basing = False
+        self.flag = Dict()
         self.images_count = 0
         self.docker_count = 0
 
@@ -48,7 +49,7 @@ local = LocalConfig()
 """
 
 
-def build_images(c, type, image, dockerfile, build='', param='', notify=True):
+def build_images(c, type, image, dockerfile, build='', param='', noisy=True):
     """ 1. 复制：将整个fabric文件夹都复制过去了
         2. 变量：build传递变量给dockerfile，目前只有 port
         3. 传参：构建server的参数，统一封装在 --build-arg EXE 参数中，交给构建脚本
@@ -59,7 +60,7 @@ def build_images(c, type, image, dockerfile, build='', param='', notify=True):
         c.run('docker rmi -f {image}'.format(image=image), warn=True)
 
     if stdouted(c, 'docker images {image} -q'.format(image=image)):
-        if notify:
+        if noisy:
             color('image [{image}] already exist'.format(image=image))
 
     else:
@@ -72,22 +73,24 @@ def build_images(c, type, image, dockerfile, build='', param='', notify=True):
 
 
 def basing_images(c):
-    if local.basing:
+    if local.flag.basing:
         return
     else:
-        local.basing = True
+        local.flag.basing = True
 
     """ 1. centos：最原始镜像，安装了 vim 等必要工具
         2. fabric：1）基础上，安装了fabric相关；执行 - fabric.sh
         3. server：2）基础上，执行不同server；  执行 - server.sh
     """
     # color('====> create base image')
-    build_images(c, 0, image=local.centos[0], dockerfile=local.centos[1], notify=False)
-    build_images(c, 0, image=local.fabric[0], dockerfile=local.fabric[1], notify=False)
+    build_images(c, 0, image=local.centos[0], dockerfile=local.centos[1], noisy=False)
+    build_images(c, 0, image=local.fabric[0], dockerfile=local.fabric[1], noisy=False)
 
 
-def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=False, notify=True, **kwargs):
+def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=False, host='',
+                 output='', noisy=True, **kwargs):
     image = args_def(image, name)
+    do_output = True
 
     if type == 0 or type == 1:
         color('remove docker: [{name}]'.format(name=name))
@@ -123,9 +126,17 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=F
         c.run('docker start {name}'.format(name=name), warn=True)
 
     else:
-        if notify:
+        if noisy:
             color('docker [{name}] already start'.format(name=name))
-        return 1
+        do_output = False
+
+    if do_output and output:
+        print(output)
+
+    """ 总是重新设置network
+    """
+    if host:
+        net.address(c, name=name, host=host, local=local)
 
 
 ########################################################################################################################
@@ -180,11 +191,9 @@ def clean_resource(c):
 
 
 ########################################################################################################################
-""" 创建必要的基础 docker
-"""
 def start_http(c, type, **kwargs):
     kwargs = Dict(kwargs)
-    start_images(c, type, 'http', port=local.http_port, http=False, proxy=False, notify=False)
+    start_images(c, type, 'http', port=local.http_port, http=False, proxy=False, noisy=False)
 
     kwargs.path = args_def(kwargs.path, local.http_path[0])
     kwargs.port = args_def(kwargs.port, local.http_port)
@@ -193,35 +202,23 @@ def start_http(c, type, **kwargs):
     volume = '{}:{}'.format(kwargs.path, local.http_path[1])
     kwargs.port = '{out}:{ins}'.format(out=kwargs.port, ins=local.http_port)
 
-    if build_docker(c, type, name='http', volume=volume, http=False, proxy=False, notify=False, **kwargs) != 1:
-        print(output)
+    build_docker(c, type, name='http', volume=volume, http=False, proxy=False, noisy=False, output=output, **kwargs)
 
 
 def start_proxy(c, type, **kwargs):
     kwargs = Dict(kwargs)
-    start_images(c, type, 'proxy', http=False, proxy=False, notify=False)
+    start_images(c, type, 'proxy', http=False, proxy=False, noisy=False)
 
     kwargs.port = local.proxy_port
     kwargs.path = args_def(kwargs.path, local.proxy_path[0])
     output = 'proxy: path [{path}]'.format(path=kwargs.path)
 
     volume = '{}:{}'.format(kwargs.path, local.proxy_path[1])
-    if build_docker(c, type, name='proxy', volume=volume, http=False, proxy=False, notify=False, **kwargs) != 1:
-        print(output)
+    build_docker(c, type, name='proxy', volume=volume, http=False, proxy=False, noisy=False, output=output, **kwargs)
 
 
-def start_sshd(c, type, docker=False, **kwargs):
-    kwargs = Dict(kwargs)
-    """ 启动sshd docker，或者仅仅是使用其镜像
-    """
-    start_images(c, type, 'sshd', notify=False, **kwargs)
-
-    if docker:
-        kwargs.port = args_def(kwargs.port, local.sshd_port)
-        print('sshd: port [{port}]'.format(port=kwargs.port))
-
-        kwargs.port = '{out}:{ins}'.format(out=kwargs.port, ins=local.sshd_port)
-        build_docker(c, type, name='sshd', **kwargs)
+def sshd_image(c, type, **kwargs):
+    start_images(c, type, 'sshd', noisy=False, **kwargs)
 
 
 ########################################################################################################################
@@ -240,7 +237,7 @@ def prepare_images(c, name):
     valid = ['sshd', local.centos[0], local.fabric[0]]
 
     if name == 'sshd':
-        start_sshd(c, -1)
+        sshd_image(c, -1)
 
     elif name in valid:
         pass
@@ -287,6 +284,6 @@ def start_docker(c, type, name, base='', enter=False, **kwargs):
 
     """ 当前进入新创建的 docker
     """
-    help.sshd(c, name)
+    helps.sshd(c, name, host=local.flag.host)
     if enter:
         c.run('docker exec -it {name} /bin/bash'.format(name=name), echo=False, pty=True)

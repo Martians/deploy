@@ -1,19 +1,20 @@
 
 network:
+  local: 192.168.0.80
 
+  netmask: 255.255.255.0
+  gateway: 192.168.0.1
+  subnet: 24
+
+  device: ens33
+  bridge: eth0m
+  domain: data.com
+
+  #  segment: 192.168.0
   address:
-    local: 192.168.0.80
+    h1: 81
+    h2: 82
+    h3: 83
     sshd: 85
     test: 87
     database: 85
-#    segment: 192.168.0
-
-  config:
-    device: ens33
-    netmask: 255.255.255.0
-    gateway: 192.168.0.1
-    subnet: 24
-    bridge: eth0m
-    domain: data.com
-
-
