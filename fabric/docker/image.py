@@ -284,6 +284,9 @@ def start_docker(c, type, name, base='', enter=False, **kwargs):
 
     """ 当前进入新创建的 docker
     """
-    helps.sshd(c, name, host=local.flag.host)
     if enter:
+        helps.sshd(c, name, host=local.flag.host)
         c.run('docker exec -it {name} /bin/bash'.format(name=name), echo=False, pty=True)
+    else:
+        helps.result(c, name, **kwargs)
+        helps.sshd(c, name, host=local.flag.host)

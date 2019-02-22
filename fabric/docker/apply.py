@@ -53,7 +53,7 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
 @task
 def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True, info=True):
     if info:
-        helps.sshd(c, name, info=info)
+        helps.sshd(c, name, sshd=info)
 
     """ 基于sshd镜像，启动 sshd docker
     """
