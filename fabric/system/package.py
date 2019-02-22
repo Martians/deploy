@@ -18,7 +18,7 @@ def package(type='', single='', centos=True):
             'compile': 'gcc make',
             'java': 'java-1.8.0-openjdk-devel',
     }
-    if  list.get(type):
+    if list.get(type):
         batch = list.get(type)
     else:
         batch = type
@@ -30,6 +30,9 @@ def package(type='', single='', centos=True):
 
 
 def install(c, type='', single='', hide=local.hide, centos=True):
+    """ system.install(c, 'group_name', 'single1 single2')
+        system.install(c, 'single1 single2')
+    """
     command = package(type=type, single=single, centos=centos)
     if c:
         c.run(command, hide=hide, pty=True)

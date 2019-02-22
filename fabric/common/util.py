@@ -24,6 +24,12 @@ class Dict(dict):
         self.update(temp)
 
 
+def load_yaml(file):
+    import yaml
+    with open(file, 'r') as f:
+        return Dict(yaml.load(f))
+
+
 def sep(full, data, sep=','):
     """ 构建full：第一次添加data时，不加sep分隔符
     """

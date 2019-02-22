@@ -1,0 +1,19 @@
+
+network:
+
+  address:
+    local: 192.168.0.80
+    sshd: 85
+    test: 87
+    database: 85
+#    segment: 192.168.0
+
+  config:
+    device: ens33
+    netmask: 255.255.255.0
+    gateway: 192.168.0.1
+    subnet: 24
+    bridge: eth0m
+    domain: data.com
+
+

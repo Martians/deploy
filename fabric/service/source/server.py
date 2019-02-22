@@ -122,6 +122,8 @@ def proxy(c, path=local.proxy_path):
 
             https://www.pitt-pladdy.com/blog/_20150720-132951_0100_Home_Lab_Project_apt-cacher-ng_with_CentOS/
             https://fabianlee.org/2018/02/11/ubuntu-a-centralized-apt-package-cache-using-apt-cacher-ng/
+
+            docker: https://hub.docker.com/r/minimum2scp/apt-cacher-ng
     """
     c = conn(c)
     c.run('rm {conf} -rf'.format(conf=local.proxy_conf))
@@ -153,7 +155,11 @@ def proxy(c, path=local.proxy_path):
 #!/bin/bash
 
 echo "start proxy"
-/etc/init.d/apt-cacher-ng start
+
+touch /var/log/apt-cacher-ng/a.log
+#/etc/init.d/apt-cacher-ng start
+
+/usr/sbin/apt-cacher-ng -c /etc/apt-cacher-ng pidfile=/var/run/apt-cacher-ng/pid SocketPath=/var/run/apt-cacher-ng/socket foreground=0
 tail -f /var/log/apt-cacher-ng/*
 EOF''')
     else:

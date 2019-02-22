@@ -13,6 +13,6 @@ python3 fabric/docker/server.py
 python3 fabric/docker/server.py $*
 
 ## 清理仓库
-yum clean all; rm -rf /var/cache/yum/*d
+yum clean all; rm -rf /var/cache/yum/*
 
 exit 0

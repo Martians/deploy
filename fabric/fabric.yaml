@@ -12,6 +12,6 @@ timeouts:
     connect: 1
 
 # 默认用户名密码
-user: root1
+user: root
 connect_kwargs:
     password: '111111'

@@ -1,61 +1,96 @@
 # coding=utf-8
 from common import *
+from docker import help
 
 
 class LocalConfig(LocalBase):
     def __init__(self):
         LocalBase.__init__(self, 'docker')
+        ################################################################################################################
+        """ 基础镜像配置
+        """
         self.centos = ('centos:centos', '0_centos')
         self.fabric = ('centos:fabric', '0_fabric')
         self.server = '0_server'
-        self.system = "--privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
+
+        ################################################################################################################
+        """ sshd 相关配置
+        """
+        self.sshd_port = 22
+        self.systemd = " --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
+        self.initial = '/usr/sbin/init'
         self.volume = '{base}:/fabric'.format(base=globing.path)
 
-        self.use_proxy = True   # 局域网 代理
-        self.use_http = True    # 局域网 http
+        ################################################################################################################
+        """ 是否使用 http、proxy 设置yum源
+                1. 如果修改 dest 位置，需要一同修改 service.source.server 中的 http_path
+        """
+        self.use_http = True
+        self.use_proxy = True
 
-        # 如果修改 dest 位置，需要一同修改 service.source.server 中的 http_path
         self.http_port = 80
         self.http_path = ('/mnt/hgfs/repo/', '/home/repo')
 
+        self.proxy_port = 3142
         self.proxy_path = ('/mnt/hgfs/proxy', '/home/proxy')
+
+        ################################################################################################################
+        self.basing = False
+        self.images_count = 0
+        self.docker_count = 0
 
 
 local = LocalConfig()
 
+""" 1. server image
+        1. 基于新 image，image中包含了server的服务内容：base的选择：fabric、sshd
+        2. 基于sshd的：然后在新创建的 docker 中，安装服务
+"""
 
-def build_images(c, type, image, dockerfile, build='', param=''):
-    """ 生成的image中，将整个fabric文件夹都复制过去了
+
+def build_images(c, type, image, dockerfile, build='', param='', notify=True):
+    """ 1. 复制：将整个fabric文件夹都复制过去了
+        2. 变量：build传递变量给dockerfile，目前只有 port
+        3. 传参：构建server的参数，统一封装在 --build-arg EXE 参数中，交给构建脚本
+        4. 构建：fabric.sh 用于构建基础fabrc镜像；server.sh 构建其他 server 镜像
     """
     if type == 1:
+        color('clean image: [{image}]'.format(image=image))
         c.run('docker rmi -f {image}'.format(image=image), warn=True)
 
     if stdouted(c, 'docker images {image} -q'.format(image=image)):
-        color('image [{image}] already exist'.format(image=image))
+        if notify:
+            color('image [{image}] already exist'.format(image=image))
+
     else:
-        color('create image [{image}]'.format(image=image))
+        local.images_count += 1
+        color('create image: [{image}]'.format(image=image))
         c.run('''cd {base}/docker; 
         docker build -t {image} -f template/{dockerfile}{build}{param} {context}'''.
                 format(base=globing.path, image=image, dockerfile=dockerfile, context=globing.path,
                        build=args(build, ' --build-arg '), param=args(param, ' --build-arg EXEC=')))
 
 
-def prepare_images(c, proxy=local.use_proxy, http=local.use_http):
+def basing_images(c):
+    if local.basing:
+        return
+    else:
+        local.basing = True
+
     """ 1. centos：最原始镜像，安装了 vim 等必要工具
         2. fabric：1）基础上，安装了fabric相关；执行 - fabric.sh
         3. server：2）基础上，执行不同server；  执行 - server.sh
     """
-    build_images(c, 0, local.centos[0], local.centos[1])
-    build_images(c, 0, local.fabric[0], local.fabric[1])
-
-    """ 创建 proxy、http
-    """
+    # color('====> create base image')
+    build_images(c, 0, image=local.centos[0], dockerfile=local.centos[1], notify=False)
+    build_images(c, 0, image=local.fabric[0], dockerfile=local.fabric[1], notify=False)
 
 
-def build_docker(c, type, name, image='', exec='', volume='', port='', **kwargs):
-    image = image if image else name
+def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=False, notify=True, **kwargs):
+    image = args_def(image, name)
 
     if type == 0 or type == 1:
+        color('remove docker: [{name}]'.format(name=name))
         c.run('docker rm -f {name}'.format(name=name), warn=True)
 
     if not stdouted(c, 'docker ps -a | grep {name}$'.format(name=name)):
@@ -77,21 +112,37 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', **kwargs)
                 else:
                     plist = sep(plist, '-p {port}:{port}'.format(port=p), ' ')
 
-        c.run('docker run -itd --name {name} -h {name}{port}{volume} {image} {exec}'.
-              format(image=image, name=name, port=args(plist, ' '), volume=args(vlist, ' '), exec=exec))
+        local.docker_count += 1
+        color('create docker: [{name}]{base}...'.format(name=name, base=' base on [{}]'.format(image) if name != image else ''))
+        c.run('docker run -itd --name {name} -h {name}{port}{volume}{systemd} {image} {exec}'.
+              format(image=image, name=name, port=args(plist, ' '), volume=args(vlist, ' '),
+                     systemd=local.systemd if systemd else '', exec=local.initial if local.systemd else exec))
 
     elif not stdouted(c, 'docker ps | grep {name}$'.format(name=name)):
-        color('docker [{name}] stopped, restart'.format(name=name))
-        c.run('docker start http '.format(name=name), warn=True)
+        color('start docker: [{name}]'.format(name=name))
+        c.run('docker start {name}'.format(name=name), warn=True)
 
     else:
-        color('docker [{name}] already start'.format(name=name))
+        if notify:
+            color('docker [{name}] already start'.format(name=name))
+        return 1
 
-def prepare_docker(c):
-    pass
+
+########################################################################################################################
+def clean_docker(c):
+    if stdouted(c, 'docker ps -aq'):
+        color('clean docker')
+        c.run('docker rm -f  $(docker ps -aq)')
+        # c.run('docker ps -a')
+    else:
+        color('no docker to clean', False)
 
 
-def clean_image(c, total=False):
+def clean_image(c, total=False, ignore='fabric|centos'):
+    if stdouted(c, 'docker images -q -f dangling=true'):
+        color('clear dangling images!')
+        c.run('docker rmi -f $(docker images -q -f dangling=true)')
+
     """
         docker images：显示所有image，包括dangling
         docker images -a：显示所有image，包括其他image所被依赖的
@@ -105,7 +156,6 @@ def clean_image(c, total=False):
     list = c.run('''docker images -q''').stdout.replace('\n', ' ')
 
     if not total:
-        ignore = "fabric|centos"
         keep = c.run('''docker images | egrep "({ignore})" | awk '{{print $3}}' '''
                      .format(ignore=ignore)).stdout.replace('\n', ' ')
         for k in keep.split(' '):
@@ -118,53 +168,125 @@ def clean_image(c, total=False):
     else:
         color('no image to clean', False)
 
+
+def clean_resource(c):
+    color('clean volume')
+    c.run('docker volume prune -f')
+
+    color('clean network')
+    c.run('docker network prune -f')
+    # c.run('docker network ls')
+    # c.run('docker volume ls')
+
+
 ########################################################################################################################
+""" 创建必要的基础 docker
+"""
 def start_http(c, type, **kwargs):
-    start_images(c, type, 'http', port=local.http_port, http=False, proxy=False)
+    kwargs = Dict(kwargs)
+    start_images(c, type, 'http', port=local.http_port, http=False, proxy=False, notify=False)
 
-    kwargs['path'] = args_def(kwargs['path'], local.http_path[0])
-    kwargs['port'] = args_def(kwargs['port'], local.http_port)
-    print('http: port [{port}], path [{path}]'.format(port=kwargs['port'], path=kwargs['path']))
+    kwargs.path = args_def(kwargs.path, local.http_path[0])
+    kwargs.port = args_def(kwargs.port, local.http_port)
+    output = 'http: port [{port}], path [{path}]'.format(port=kwargs.port, path=kwargs.path)
 
-    volume = '{}:{}'.format(kwargs['path'], local.http_path[1])
-    kwargs['port'] = '{out}:{ins}'.format(out=kwargs['port'], ins=local.http_port)
+    volume = '{}:{}'.format(kwargs.path, local.http_path[1])
+    kwargs.port = '{out}:{ins}'.format(out=kwargs.port, ins=local.http_port)
 
-    build_docker(c, type, name='http', volume=volume, http=False, proxy=False, **kwargs)
+    if build_docker(c, type, name='http', volume=volume, http=False, proxy=False, notify=False, **kwargs) != 1:
+        print(output)
 
 
 def start_proxy(c, type, **kwargs):
-    start_images(c, type, 'proxy', http=False, proxy=False)
+    kwargs = Dict(kwargs)
+    start_images(c, type, 'proxy', http=False, proxy=False, notify=False)
 
-    kwargs['path'] = args_def(kwargs['path'], local.proxy_path[0])
-    print('proxy: path [{path}]'.format(path=kwargs['path']))
+    kwargs.port = local.proxy_port
+    kwargs.path = args_def(kwargs.path, local.proxy_path[0])
+    output = 'proxy: path [{path}]'.format(path=kwargs.path)
 
-    volume = '{}:{}'.format(kwargs['path'], local.proxy_path[1])
-    build_docker(c, type, name='proxy', volume=volume, http=False, proxy=False, **kwargs)
+    volume = '{}:{}'.format(kwargs.path, local.proxy_path[1])
+    if build_docker(c, type, name='proxy', volume=volume, http=False, proxy=False, notify=False, **kwargs) != 1:
+        print(output)
+
+
+def start_sshd(c, type, docker=False, **kwargs):
+    kwargs = Dict(kwargs)
+    """ 启动sshd docker，或者仅仅是使用其镜像
+    """
+    start_images(c, type, 'sshd', notify=False, **kwargs)
+
+    if docker:
+        kwargs.port = args_def(kwargs.port, local.sshd_port)
+        print('sshd: port [{port}]'.format(port=kwargs.port))
+
+        kwargs.port = '{out}:{ins}'.format(out=kwargs.port, ins=local.sshd_port)
+        build_docker(c, type, name='sshd', **kwargs)
 
 
 ########################################################################################################################
-def start_images(c, type, name, port=0, http=local.use_http, proxy=local.use_proxy, **kwargs):
-    prepare_images(c)
+def prepare_docker(c, http=local.use_http, proxy=local.use_proxy, **kwargs):
+    if http:
+        start_http(c, -1)
 
-    """ 将所有参数用引号封装 -> dockerfile run shell -> 传递给 server.py 解析出来
+    if proxy:
+        start_proxy(c, -1)
+
+    if local.images_count > 0 or local.docker_count > 0:
+        color('create prepre completed, wait to continue ... ')
+
+
+def prepare_images(c, name):
+    valid = ['sshd', local.centos[0], local.fabric[0]]
+
+    if name == 'sshd':
+        start_sshd(c, -1)
+
+    elif name in valid:
+        pass
+    else:
+        print('prepare images, but image [{name}] not exist, valid {valid}'.format(name=name, valid=valid))
+        exit(-1)
+
+
+def start_images(c, type, name, base='', port=0, http=local.use_http, proxy=local.use_proxy, **kwargs):
+    """ 创建image
+            1. dockerfile 默认是 0_server：可用于生成sshd、其他server等
+            2. base：为空：新生成的image，并且名字与 name 一致，通常是生成了不同 server 自己的 image
+                     非空：基于某个已存在的image，建立docker后，再进行安装
+
+            3. port：只用于设置dockerfile中的 expose，用于声明作用
+            4. http：传递给image构建脚本 server.sh，设置镜像的 yum
     """
-    param = ''
-    param = sep(param, args(name, '--server '), ' ')
-    param = sep(param, args(http, '--http', ignore=True), ' ')
-    param = sep(param, args(proxy, '--proxy', ignore=True), ' ')
+    basing_images(c)
 
-    build_images(c, type, image=name, dockerfile=local.server, build=args(port, 'LISTEN='), param=args(param, '"', '"'))
+    if base:
+        prepare_images(c, base)
+
+    else:
+        """ 将所有参数用引号封装 -> dockerfile run shell -> 传递给 server.py 解析出来
+        """
+        param = ''
+        param = sep(param, args(name, '--server '), ' ')
+        param = sep(param, args(http, '--http', ignore=True), ' ')
+        param = sep(param, args(proxy, '--proxy', ignore=True), ' ')
+
+        build_images(c, type, image=name, dockerfile=local.server, build=args(port, 'LISTEN='), param=args(param, '"', '"'), **kwargs)
 
 
-def start_docker(c, type, name, enter=False, **kwargs):
-    start_images(c, type, name, **kwargs)
+def start_docker(c, type, name, base='', enter=False, **kwargs):
+    """ 准备工作
+    """
+    start_images(c, type, name, base=base, **kwargs)
 
-    build_docker(c, type, name=name, **kwargs)
+    prepare_docker(c, **kwargs)
+
+    """ 启动容器
+    """
+    build_docker(c, type, name=name, image=base, **kwargs)
 
     """ 当前进入新创建的 docker
     """
-    command = 'docker exec -it {name} /bin/bash'.format(name=name)
+    help.sshd(c, name)
     if enter:
-        c.run('{command}'.format(command=command), echo=False, pty=True)
-    else:
-        c.run('echo "{command}"'.format(command=command), echo=False)
+        c.run('docker exec -it {name} /bin/bash'.format(name=name), echo=False, pty=True)

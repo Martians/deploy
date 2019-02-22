@@ -10,44 +10,25 @@ from docker.image import *
 def install(c):
     build_images(c, local.base[0], local.base[1])
 
+
 @task
-def clean(c, all=False, docker=False, image=False, resource=False):
-    if all:
-        docker=True
-        image=True
-        resource=True
+def clean(c, total=False, docker=False, image=False, resource=False):
+    if total:
+        docker = True
+        image = True
+        resource = True
 
-    if stdouted(c, 'docker images -q -f dangling=true'):
-        color('clear dangling images!')
-        c.run('docker rmi -f $(docker images -q -f dangling=true)')
-
+    """ total：清理全部，不保留任何image
+        image: 删除image，保留ignore
+    """
     if docker:
-        if stdouted(c, 'docker ps -aq'):
-            color('clean docker')
-            c.run('docker rm -f  $(docker ps -aq)')
-            # c.run('docker ps -a')
-        else:
-            color('no docker', False)
+        clean_docker(c)
 
     if image:
-        if stdouted(c, 'docker images -aq'):
-            color('clean images')
-            c.run('docker rmi -f $(docker images -aq)')
-            # c.run('docker images -a')
-        else:
-            color('no image', False)
+        clean_image(c, total)
 
     if resource:
-        color('clean volume')
-        c.run('docker volume prune -f')
-
-        color('clean network')
-        c.run('docker network prune -f')
-        # c.run('docker network ls')
-        # c.run('docker volume ls')
-#
-# @task
-# def proxy(c):
+        clean_resource(c)
 
 @task
 def help(c):
@@ -70,20 +51,24 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
     start_proxy(c, type, path=path)
 
 @task
-def sshd(c, type=-1):
-    start_docker(c, type, 'sshd', enter=True, exec='/bin/bash')
+def sshd(c, type=-1, port=local.sshd_port):
+    """ 基于sshd镜像，启动 sshd docker
+    """
+    start_sshd(c, type, port=port)
 
 @task
-def test(c, type=-1, fabirc=True):
-    """ 根据base生成的纯净版本
-    """
+def cluster(c, type=-1, **kwargs):
     start_docker(c, type)
 
+
 @task
-def cc(c):
-    clean_image(c)
+def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', systemd=False):
+    """ 根据base生成的纯净版本，可用于构建测试程序，见：prepare_images
+    """
+    start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, enter=True)
+
 
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    clean_image(conn(hosts.one()))
+    test(conn(hosts.one()), type=0, port=90)

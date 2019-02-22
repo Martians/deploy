@@ -72,10 +72,7 @@ def config_server(withdraw=True):
     traverse('.')
 
     for file in collect:
-        with open(file, 'r') as f:
-            import yaml
-            conf = Dict(yaml.load(f))
-            server.update(conf)
+        server.update(load_yaml(file))
 
     if withdraw:
         server.withdraw()

@@ -98,10 +98,8 @@ class Hosts:
     glob = {}
 
     def parse(self, config, user=None, paww=None):
-        import yaml
-        with open(config, 'r') as f:
-            config = Dict(yaml.load(f))
-            self.parse_host(config)
+        config = load_yaml(config)
+        self.parse_host(config)
 
         """ 获取配置中lists之外的部分
         """

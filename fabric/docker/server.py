@@ -24,7 +24,8 @@ def regist_entries(server):
     set_invoke(True)
 
     redirect = Dict({'http': Entry('service.source.server', 'http'),
-                     'proxy': Entry('service.source.server', 'proxy')})
+                     'proxy': Entry('service.source.server', 'proxy'),
+                     'sshd': Entry('service.source.client', 'use_sshd')})
     return redirect.get(server)
 
 

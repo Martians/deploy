@@ -12,7 +12,7 @@ ln -s /bin/python3.6 /bin/python3
 ln -s /bin/pip3.6 /bin/pip3
 
 ## 删除python安装源
-yum remote ius-release -y
+yum remove ius-release -y
 
 ## 修改pip源
 mkdir ~/.pip
@@ -30,5 +30,5 @@ python3 fabric/common/prepare.py pip3
 rm ~/.cache/pip -rf
 
 ## 清理仓库
-yum clean all; rm -rf /var/cache/yum/*d
+yum clean all; rm -rf /var/cache/yum/*
 
