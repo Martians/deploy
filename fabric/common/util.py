@@ -89,27 +89,3 @@ def stdouted(c, cmd):
     """ 执行命令产生stdout时，则返回 True
     """
     return len(c.run(cmd, echo=False, hide=True, warn=True).stdout) > 0
-
-
-def color(string, type='green', newline=True, fetch=False):
-    color_map = {'red': 31, 'green': 32 }
-    type = type if type in color_map else 'green'
-
-    display = "{newline}\033[1;{color};40m{string}\033[0m"\
-        .format(string=string, color=color_map.get(type), newline='\n' if newline else '')
-
-    if fetch:
-        return display
-    else:
-        print(display)
-
-
-def color_partial(string, type='green', range=(0, 1)):
-    print('{prefix}{string}{suffix}'.format(prefix=string[0:range[0]], suffix=string[range[1]:],
-                                            string=color(string[range[0]:range[1]], type=type, fetch=True, newline=False)))
-
-
-def color_sub(string, sub, type='green'):
-    index = string.find(sub)
-    color_partial(string, type=type, range=(index, index + len(sub)))
-

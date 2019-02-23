@@ -45,12 +45,15 @@ def http(c, type=-1, port=local.http_port, path=local.http_path[0]):
     """ 单独启动 http，可以指定更多参数
     """
     start_http(c, type, port=port, path=path)
+    helps.result(c, name='http', port=port)
 
 @task
 def proxy(c, type=-1, path=local.proxy_path[0]):
     """ 单独启动 proxy，可以指定更多参数
     """
     start_proxy(c, type, path=path)
+    helps.result(c, name='proxy', port=3142)
+    helps.proxy(c, name='proxy')
 
 @task
 def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
@@ -70,10 +73,10 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
     start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
 # @task
-# def help(c)
-#
+# def mariadb(c):
+#     start_docker(c, type, 'mari', base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    sshd(conn(hosts.one()), type=1)
+    http(conn(hosts.one()), type=0)

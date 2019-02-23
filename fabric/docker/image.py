@@ -119,7 +119,7 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=F
         color('create docker: [{name}]{base}...'.format(name=name, base=' base on [{}]'.format(image) if name != image else ''))
         c.run('docker run -itd --name {name} -h {name}{port}{volume}{systemd} {image} {exec}'.
               format(image=image, name=name, port=args(plist, ' '), volume=args(vlist, ' '),
-                     systemd=local.systemd if systemd else '', exec=local.initial if local.systemd else exec))
+                     systemd=local.systemd if systemd else '', exec=local.initial if systemd else exec))
 
     elif not stdouted(c, 'docker ps | grep {name}$'.format(name=name)):
         color('start docker: [{name}]'.format(name=name))
@@ -223,13 +223,16 @@ def sshd_image(c, type, **kwargs):
 
 ########################################################################################################################
 def prepare_docker(c, http=local.use_http, proxy=local.use_proxy, **kwargs):
+    images_origin = local.images_count
+    docker_origin = local.docker_count
+
     if http:
         start_http(c, -1)
 
     if proxy:
         start_proxy(c, -1)
 
-    if local.images_count > 0 or local.docker_count > 0:
+    if local.images_count != images_origin or local.docker_count != docker_origin:
         color('create prepre completed, wait to continue ... ')
 
 

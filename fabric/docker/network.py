@@ -1,16 +1,11 @@
 # coding=utf-8
 from common import *
 
-config = Dict()
-
-
-def config_network():
-    """ 多个配置合并起来
+""" 多个配置合并起来
         1. 最低优先级是 config 目录中的配置，相当于默认配置
         2. 每个机器可以在复制 config 中目录中的相应配置到 ~ 下
-    """
-    global config
-    config = parse_config('network.yaml', merge=True, low='config')
+"""
+config = parse_config('network.yaml', merge=True, low='config')
 
 
 def initial_network(c, local):
@@ -18,8 +13,6 @@ def initial_network(c, local):
         return
     else:
         local.flag.network = True
-
-    config_network()
 
     if not config.segment:
         index = config.local.rfind('.')
@@ -54,7 +47,11 @@ def alloc(c, host):
     elif config.address.get(host):
         return alloc(c, config.address.get(host))
 
-    # elif host.find("")
+    elif len(host) >= 2 and host[0] == 'h' and host[1:].isdigit():
+        """ 用于 cluster，启动多个host，超过手动配置的个数 
+        """
+        base = int(config.address.get('h1'))
+        return alloc(c, str(base + (int(host[1:]) - 1)))
     else:
         return host
 
