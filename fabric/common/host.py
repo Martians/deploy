@@ -2,6 +2,8 @@
 
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 from common.util import *
+from common.globing import *
+
 
 class Host(Dict):
     def __init__(self, hosts, *args, **kw):
@@ -90,7 +92,6 @@ class Hosts:
            - /mnt/disk2
     """
     valid = ['name', 'host', 'user', 'pass', 'port', 'disk', 'type']
-    invoke = False  # 不建立连接，而是使用本地 invoke.Context
 
     control = {}
     array = []
@@ -281,7 +282,7 @@ class Hosts:
         return self.get('control') if host else self.conn('control')
 
     def conn(self, data):
-        if self.invoke:
+        if globing.invoke:
             from invoke import Context
             return Context()
 

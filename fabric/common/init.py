@@ -4,6 +4,7 @@ import os
 from fabric import Connection, Config
 from common.host import hosts
 from common.util import *
+from common.globing import *
 
 """ 搜索路径：
     1. 方案1：加入到系统搜索路径，执行 python prepare.py即可
@@ -141,25 +142,6 @@ def conn(c, one=False):
         c = hosts.one() if one else hosts.conn(0)
         print("connection [{}]".format(c.host))
     return c
-
-
-""" 默认配置内容
-"""
-globing = Dict({
-    # 全局路径
-    'path': os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")),
-
-    # 当前在docker中，执行本地任务
-    'invoke': False,
-
-    'config': {
-        'hosts': 'hosts.yaml'
-    },
-    'source': {
-        'parent': '/opt',
-        'source': '/home/long/source'
-    }
-})
 
 
 def set_invoke(set):
