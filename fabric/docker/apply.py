@@ -61,13 +61,13 @@ def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
 @task
 def cluster(c, name='sshd', systemd=True, count=3):
     for i in range(1, count + 1):
-        sshd(c, -1, name='{}-{}'.format(name, i), systemd=systemd, host='h{}'.format(i), enter=False, info=False)
+        sshd(c, -1, name='{}-{}'.format(name, i), systemd=systemd, addr='h{}'.format(i), enter=False)
 
 @task
-def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', systemd=True, addr='test'):
+def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', systemd=True, addr='test', enter=True):
     """ 根据base生成的纯净版本，可用于构建测试程序，见：prepare_images
     """
-    start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=True)
+    start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
 # @task
 # def help(c)

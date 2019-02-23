@@ -31,9 +31,10 @@ def config_fabric():
 
     name = 'fabric.yaml'
     src = search_config(name)
+    dst = os.path.join(os.path.expanduser('~'), '.' + name)
 
-    dst = '~/.' + name
-    if not file_exist(c, dst):
+    restart = False
+    if not file_exist(c, dst, echo=False):
         print('copy config, try next time!')
         restart = True
 

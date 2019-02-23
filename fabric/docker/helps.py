@@ -27,5 +27,15 @@ def result(c, name, port=False, host=True, **kwargs):
     if port:
         c.run('sudo netstat -antp | grep :$PORT[\t\ ] --color')
     else:
-        print('''show host address:''')
-        c.run('    docker exec {name} ip addr show eth1 | grep inet | grep [0-9.].*/ --color'.format(name=name))
+        result = c.run('docker exec {name} ip addr show eth1 | grep inet | grep [0-9.].*/ --color'
+                    .format(name=name), hide='out', echo=False).stdout.strip()
+        import re
+        match = re.search('(([0-9.].*)/)', result, flags=0)
+
+        if not match.group(2):
+            color("show host address, but not find!")
+            return
+
+        string = match.group(2)
+        color_sub('''show host address:
+        {result}'''.format(result=result), string, type='red')

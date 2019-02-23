@@ -29,9 +29,8 @@ def initial_network(c, local):
 
 
 def prepare_network(c):
-    print(config)
     if stdouted(c, 'ip address show | grep {bridge}'.format(bridge=config.bridge)):
-        print('network exist')
+        print('network already exist')
         return
 
     color('create network')
@@ -46,6 +45,9 @@ sudo route add default gw {gateway}	'''
 
 
 def alloc(c, host):
+    """ 1. 数组：当做ip地址最后一段
+        2. 字符：检查 config.address 部分是否存在相应的项目
+    """
     if isinstance(host, int) or (isinstance(host, str) and host.isdigit()):
         return '{}.{}'.format(config.segment, host)
 
@@ -60,11 +62,13 @@ def address(c, name, host, local):
     initial_network(c, local)
 
     host = alloc(c, host)
-
     print('set [name] host {host}'.format(host=host, name=name))
+
+    """ 为了减少不必要信息，这里设置了 hide=True
+    """
     c.run('sudo pipework {device} {name} {host}/{subnet}@{gateway}'
           .format(name=name, host=host, subnet=config.subnet, device=config.device,
-                  bridge=config.bridge, gateway=config.gateway), warn=True)
+                  bridge=config.bridge, gateway=config.gateway), warn=True, echo=False, hide=True)
     local.flag.host = host
 
 

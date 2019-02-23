@@ -1,8 +1,8 @@
 # coding=utf-8
 
 
-def file_exist(c, path, name=None, dir=False):
-    return c.run(_file_exist_command(path, name, dir), warn=True).ok
+def file_exist(c, path, name=None, dir=False, echo=True):
+    return c.run(_file_exist_command(path, name, dir), warn=True, echo=echo).ok
 
 
 def _file_exist_command(path, name=None, dir=False):
