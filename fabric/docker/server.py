@@ -29,7 +29,7 @@ def regist_entries(server):
     return redirect.get(server)
 
 
-def install_server(c='', server=''):
+def install_server(cs='', server=''):
     if server:
         color('prepare install server [{}]'.format(server))
     else:
@@ -51,13 +51,13 @@ def install_server(c='', server=''):
     else:
         """ 方式2：通过程序方式，直接调用函数
         """
-        do_install(c, entry.path, entry.work)
+        do_install(cs, entry.path, entry.work)
 
 
 def do_install(c, path, work):
     from invoke import Context
     server = __import__(path, fromlist=[path.split('.')[-1]])
-    eval('server.{work}(c)'.format(work=work, c='c' if c else 'Context()'))
+    eval('server.{work}({c})'.format(work=work, c='c' if c else 'Context()'))
 
 
 if __name__ == '__main__':

@@ -300,13 +300,17 @@ def sshd_server(c, type, name, base='sshd', host='sshd', enter=False):
         host: 默认使用 sshd 对应的地址
         enter: 不传入start_docker，用于安装server完成后
 
-        安装：1）本地docker：docker exec {name}
+        安装：1）本地docker：docker exec mariadb python3 server.py --server mariadb
              2）fab 网络连接：直接使用 fab 正常方式进行安装
     """
     start_docker(c, type, name, base=base, host=host, systemd=True, enter=False)
 
-    set_invoke(False)
-    c = hosts.adhoc(local.flag.host, user='root', passwd='111111')
+    mode = 1
+    if mode == 0:
+        pass
+    else:
+        set_invoke(False)
+        c = hosts.adhoc(local.flag.host, user='root', passwd='111111')
 
-    from docker import server
-    server.install_server(c=c, server=name)
+        from docker import server
+        server.install_server(cs=c, server=name)
