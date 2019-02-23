@@ -13,13 +13,15 @@ def install(c):
 
 @task
 def clean(c, total=False, docker=False, image=False, resource=False):
+    """ -di 删除所有docker、大部分image（保留centos、fabric）
+    """
     if total:
         docker = True
         image = True
         resource = True
 
     """ total：清理全部，不保留任何image
-        image: 删除image，保留ignore
+        image: 删除image，保留ignore（但必须先清理相关docker）
     """
     if docker:
         clean_docker(c)
@@ -54,7 +56,7 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
 def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
     """ 基于sshd镜像，启动 sshd docker
     """
-    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, enter=enter, info=info)
+    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, enter=enter)
 
 @task
 def cluster(c, name='sshd', systemd=True, count=3):
@@ -74,4 +76,4 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    sshd(conn(hosts.one()), info=True)
+    sshd(conn(hosts.one()))

@@ -4,7 +4,8 @@ import os
 from fabric import Connection, Config
 from common.host import hosts
 from common.util import *
-from common.globing import *
+from common.disk import *
+from common.config import *
 
 """ 搜索路径：
     1. 方案1：加入到系统搜索路径，执行 python prepare.py即可
@@ -19,69 +20,10 @@ from common.globing import *
 """
 
 
-def search_config(name):
-    """ 当前目录 yaml
-    """
-    origin = os.path.join(os.getcwd(), name)
-
-    """ 全局目录
-    """
-    user_home = '{}/{}'.format(os.path.expanduser('~'), name)
-    glob_etc = '/etc/{}'.format(name)
-
-    """ 顶层目录 yaml
-    """
-    module = os.path.join(os.path.abspath(globing.path), name)
-
-    if os.path.exists(origin):
-        src, pos = origin, 'pwd'
-
-    elif os.path.exists(user_home):
-        src, pos = user_home, 'user home'
-    elif os.path.exists(glob_etc):
-        src, pos = glob_etc, '/etc'
-
-    elif os.path.exists(module):
-        src, pos = module, 'module'
-    else:
-        print('not find {}!'.format(name))
-        exit(-1)
-
-    return src
-
-
-def hosts_config():
-    name = globing.config.hosts
-    return search_config(name)
-
-
-def config_server(withdraw=True):
-    """ 将本地所有的 yaml 配置文件，聚合起来
-    """
-    collect = []
-
-    def traverse(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if file.find('yaml') != -1 or file.find('yml') != -1:
-                    collect.append(os.path.join(root, file))
-
-            for dir in dirs:
-                if not dir.startswith('_'):
-                    traverse(os.path.join(root, dir))
-            break
-    traverse('.')
-
-    for file in collect:
-        server.update(load_yaml(file))
-
-    if withdraw:
-        server.withdraw()
-    return collect
-
-
 def config_fabric():
     """ fabric 配置文件：当前目录、用户目录、全局目录、工程目录（默认配置）
+        只有配置在 ~/.fabric.yaml 和 /etc/fabric.yaml 的才能真正生效（此处选择~/.fabric.yaml）
+
         1. 比较找到的 fabric.yaml 和 ~/.fabric.yaml 的差别
         2. 需要时，将 fabric.yaml 复制到 ~/.fabric.yaml
     """
@@ -91,17 +33,32 @@ def config_fabric():
     src = search_config(name)
 
     dst = '~/.' + name
-    if c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
-        c.local("\cp {} {}".format(src, dst))
+    if not file_exist(c, dst):
+        print('copy config, try next time!')
+        restart = True
+
+    elif c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
         print("update config, try next time!")
+        restart = True
+
+    if restart:
+        c.local("\cp {} {}".format(src, dst))
         exit(-1)
 
 
 def config_hosts():
     fabric_config = Config()
-
     user, paww = fabric_config.user, fabric_config.connect_kwargs.password
-    hosts.parse(hosts_config(), user=user, paww=paww)
+
+    path = search_config(globing.config.hosts)
+    hosts.parse(path, user=user, paww=paww)
+
+
+def config_server(withdraw=True):
+    """ 将本地所有的 yaml 配置文件，聚合起来
+    """
+    config = parse_traverse('.', withdraw=withdraw)
+    server.update(config)
 
 
 class LocalBase:

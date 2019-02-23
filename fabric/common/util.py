@@ -23,12 +23,21 @@ class Dict(dict):
         self.clear()
         self.update(temp)
 
+    def updating(self, other):
+        """ 像遍历文件路径一样进行遍历
+        """
+        curr = merge(self, other)
+        self.update(curr)
 
-def load_yaml(file):
-    import yaml
-    with open(file, 'r') as f:
-        return Dict(yaml.load(f))
-
+def merge(a, b):
+    if not a:
+        a = Dict()
+    for k, v in b.items():
+        if isinstance(v, dict):
+            a[k] = merge(a.get(k), v)
+        else:
+            a[k] = v
+    return a
 
 def sep(full, data, sep=','):
     """ 构建full：第一次添加data时，不加sep分隔符

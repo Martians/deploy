@@ -2,7 +2,7 @@
 
 from fabric import Connection, SerialGroup as Group, Config, ThreadingGroup
 from common.util import *
-from common.globing import *
+from common.config import *
 
 
 class Host(Dict):

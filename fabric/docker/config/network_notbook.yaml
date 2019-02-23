@@ -1,0 +1,9 @@
+
+network:
+  local: 192.168.127.129
+
+  netmask: 255.255.255.0
+  gateway: 192.168.127.2
+  subnet: 24
+
+  device: ens38

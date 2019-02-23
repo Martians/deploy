@@ -171,7 +171,7 @@ from common.init import *
 from common.pack import *
 from common.host import *
 from common.util import *
-from common.globing import *
+from common.config import *
 from common.previous import *
 
 import common.execute

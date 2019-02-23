@@ -1,8 +1,16 @@
 # coding=utf-8
 from common import *
 
-config = load_yaml('network.yaml')
-config = config.network
+config = Dict()
+
+
+def config_network():
+    """ 多个配置合并起来
+        1. 最低优先级是 config 目录中的配置，相当于默认配置
+        2. 每个机器可以在复制 config 中目录中的相应配置到 ~ 下
+    """
+    global config
+    config = parse_config('network.yaml', merge=True, low='config')
 
 
 def initial_network(c, local):
@@ -10,6 +18,8 @@ def initial_network(c, local):
         return
     else:
         local.flag.network = True
+
+    config_network()
 
     if not config.segment:
         index = config.local.rfind('.')
@@ -19,6 +29,7 @@ def initial_network(c, local):
 
 
 def prepare_network(c):
+    print(config)
     if stdouted(c, 'ip address show | grep {bridge}'.format(bridge=config.bridge)):
         print('network exist')
         return
@@ -47,6 +58,7 @@ def alloc(c, host):
 
 def address(c, name, host, local):
     initial_network(c, local)
+
     host = alloc(c, host)
 
     print('set [name] host {host}'.format(host=host, name=name))
@@ -54,3 +66,5 @@ def address(c, name, host, local):
           .format(name=name, host=host, subnet=config.subnet, device=config.device,
                   bridge=config.bridge, gateway=config.gateway), warn=True)
     local.flag.host = host
+
+

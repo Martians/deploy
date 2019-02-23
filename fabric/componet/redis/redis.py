@@ -210,6 +210,7 @@ def help(c):
     fab clean
     ''')
 
-# install(hosts.conn(0))
-# clean(hosts.conn(0))
-# cluster(hosts.conn(0))
+if __name__ == '__main__':
+    install(hosts.conn(0))
+    # clean(hosts.conn(0))
+    # cluster(hosts.conn(0))
