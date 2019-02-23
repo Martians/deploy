@@ -51,10 +51,7 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
     start_proxy(c, type, path=path)
 
 @task
-def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True, info=True):
-    if info:
-        helps.sshd(c, name, sshd=info)
-
+def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
     """ 基于sshd镜像，启动 sshd docker
     """
     start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, enter=enter, info=info)
@@ -70,6 +67,9 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
     """
     start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=True)
 
+# @task
+# def help(c)
+#
 
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)

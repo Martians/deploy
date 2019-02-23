@@ -172,7 +172,7 @@ def clean_image(c, total=False, ignore='fabric|centos'):
         for k in keep.split(' '):
             list = list.replace(k, '')
 
-    list.strip()
+    list = list.strip()
     if list:
         color('clean images')
         c.run('echo {list} | xargs docker rmi -f'.format(list=list))
