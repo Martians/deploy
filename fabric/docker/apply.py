@@ -72,11 +72,13 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
     """
     start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
-# @task
-# def mariadb(c):
-#     start_docker(c, type, 'mari', base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
+@task
+def mariadb(c, type=-1, name='mariadb', addr='sshd', enter=False):
+    sshd_server(c, type, name, host=addr, enter=enter)
+
 
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    http(conn(hosts.one()), type=0)
+    # http(conn(hosts.one()), type=0)
+    mariadb(conn(hosts.one()), 0)

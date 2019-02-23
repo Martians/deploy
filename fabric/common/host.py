@@ -297,6 +297,10 @@ class Hosts:
             host.conn = Connection(host=host.host, user=host.user, port=host.port, connect_kwargs=kwarg)
         return host.conn
 
+    def adhoc(self, host, user='root', passwd='111111', port=22):
+        kwarg = {'password': passwd} if passwd else None
+        return Connection(host=host, user=user, port=port, connect_kwargs=kwarg)
+
 
 hosts = Hosts()
 

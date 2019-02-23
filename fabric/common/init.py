@@ -104,7 +104,6 @@ def conn(c, one=False):
 
 
 def set_invoke(set):
-    hosts.invoke = set
     globing.invoke = set
 
 
