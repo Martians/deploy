@@ -49,7 +49,7 @@ local = LocalConfig()
 """
 
 
-def build_images(c, type, image, dockerfile, build='', param='', noisy=True):
+def build_images(c, type, image, dockerfile, build='', param='', noisy=True, **kwargs):
     """ 1. 复制：将整个fabric文件夹都复制过去了
         2. 变量：build传递变量给dockerfile，目前只有 port
         3. 传参：构建server的参数，统一封装在 --build-arg EXE 参数中，交给构建脚本
@@ -257,7 +257,7 @@ def start_images(c, type, name, base='', port=0, http=local.use_http, proxy=loca
     """
     basing_images(c)
 
-    if base:
+    if base and base != name:
         prepare_images(c, base)
 
     else:
@@ -274,9 +274,9 @@ def start_images(c, type, name, base='', port=0, http=local.use_http, proxy=loca
 def start_docker(c, type, name, base='', enter=False, **kwargs):
     """ 准备工作
     """
-    start_images(c, type, name, base=base, **kwargs)
-
     prepare_docker(c, **kwargs)
+
+    start_images(c, type, name, base=base, **kwargs)
 
     """ 启动容器
     """

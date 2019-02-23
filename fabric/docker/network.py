@@ -54,6 +54,7 @@ def alloc(c, host):
     elif config.address.get(host):
         return alloc(c, config.address.get(host))
 
+    # elif host.find("")
     else:
         return host
 

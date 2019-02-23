@@ -29,6 +29,9 @@ source $conf
 python3 fabric/common/prepare.py pip3
 rm ~/.cache/pip -rf
 
+########################################################################################################################
+## 安装更多
+
 ## 清理仓库
 yum clean all; rm -rf /var/cache/yum/*
 

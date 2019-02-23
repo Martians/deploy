@@ -27,7 +27,8 @@ def config_fabric():
         1. 比较找到的 fabric.yaml 和 ~/.fabric.yaml 的差别
         2. 需要时，将 fabric.yaml 复制到 ~/.fabric.yaml
     """
-    c = Connection("127.0.0.1")
+    from invoke import Context
+    c = Context()
 
     name = 'fabric.yaml'
     src = search_config(name)
@@ -38,12 +39,12 @@ def config_fabric():
         print('copy config, try next time!')
         restart = True
 
-    elif c.local("diff {} {}".format(src, dst), warn=True, echo=False).failed:
+    elif c.run("diff {} {}".format(src, dst), warn=True, echo=False).failed:
         print("update config, try next time!")
         restart = True
 
     if restart:
-        c.local("\cp {} {}".format(src, dst))
+        c.run("\cp {} {}".format(src, dst))
         exit(-1)
 
 

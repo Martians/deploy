@@ -76,4 +76,4 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
 if __name__ == '__main__':
     # sshd(hosts.one(), 0)
     globing.invoke = True
-    sshd(conn(hosts.one()))
+    sshd(conn(hosts.one()), type=1)
