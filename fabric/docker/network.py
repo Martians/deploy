@@ -21,8 +21,8 @@ def initial_network(c, local):
     prepare_network(c)
 
 
-def prepare_network(c):
-    if stdouted(c, 'ip address show | grep {bridge}'.format(bridge=config.bridge)):
+def prepare_network(c, force=False):
+    if not force and stdouted(c, 'ip address show | grep {bridge}'.format(bridge=config.bridge)):
         print('network already exist')
         return
 

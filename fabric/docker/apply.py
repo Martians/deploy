@@ -5,6 +5,7 @@ from common import *
 import system
 from docker.image import *
 from docker import helps
+from docker import network as net
 
 @task
 def install(c):
@@ -73,12 +74,19 @@ def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', system
     start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
 @task
+def network(c, force=True):
+    net.prepare_network(c, force=force)
+
+@task
 def mariadb(c, type=-1, name='mariadb', addr='sshd', enter=False):
     sshd_server(c, type, name, host=addr, enter=enter)
 
 
 if __name__ == '__main__':
-    # sshd(hosts.one(), 0)
     globing.invoke = True
-    # http(conn(hosts.one()), type=0)
-    mariadb(conn(hosts.one()), 0)
+    c = conn(hosts.one())
+
+    # sshd(c, 0)
+    # http(c, type=0)
+    # mariadb(c, 0)
+    test(c)

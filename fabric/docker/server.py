@@ -29,7 +29,7 @@ def regist_entries(server):
     return redirect.get(server)
 
 
-def install_server(cs='', server=''):
+def install_server(c='', server=''):
     if server:
         color('prepare install server [{}]'.format(server))
     else:
@@ -51,7 +51,7 @@ def install_server(cs='', server=''):
     else:
         """ 方式2：通过程序方式，直接调用函数
         """
-        do_install(cs, entry.path, entry.work)
+        do_install(c, entry.path, entry.work)
 
 
 def do_install(c, path, work):

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## 安装python3
-yum install epel-release wget -y
+yum install wget -y
 
 wget https://centos7.iuscommunity.org/ius-release.rpm
 yum install ius-release.rpm -y
@@ -12,7 +12,7 @@ ln -s /bin/python3.6 /bin/python3
 ln -s /bin/pip3.6 /bin/pip3
 
 ## 删除python安装源
-yum remove ius-release -y
+yum remove ius-release epel-release -y
 
 ## 修改pip源
 mkdir ~/.pip
