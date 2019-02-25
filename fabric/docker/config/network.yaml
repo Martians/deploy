@@ -17,4 +17,4 @@ network:
     h3: 83
     sshd: 85
     test: 87
-    database: 85
+    db: 85

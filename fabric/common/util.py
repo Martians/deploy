@@ -88,7 +88,7 @@ def args_insert(kwargs, **update):
 def stdouted(c, cmd, out=False):
     """ 执行命令产生stdout时，则返回 True
     """
-    stdout = c.run(cmd, echo=False, hide=True, warn=True).stdout
+    stdout = c.run(cmd, echo=False, hide=True, warn=True).stdout.strip()
     if out:
         return stdout
     else:

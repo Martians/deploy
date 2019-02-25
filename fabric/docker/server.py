@@ -26,10 +26,11 @@ def parse_options():
 
 
 class Entry:
-    def __init__(self, path, work, param=''):
+    def __init__(self, path, work, param='', start=''):
         self.path = path
         self.work = work
         self.param = param
+        self.start = start
 
 
 def regist_entries():
@@ -41,7 +42,8 @@ def regist_entries():
                      'use_proxy': Entry('service.source.client', 'use_proxy', net.config.local),
                      'use_file': Entry('service.source.client', 'use_file', os.path.join(local.http_path[1], local.http_url))})
 
-    redirect.update({'mariadb': Entry('service.database.mariadb', 'install')})
+    redirect.update({'mariadb': Entry('service.database.mariadb', 'install', start='systemctl start mariadb'),
+                     'postgres': Entry('service.database.postgres', 'install', start='systemctl start postgresql-9.5.service')})
     return redirect
 
 
@@ -65,6 +67,18 @@ def install_sources(c, source, address):
     if str_enum_exist(local.senums, source, 'file'):
         print(redirect.get('use_file').param)
         do_install(c, 'use_file')
+
+
+def start_server(c, name, errexit=True):
+    entry = get_entry(name)
+    if entry:
+        if entry.start:
+            c.run('{}'.format(entry.start))
+        else:
+            print('no retart code, ignore')
+    else:
+        color('restart server [{}], not find entry, ignore'.format(name))
+        if errexit: exit(0)
 
 
 def install_server(c='', server='', source='', errexit=True):

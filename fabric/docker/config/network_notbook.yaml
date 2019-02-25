@@ -14,4 +14,4 @@ network:
     h3: 13
     sshd: 15
     test: 17
-    database: 15
+    db: 15

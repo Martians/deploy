@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import sys
 from invoke import task
 from common import *
 import system
@@ -89,17 +90,20 @@ def network(c, force=True):
     net.prepare_network(c, force=force)
 
 @task
-def mariadb(c, type=-1, name='mariadb', addr='sshd', enter=False):
+def mariadb(c, type=-1, name='', addr='db', enter=False):
+    name = sys._getframe().f_code.co_name   # 这样其他构建server的函数都可以直接复制了
     sshd_server(c, type, name, host=addr, enter=enter)
 
 @task
-def tt(c):
-    sshd_server(c, type, 'aa', host='database', enter=True)
+def postgres(c, type=-1, name='', addr='db', enter=False):
+    name = sys._getframe().f_code.co_name
+    sshd_server(c, type, name, host=addr, enter=enter)
+
 
 if __name__ == '__main__':
     globing.invoke = True
     c = conn(hosts.one())
-    tt(c)
+
     # sshd(c, 1)
     # test(c)
     # http(c, type=0)

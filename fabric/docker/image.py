@@ -303,7 +303,7 @@ def start_docker(c, type, name, base='', enter=False, **kwargs):
     """
     build_docker(c, type, name=name, image=base, **kwargs)
 
-    enter_docker(c, name, enter, **kwargs)
+    enter_docker(c, name, enter)
 
 
 def enter_docker(c, name, enter=False):
@@ -326,35 +326,44 @@ def sshd_server(c, type, name, base='sshd', host='sshd', mode=1, enter=False):
     """
     start_docker(c, type, name, base=base, host=host, systemd=True, enter=False)
 
-    if sshd_server_installed(c, name, False):
-        color('sshd_server: [{}] already installed'.format(name))
+    if mode == 0:
+        """ 本地docker：docker exec mariadb python3 server.py --server mariadb
+        """
+        c.run('docker exec {name} python3 server.py --server {name}'.format(name=name))
 
     else:
-        if mode == 0:
-            """ 本地docker：docker exec mariadb python3 server.py --server mariadb
-            """
-            c.run('docker exec {name} python3 server.py --server {name}'.format(name=name))
-        else:
-            """ fab 网络连接：直接使用 fab 正常方式进行安装
-            """
-            set_invoke(False)
-            c = hosts.adhoc(local.flag.host, user=local.sshd_user, passwd=local.sshd_paww)
+        """ fab 网络连接：直接使用 fab 正常方式进行安装
+        """
+        set_invoke(False)
+        c = hosts.adhoc(local.flag.host, user=local.sshd_user, passwd=local.sshd_paww)
+        from docker import server
 
-            from docker import server
+        if sshd_server_installed(c, name, False):
+            color('sshd_server: [{}] already installed'.format(name))
+            server.start_server(c=c, name=name)
+
+        else:
+            color('sshd_server: install [{}] ...'.format(name))
             server.install_server(c=c, server=name, errexit=False)
 
-        sshd_server_installed(c, name, True)
+            sshd_server_installed(c, name, True)
 
     if enter:
+        from invoke import Context
+        c = Context(Config())
         enter_docker(c, name, enter)
 
 
 def sshd_server_installed(c, name, set=True):
     path = '/installed'
     if set:
+        """ 设置已经安装标志
+        """
         c.run('echo {} > {}'.format(name, path))
     else:
-        if file_exist(c, path):
+        """ 检测是否已经安装
+        """
+        if file_exist(c, path, echo=False):
             if stdouted(c, 'cat {}'.format(path), out=True) == name:
                 return True
         return False
