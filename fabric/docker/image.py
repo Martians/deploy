@@ -18,22 +18,29 @@ class LocalConfig(LocalBase):
         """ sshd 相关配置
         """
         self.sshd_port = 22
+        self.sshd_user = 'root1'
+        self.sshd_paww = '111111'
+
         self.systemd = " --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
         self.initial = '/usr/sbin/init'
         self.volume = '{base}:/fabric'.format(base=globing.path)
 
         ################################################################################################################
         """ 是否使用 http、proxy 设置yum源
-                1. 如果修改 dest 位置，需要一同修改 service.source.server 中的 http_path
+                1. 这里配置的参数，主要是外部配置，如：docker映射时的外部 path /mnt/hgfs/repo
+                   服务内部配置是在安装时，传入参数安装函数时指定，如：http使用内部path /home/repo
+                   
+                2. http server充电当文件服务器，而不仅仅是 yum source，因此其外部路径 /mnt/hgfs/repo 并非是 yum的跟目录
+                   yum 的根目录 为 path（/mnt/hgfs/repo） + http.url(common/centos7)
         """
-        self.use_http = True
-        self.use_proxy = True
-
-        self.http_port = 80
+        self.http_port = 80                 # http与主机搭建在一起，这里是指定http服务的 本机映射端口，内部端口不变为 80
         self.http_path = ('/mnt/hgfs/repo/', '/home/repo')
+        self.http_url = 'common/centos7'    # 访问的是 ip/url
 
         self.proxy_port = 3142
         self.proxy_path = ('/mnt/hgfs/proxy', '/home/proxy')
+        self.source = 'http,proxy'
+        self.senums = str_enum('http,proxy,file')
 
         ################################################################################################################
         self.flag = Dict()
@@ -70,21 +77,6 @@ def build_images(c, type, image, dockerfile, build='', param='', noisy=True, **k
         docker build -t {image} -f template/{dockerfile}{build}{param} {context}'''.
                 format(base=globing.path, image=image, dockerfile=dockerfile, context=globing.path,
                        build=args(build, ' --build-arg '), param=args(param, ' --build-arg EXEC=')))
-
-
-def basing_images(c):
-    if local.flag.basing:
-        return
-    else:
-        local.flag.basing = True
-
-    """ 1. centos：最原始镜像，安装了 vim 等必要工具
-        2. fabric：1）基础上，安装了fabric相关；执行 - fabric.sh
-        3. server：2）基础上，执行不同server；  执行 - server.sh
-    """
-    # color('====> create base image')
-    build_images(c, 0, image=local.centos[0], dockerfile=local.centos[1], noisy=False)
-    build_images(c, 0, image=local.fabric[0], dockerfile=local.fabric[1], noisy=False)
 
 
 def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=False, host='',
@@ -191,9 +183,24 @@ def clean_resource(c):
 
 
 ########################################################################################################################
+def basing_images(c):
+    if local.flag.basing:
+        return
+    else:
+        local.flag.basing = True
+
+    """ 1. centos：最原始镜像，安装了 vim 等必要工具
+        2. fabric：1）基础上，安装了fabric相关；执行 - fabric.sh
+        3. server：2）基础上，执行不同server；  执行 - server.sh
+    """
+    # color('====> create base image')
+    build_images(c, 0, image=local.centos[0], dockerfile=local.centos[1], noisy=False)
+    build_images(c, 0, image=local.fabric[0], dockerfile=local.fabric[1], noisy=False)
+
+
 def start_http(c, type, **kwargs):
     kwargs = Dict(kwargs)
-    start_images(c, type, 'http', port=local.http_port, http=False, proxy=False, noisy=False)
+    start_images(c, type, 'http', port=local.http_port, source='', noisy=False)
 
     kwargs.path = args_def(kwargs.path, local.http_path[0])
     kwargs.port = args_def(kwargs.port, local.http_port)
@@ -202,19 +209,19 @@ def start_http(c, type, **kwargs):
     volume = '{}:{}'.format(kwargs.path, local.http_path[1])
     kwargs.port = '{out}:{ins}'.format(out=kwargs.port, ins=local.http_port)
 
-    build_docker(c, type, name='http', volume=volume, http=False, proxy=False, noisy=False, output=output, **kwargs)
+    build_docker(c, type, name='http', volume=volume, source='', noisy=False, output=output, **kwargs)
 
 
 def start_proxy(c, type, **kwargs):
     kwargs = Dict(kwargs)
-    start_images(c, type, 'proxy', http=False, proxy=False, noisy=False)
+    start_images(c, type, 'proxy', source='', noisy=False)
 
     kwargs.port = local.proxy_port
     kwargs.path = args_def(kwargs.path, local.proxy_path[0])
     output = 'proxy: path [{path}]'.format(path=kwargs.path)
 
     volume = '{}:{}'.format(kwargs.path, local.proxy_path[1])
-    build_docker(c, type, name='proxy', volume=volume, http=False, proxy=False, noisy=False, output=output, **kwargs)
+    build_docker(c, type, name='proxy', volume=volume, source='', noisy=False, output=output, **kwargs)
 
 
 def sshd_image(c, type, **kwargs):
@@ -222,14 +229,14 @@ def sshd_image(c, type, **kwargs):
 
 
 ########################################################################################################################
-def prepare_docker(c, http=local.use_http, proxy=local.use_proxy, **kwargs):
+def prepare_docker(c, source=local.source, **kwargs):
     images_origin = local.images_count
     docker_origin = local.docker_count
 
-    if http:
+    if str_enum_exist(local.senums, source, 'http'):
         start_http(c, -1)
 
-    if proxy:
+    if str_enum_exist(local.senums, source, 'proxy'):
         start_proxy(c, -1)
 
     if local.images_count != images_origin or local.docker_count != docker_origin:
@@ -249,7 +256,7 @@ def prepare_images(c, name):
         exit(-1)
 
 
-def start_images(c, type, name, base='', port=0, http=local.use_http, proxy=local.use_proxy, **kwargs):
+def start_images(c, type, name, base='', port=0, source=local.source, **kwargs):
     """ 创建image
             1. dockerfile 默认是 0_server：可用于生成sshd、其他server等
             2. base：为空：新生成的image，并且名字与 name 一致，通常是生成了不同 server 自己的 image
@@ -266,10 +273,9 @@ def start_images(c, type, name, base='', port=0, http=local.use_http, proxy=loca
     else:
         """ 将所有参数用引号封装 -> dockerfile run shell -> 传递给 server.py 解析出来
         """
-        param = ''
+        param = '--address {}'.format(net.config.local)
         param = sep(param, args(name, '--server '), ' ')
-        param = sep(param, args(http, '--http', ignore=True), ' ')
-        param = sep(param, args(proxy, '--proxy', ignore=True), ' ')
+        param = sep(param, args(source, '--source '), ' ')
 
         build_images(c, type, image=name, dockerfile=local.server, build=args(port, 'LISTEN='), param=args(param, '"', '"'), **kwargs)
 

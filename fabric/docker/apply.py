@@ -69,7 +69,10 @@ def cluster(c, name='sshd', systemd=True, count=3):
 
 @task
 def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', systemd=True, addr='test', enter=True):
-    """ 根据base生成的纯净版本，可用于构建测试程序，见：prepare_images
+    """ 构架测试场景
+
+        1. 指定基础镜像：指定base生成纯净版本，可用于构建测试程序，可选项详见：prepare_images
+        2. 内部执行安装：cd /fabric/docker; python3 server.py --server mariadb
     """
     start_docker(c, type, name, base=base, port=port, exec=exec, systemd=systemd, host=addr, enter=enter)
 
@@ -86,7 +89,7 @@ if __name__ == '__main__':
     globing.invoke = True
     c = conn(hosts.one())
 
-    # sshd(c, 0)
+    sshd(c, 1)
     # http(c, type=0)
     # mariadb(c, 0)
-    test(c)
+    # test(c)

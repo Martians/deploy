@@ -1,64 +1,115 @@
 
 from common import *
-from docker.image import *
 from optparse import OptionParser
+from docker.image import *
+
+""" 用于根据传入的 server 函数地址，进行server的安装
+    1. 本地模式：python3 server.py --server {name} --source {source}
+            1. 此时set_invoke(True)，使用的c是Context
+            2. 此时 getcwd="/"，因为是在根目录下执行本文件
+            
+    2. 远程模式：先构建c，在执行函数 install_server
+            此时使用的c是Connection
+            
+"""
 
 
 def parse_options():
     parser = OptionParser(usage='%prog --server server --http --proxy')
     parser.add_option('--server', dest='server', help='server type')
-    parser.add_option('--http', dest='http', action='store_true', help='use local yum http source')
-    parser.add_option('--proxy', dest='proxy', action='store_true', help='use local yum proxy')
+    parser.add_option('--source', dest='source', help='use local yum http、proxy、file source')
+    parser.add_option('--address',  dest='address',  help='local host ip')
 
     (options, args) = parser.parse_args()
     return options
 
 
 class Entry:
-    def __init__(self, path, work):
+    def __init__(self, path, work, param=''):
         self.path = path
         self.work = work
+        self.param = param
 
 
-def regist_entries(server):
-    redirect = Dict({'http': Entry('service.source.server', 'http'),
-                     'proxy': Entry('service.source.server', 'proxy'),
-                     'sshd': Entry('service.source.client', 'use_sshd')})
+def regist_entries():
+    redirect = Dict({'http': Entry('service.source.server', 'http', local.http_path[1]),
+                     'proxy': Entry('service.source.server', 'proxy', local.proxy_path[1]),
+                     'sshd': Entry('service.source.client', 'use_sshd', '{},{}'.format(local.sshd_user, local.sshd_paww))})
+
+    redirect.update({'use_http': Entry('service.source.client', 'use_http', '{}/{}'.format(net.config.local, local.http_url)),
+                     'use_proxy': Entry('service.source.client', 'use_proxy', net.config.local),
+                     'use_file': Entry('service.source.client', 'use_file')})
 
     redirect.update({'mariadb': Entry('service.database.mariadb', 'install')})
+    return redirect
+
+
+def get_entry(server):
     return redirect.get(server)
 
 
-def install_server(c='', server=''):
+def install_sources(c, source, address):
+    print(net.config)
+    print('---------------------')
+    exit(-1)
+    if address:
+        """ 本地模式执行时，本地没有network.yaml配置文件，使用外部传入的配置参数
+        """
+        redirect.get('use_http').param = '{}/{}'.format(address, local.http_url)
+        redirect.get('use_proxy').param = '{}'.format(address)
+
+    if str_enum_exist(local.senums, source, 'http'):
+        do_install(c, 'use_http')
+
+    if str_enum_exist(local.senums, source, 'proxy'):
+        do_install(c, 'use_proxy')
+
+    if str_enum_exist(local.senums, source, 'file'):
+        do_install(c, 'use_file')
+
+
+def install_server(c='', server='', source=''):
+    """ 指定了server，表明是以函数方式调用此函数
+    """
+    address = net.config.local
     if server:
-        color('prepare install server [{}]'.format(server))
+        color('prepare install server [{}], source [{}]'.format(server, source))
     else:
         set_invoke(True)
         options = parse_options()
         server = options.server
+        source = options.source
+        address = options.address
 
-    entry = regist_entries(server)
+    install_sources(c, source, address)
 
-    if not entry:
-        color('install server, not find entry, ignore')
+    do_install(c, server)
+
+
+def do_install(c, name):
+    entry = get_entry(name)
+
+    """ 方式1：通过shell方式，调用fab进行安装
+        os.system('cd {path}; {work}'.format(path=os.path.join(globing.path, entry.path), work=entry.work))
+        
+        方式2：直接调用函数来执行; 使用此方式来执行
+    """
+    if entry:
+        from invoke import Context
+        handle = __import__(entry.path, fromlist=[entry.path.split('.')[-1]])
+
+        param = ''
+        for p in entry.param.split(','):
+            param = " , '{}'".format(p)
+        eval('handle.{work}({c}{param})'.format(work=entry.work, c='c' if c else 'Context()', param=param))
+
+    else:
+        color('do install [{}], not find entry, ignore'.format(name))
         exit(0)
 
-    mode = 1
-    if mode == 0:
-        """ 方式1：通过shell方式，调用fab进行安装
-        """
-        os.system('cd {path}; {work}'.format(path=os.path.join(globing.path, entry.path), work=entry.work))
-    else:
-        """ 方式2：通过程序方式，直接调用函数
-        """
-        do_install(c, entry.path, entry.work)
 
-
-def do_install(c, path, work):
-    from invoke import Context
-    server = __import__(path, fromlist=[path.split('.')[-1]])
-    eval('server.{work}({c})'.format(work=work, c='c' if c else 'Context()'))
-
+redirect = regist_entries()
 
 if __name__ == '__main__':
     install_server()
+    # install_server(hosts.adhoc('192.168.0.85', 'root', '111111'), 'http', 'http,proxy')

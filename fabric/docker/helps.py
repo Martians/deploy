@@ -46,4 +46,6 @@ def result(c, name, port=False, **kwargs):
 
 
 def proxy(c, name):
-    print('        docker exec -it {name} tail -f /var/log/apt-cacher-ng/*'.format(name=name))
+    print('''
+        docker exec -it {name} tail -f /var/log/apt-cacher-ng/*
+        docker logs -f proxy'''.format(name=name))

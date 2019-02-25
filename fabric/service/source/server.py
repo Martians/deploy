@@ -127,7 +127,11 @@ def proxy(c, path=local.proxy_path):
     """
     c = conn(c)
     c.run('rm {conf} -rf'.format(conf=local.proxy_conf))
-    system.install(c, 'source', 'apt-cacher-ng')
+
+    """ 这里需要分开安装：先安装 epel-release 之后，才能安装 其他server
+    """
+    system.install(c, 'source')
+    system.install(c, 'apt-cacher-ng')
 
     from common.disk import file_exist
     if not file_exist(c, local.proxy_conf):

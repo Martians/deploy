@@ -116,3 +116,29 @@ def parse_traverse(search, withdraw=True):
 
     return parse_config_list(collect, withdraw=withdraw)
 
+
+def str_enum(valid):
+    import re
+    result = re.split('[|,]', valid)
+
+    enums = []
+    for item in result:
+        enums.append(item)
+    return enums
+
+
+def str_enum_exist(enums, strs, exist):
+    if not strs:
+        return
+    """ 全集合为：enums
+        当前配置：strs
+        当前检测：exist
+    """
+    import re
+    result = re.split('[|,]', strs)
+
+    for item in result:
+        if item not in enums:
+            print('enum [{}] not in {}'.format(strs, enums))
+            exit(-1)
+    return exist in result
