@@ -19,7 +19,7 @@ or,
         ssh root@{host}'''.format(host=host, name=name))
 
 
-def result(c, name, port=False, **kwargs):
+def result(c, name, port=False):
     """ docker建立成功后，显示结果
             1. docker 内部，网卡名称是 eth1
     """
@@ -43,6 +43,13 @@ def result(c, name, port=False, **kwargs):
 
         if not color_re(string, '([0-9.].*)/'):
             color("show host address, but not find!")
+
+
+def repo(c):
+    print('''repo:
+        yum whatprovides parted
+        yum --disablerepo="*" --enablerepo="http_repo" list available
+        yum --downloadonly --downloaddir=./ install parted''')
 
 
 def proxy(c, name):

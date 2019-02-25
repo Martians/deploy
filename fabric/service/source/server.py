@@ -109,7 +109,7 @@ def update(c, init=False):
         print("not find repo path!")
         exit(-1)
 
-    c.run('createrepo {type}{path}'.format(type='' if init else '-update ', path=path))
+    c.run('createrepo {type}{path}'.format(type='' if init else '--update ', path=path))
 
 
 @task

@@ -7,7 +7,7 @@ ARG LISTEN=10000
 ARG BASE=fabric
 ARG EXEC=""
 
-# 测试时开启：centos:fabric中的fabric目录，可能不是最新的
+# 再次复制：centos:fabric中的fabric目录，可能不是最新的
 COPY . $BASE
 
 RUN $BASE/docker/template/server.sh $EXEC

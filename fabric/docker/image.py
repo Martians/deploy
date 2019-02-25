@@ -18,7 +18,7 @@ class LocalConfig(LocalBase):
         """ sshd 相关配置
         """
         self.sshd_port = 22
-        self.sshd_user = 'root1'
+        self.sshd_user = 'root'
         self.sshd_paww = '111111'
 
         self.systemd = " --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
@@ -57,10 +57,12 @@ local = LocalConfig()
 
 
 def build_images(c, type, image, dockerfile, build='', param='', noisy=True, **kwargs):
-    """ 1. 复制：将整个fabric文件夹都复制过去了
-        2. 变量：build传递变量给dockerfile，目前只有 port
-        3. 传参：构建server的参数，统一封装在 --build-arg EXE 参数中，交给构建脚本
-        4. 构建：fabric.sh 用于构建基础fabrc镜像；server.sh 构建其他 server 镜像
+    """ 构建过程：
+
+        1. 复制：将整个fabric文件夹都复制过去了；这个复制的文件，新旧只影响image中的，构建的docker中会挂载最新版本的fabric文件夹
+        2. 变量：build参数是传递变量给dockerfile，目前只有 port
+        3. 传参：构建server的参数，统一封装在 --build-arg EXE 参数中，交给构建脚本 server.py
+        4. 构建：fabric.sh 用于构建基础fabric镜像；server.sh 在此基础上构建其他 server 镜像
     """
     if type == 1:
         color('clean image: [{image}]'.format(image=image))
@@ -183,6 +185,7 @@ def clean_resource(c):
 
 
 ########################################################################################################################
+# 构建基础 image、docker
 def basing_images(c):
     if local.flag.basing:
         return
@@ -200,6 +203,10 @@ def basing_images(c):
 
 def start_http(c, type, **kwargs):
     kwargs = Dict(kwargs)
+    """ 安装源：
+            http 无法使用 file 源进行安装：这里是创建image，并没有任何repo挂载进去
+            http 启动后的docker中，可以配置并使用 file source，但此时用处不大
+    """
     start_images(c, type, 'http', port=local.http_port, source='', noisy=False)
 
     kwargs.path = args_def(kwargs.path, local.http_path[0])
@@ -213,8 +220,12 @@ def start_http(c, type, **kwargs):
 
 
 def start_proxy(c, type, **kwargs):
+    """ 安装源：
+            已经将proxy相关的库放到 http source中了，这里使用 http 源来安装
+            前提：http 要在 proxy 之前进行安装
+    """
     kwargs = Dict(kwargs)
-    start_images(c, type, 'proxy', source='', noisy=False)
+    start_images(c, type, 'proxy', source='http', noisy=False)
 
     kwargs.port = local.proxy_port
     kwargs.path = args_def(kwargs.path, local.proxy_path[0])
@@ -228,7 +239,6 @@ def sshd_image(c, type, **kwargs):
     start_images(c, type, 'sshd', noisy=False, **kwargs)
 
 
-########################################################################################################################
 def prepare_docker(c, source=local.source, **kwargs):
     images_origin = local.images_count
     docker_origin = local.docker_count
@@ -256,6 +266,8 @@ def prepare_images(c, name):
         exit(-1)
 
 
+########################################################################################################################
+# 构建常规docker
 def start_images(c, type, name, base='', port=0, source=local.source, **kwargs):
     """ 创建image
             1. dockerfile 默认是 0_server：可用于生成sshd、其他server等
@@ -291,33 +303,58 @@ def start_docker(c, type, name, base='', enter=False, **kwargs):
     """
     build_docker(c, type, name=name, image=base, **kwargs)
 
+    enter_docker(c, name, enter, **kwargs)
+
+
+def enter_docker(c, name, enter=False):
     """ 当前进入新创建的 docker
     """
     if enter:
         helps.sshd(c, name, host=local.flag.host)
         c.run('docker exec -it {name} /bin/bash'.format(name=name), echo=False, pty=True)
     else:
-        helps.result(c, name, **kwargs)
+        helps.result(c, name)
         helps.sshd(c, name, host=local.flag.host)
 
 
-def sshd_server(c, type, name, base='sshd', host='sshd', enter=False):
+########################################################################################################################
+# 依托于sshd的镜像，启动独立docker，再构建的server
+def sshd_server(c, type, name, base='sshd', host='sshd', mode=1, enter=False):
     """ base: 默认使用 sshd image
         host: 默认使用 sshd 对应的地址
         enter: 不传入start_docker，用于安装server完成后
     """
     start_docker(c, type, name, base=base, host=host, systemd=True, enter=False)
 
-    mode = 1
-    if mode == 0:
-        """ 本地docker：docker exec mariadb python3 server.py --server mariadb
-        """
-        c.run('docker exec {name} python3 server.py --server {name}'.format(name=name))
-    else:
-        """ fab 网络连接：直接使用 fab 正常方式进行安装
-        """
-        set_invoke(False)
-        c = hosts.adhoc(local.flag.host, user='root', passwd='111111')
+    if sshd_server_installed(c, name, False):
+        color('sshd_server: [{}] already installed'.format(name))
 
-        from docker import server
-        server.install_server(c=c, server=name)
+    else:
+        if mode == 0:
+            """ 本地docker：docker exec mariadb python3 server.py --server mariadb
+            """
+            c.run('docker exec {name} python3 server.py --server {name}'.format(name=name))
+        else:
+            """ fab 网络连接：直接使用 fab 正常方式进行安装
+            """
+            set_invoke(False)
+            c = hosts.adhoc(local.flag.host, user=local.sshd_user, passwd=local.sshd_paww)
+
+            from docker import server
+            server.install_server(c=c, server=name, errexit=False)
+
+        sshd_server_installed(c, name, True)
+
+    if enter:
+        enter_docker(c, name, enter)
+
+
+def sshd_server_installed(c, name, set=True):
+    path = '/installed'
+    if set:
+        c.run('echo {} > {}'.format(name, path))
+    else:
+        if file_exist(c, path):
+            if stdouted(c, 'cat {}'.format(path), out=True) == name:
+                return True
+        return False

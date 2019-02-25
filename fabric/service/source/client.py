@@ -4,10 +4,12 @@ from service.source.server import *
 import system
 
 
-def use_repo(c, file, name, path):
+def use_repo(c, file, name, path, test):
+    print(path)
+    print('-------------')
     c.run('''cat << EOF > /etc/yum.repos.d/{file}
 [{name}]
-name=local file repo
+name=local {name} repo
 baseurl={type}://{path}
 
 gpgcheck=0
@@ -16,8 +18,9 @@ priority=1
 proxy=_none_
 EOF'''.format(file=file, name=name, type='file' if path.startswith('/') else 'http', path=path))
 
-    test = '''yum --disablerepo="*" --enablerepo="{name}" list available'''.format(name=name)
-    c.run(test)
+    if test:
+        test = '''yum --disablerepo="*" --enablerepo="{name}" list available'''.format(name=name)
+        c.run(test)
 
     system.help(c, '''
     {test}\n'''.format(test=test), 'test')
@@ -32,6 +35,8 @@ def use_sshd(c, user='root', paww='111111'):
 
     """ 方法1：此方法显示 chpasswd 无法找到
     """
+    if user != 'root':
+        c.run('/usr/sbin/useradd {user}'.format(user=user))
     c.run("echo '{user}:{paww}' | /usr/sbin/chpasswd".format(user=user, paww=paww))
 
     # c.run("echo '{paww}' | password {user} --stdin".format(user=user, paww=paww))
@@ -64,19 +69,35 @@ EOF''')
 
 
 @task
-def use_file(c, path=local.http_path):
+def use_file(c, path=local.http_path, test=True):
     """ fab -H 192.168.0.81 source.use_file --path /home/repo
     """
     c = conn(c)
-    use_repo(c, 'file.repo', local.file_repo, path)
+    system.install(c, 'yum-plugin-priorities')
+    use_repo(c, 'file.repo', local.file_repo, path, test=test)
 
+    """ yum whatprovides parted
+        yum --disablerepo="*" --enablerepo="file_repo" list available
+    """
 
 @task
-def use_http(c, url):
+def use_http(c, url, test=True):
     """ fab -H 192.168.0.81 source.use_http --url 192.168.0.81
+
+        yum repo 相关：
+        yum repolist
+        yum whatprovides parted
+        yum --disablerepo="*" --enablerepo="http_repo" list available
+        yum --downloadonly --downloaddir=./ install apt-cacher-ng
     """
     c = conn(c)
-    use_repo(c, 'http.repo', local.http_repo, url)
+    system.install(c, 'yum-plugin-priorities')
+    use_repo(c, 'http.repo', local.http_repo, url, test=test)
+
+    """ 测试是否成功
+        1. 日志：docker logs proxy
+        2. 内部：yum remove parted -y; yum install parted -y，查看待安装软件部分的 ‘Repository’ 列
+    """
 
 @task
 def use_help(c):
