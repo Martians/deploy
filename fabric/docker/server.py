@@ -99,7 +99,7 @@ def install_server(c='', server='', source='', errexit=True):
     do_install(c, server, errexit=errexit)
 
 
-def do_install(c, name, errexit):
+def do_install(c, name, errexit=True):
     entry = get_entry(name)
 
     """ 方式1：通过shell方式，调用fab进行安装

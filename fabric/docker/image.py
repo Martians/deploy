@@ -322,7 +322,9 @@ def enter_docker(c, name, enter=False):
 def sshd_server(c, type, name, base='sshd', host='sshd', mode=1, enter=False):
     """ base: 默认使用 sshd image
         host: 默认使用 sshd 对应的地址
-        enter: 不传入start_docker，用于安装server完成后
+        port：无此参数，通常会分配额外的IP地址，就不需要端口映射了
+        
+        enter: 不是传入给start_docker，而是在安装server完成后
     """
     start_docker(c, type, name, base=base, host=host, systemd=True, enter=False)
 
