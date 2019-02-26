@@ -183,6 +183,9 @@ class Hosts:
         else:
             self.control = self.array[0]
             self.add_last()
+
+        if self.size == 0:
+            self.size = index + 1
         self.total += self.size
 
     def add_index(self, name, host):

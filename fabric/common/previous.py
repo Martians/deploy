@@ -26,13 +26,13 @@ def config(c, fabric=False, size=-1):
         sed.update(c, '    - size:', str(size), file=dst)
 
         config_hosts()
-        print('hosts config: ')
-        hosts.print()
+
 
     else:
         """ 显示各种配置
         """
-        print('hosts config  ----- [{}]'.format(search_config(globing.config.hosts)))
+        dst = search_config(globing.config.hosts)
+        # print('hosts config  ----- [{}]'.format(dst))
 
         lists, config = config_server()
         if len(lists):
@@ -43,9 +43,10 @@ def config(c, fabric=False, size=-1):
         if fabric:
             print('fabric config: ')
             print(Config())
-        else:
-            print('hosts config: ')
-            hosts.print()
+            print()
+
+    print('hosts config: [{}]'.format(dst))
+    hosts.print()
 
 @task
 def kill(c, name):
