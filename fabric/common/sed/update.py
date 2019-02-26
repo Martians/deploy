@@ -33,7 +33,7 @@ def update(c, key, data, file=None, **kwargs):
             半精确超找：key 和 value之间之只有 sep，即只查找自己插入的数据；
             这是默认行为，除非修改 local.grep_update
     """
-    if grep_data(c, key, data, **kwargs):
+    if grep_data(c, key, data, file=file, **kwargs):
         print("update, item [{}] already exist".format(grep_param(key, data, local.grep_option(**kwargs))))
         return False
 

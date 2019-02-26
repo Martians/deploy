@@ -32,7 +32,7 @@ def config_fabric():
 
     name = 'fabric.yaml'
     src = search_config(name)
-    dst = os.path.join(os.path.expanduser('~'), '.' + name)
+    dst = os.path.join(globing.user, '.' + name)
 
     restart = False
     if not file_exist(c, dst, echo=False):
@@ -59,8 +59,9 @@ def config_hosts():
 def config_server(withdraw=True):
     """ 将本地所有的 yaml 配置文件，聚合起来
     """
-    config = parse_traverse('.', withdraw=withdraw)
+    lists, config = parse_traverse('.', withdraw=withdraw)
     server.update(config)
+    return lists, server
 
 
 class LocalBase:

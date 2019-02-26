@@ -98,6 +98,9 @@ class Hosts:
     index = {}
     glob = {}
 
+    size = 0
+    total = 0
+
     def parse(self, config, user=None, paww=None):
         config = load_yaml(config)
         self.parse_host(config)
@@ -112,14 +115,22 @@ class Hosts:
         self.glob['user'] = conn.get('user') if conn.get('user') else user
         self.glob['pass'] = conn.get('pass') if conn.get('pass') else paww
 
+    def parse_meta(self, host):
+        if 'host' not in host:
+            if 'size' in host:
+                self.size = host.size
+                return True
+            else:
+                print("parse host, [host] not in {}".format(host))
+                exit(-1)
+
     def parse_host(self, hosts):
         index = 0
     
         for item in hosts['list']:
             host = Host(self, item.copy())
-            if 'host' not in host:
-                print("parse host, [host] not in {}".format(host))
-                exit(-1)
+            if self.parse_meta(host):
+                continue
 
             for key in item:
                 ''' 检查是否有name字段，有的话就添加索引
@@ -137,6 +148,13 @@ class Hosts:
                 self.control = host
                 host.index = -1
                 self.add_index(host.type, host)
+
+            elif self.size > 0 and self.size == index:
+                self.total += 1
+                """ 设置个个数限制
+                """
+                continue
+
             else:
                 ''' 添加index、ip last exceed host cou
                         '''
@@ -156,6 +174,7 @@ class Hosts:
         else:
             self.control = self.array[0]
             self.add_last()
+        self.total += self.size
 
     def add_index(self, name, host):
         if name in self.index:
@@ -195,6 +214,12 @@ class Hosts:
             print("\nhost info:")
             pp.pprint(self.glob)
         print()
+
+    def print(self):
+        print('\t<one\t[{one}] \t- [{size}/{total}]'.format(one=self.one(host=True).host, size=self.size, total=self.total))
+        for host in self.array:
+            print('\t<{index}\t{host} {type}'.format(index=host.index, host=host.host,
+                                                     type='[master]' if host.index == 0 else ''))
 
     def get(self, index):
         if isinstance(index, Host):

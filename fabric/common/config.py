@@ -8,6 +8,7 @@ from common.util import *
 globing = Dict({
     # 全局路径
     'path': os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")),
+    'user': os.path.expanduser('~'),
 
     # 当前在docker中，执行本地任务
     'invoke': False,
@@ -30,7 +31,7 @@ def load_yaml(file):
 
 def default_config_path(name, type):
     entries = {'curr': lambda: os.path.join(os.getcwd(), name),
-               'user': lambda: '{}/{}'.format(os.path.expanduser('~'), name),
+               'user': lambda: '{}/{}'.format(globing.user, name),
                'glob': lambda: '/etc/{}'.format(name),
                'module': lambda: os.path.join(os.path.abspath(globing.path), name)}
 
@@ -114,7 +115,7 @@ def parse_traverse(search, withdraw=True):
             break
     traverse(search)
 
-    return parse_config_list(collect, withdraw=withdraw)
+    return collect, parse_config_list(collect, withdraw=withdraw)
 
 
 def str_enum(valid):

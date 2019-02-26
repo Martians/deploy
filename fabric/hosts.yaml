@@ -4,6 +4,7 @@ conn:
     pass: '111111'
 
 list:
+    - size: 0
     - name: local
       host: 192.168.0.80
       user: root
