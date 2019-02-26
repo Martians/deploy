@@ -66,11 +66,14 @@ def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
     start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, enter=enter)
 
 @task
-def cluster(c, name='sshd', systemd=True, count=3):
+def cluster(c, name='sshd', systemd=True, count=3, addr='h1'):
     """ 启动多个sshd docker
+
+        fab cluster -c 5 -a 51
+        fab cluster -c 5 -a 192.168.1.51
     """
     for i in range(1, count + 1):
-        sshd(c, -1, name='{}-{}'.format(name, i), systemd=systemd, addr='h{}'.format(i), enter=False)
+        sshd(c, -1, name='{}-{}'.format(name, i), systemd=systemd, addr=net.alloc_next(addr, i - 1), enter=False)
 
 @task
 def test(c, type=-1, name='test', base='sshd', port='', exec='/bin/bash', systemd=True, addr='test', enter=True):
@@ -108,3 +111,4 @@ if __name__ == '__main__':
     # test(c)
     # http(c, type=0)
     # mariadb(c, 0)
+

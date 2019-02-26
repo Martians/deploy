@@ -56,6 +56,27 @@ def alloc(c, host):
         return host
 
 
+def alloc_next(host, inc):
+    """ 将传入的host的最后一部分（必须是全数字）加一
+
+        alloc_next('10', 10)
+        alloc_next('192.168.0.10', 10)
+        alloc_next('h-10', 10)
+        alloc_next('h10', 10)
+    """
+    import re
+    host = str(host)
+    match = re.search('[0-9]*$', host)
+    result = match.group(0)
+    if result:
+        index = host.find(result)
+        if index != -1:
+            newh = host[:index] + str(int(result) + inc)
+            return newh
+    print('can not alloc next for host [{}]'.format(host))
+    exit(-1)
+
+
 def address(c, name, host, local):
     initial_network(c, local)
 
@@ -68,5 +89,6 @@ def address(c, name, host, local):
           .format(name=name, host=host, subnet=config.subnet, device=config.device,
                   bridge=config.bridge, gateway=config.gateway), warn=True, echo=False, hide=True)
     local.flag.host = host
+
 
 
