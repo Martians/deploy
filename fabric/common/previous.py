@@ -22,7 +22,12 @@ def config(c, fabric=False, size=-1):
             exit(-1)
 
         import common.sed as sed
+        sed.mute(True)
         sed.update(c, '    - size:', str(size), file=dst)
+
+        config_hosts()
+        print('hosts config: ')
+        hosts.print()
 
     else:
         """ 显示各种配置

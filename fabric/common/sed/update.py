@@ -16,7 +16,7 @@ def grep_data(c, key, data=None, file=None, **kwargs):
     command = grep_param(key, data, options)
     result, command = do_grep(c, 'grep_data', command, file, options)
 
-    print("[grep_data]: {command} {file}, line: [{output}]"
+    logs("[grep_data]: {command} {file}, line: [{output}]"
           .format(command=command, file=local.file(file), output=local.grep_out))
     return True if len(local.grep_out) else False
 
@@ -34,7 +34,7 @@ def update(c, key, data, file=None, **kwargs):
             这是默认行为，除非修改 local.grep_update
     """
     if grep_data(c, key, data, file=file, **kwargs):
-        print("update, item [{}] already exist".format(grep_param(key, data, local.grep_option(**kwargs))))
+        logs("update, item [{}] already exist".format(grep_param(key, data, local.grep_option(**kwargs))))
         return False
 
     options = local.sed_option(**kwargs)
@@ -46,22 +46,22 @@ def update(c, key, data, file=None, **kwargs):
     count = len(local.result.split('\n'))
     if count > display + 1:
         if kwargs.get('multi_line'):
-            print('[update]: item [{}], success, update multi line, count [{}]'.format(expect, count))
+            logs('[update]: item [{}], success, update multi line, count [{}]'.format(expect, count))
             return True
         else:
-            print('[update]: item [{}], ambiguous count [{}], result:\n{}\n'.format(expect, count, local.result))
+            logs('[update]: item [{}], ambiguous count [{}], result:\n{}\n'.format(expect, count, local.result))
             return local.exit(False)
 
     elif count < display + 1:
-        print('[update]: item [{}], get line [{}], not match [{}]\n'.format(expect, count, display + 1))
+        logs('[update]: item [{}], get line [{}], not match [{}]\n'.format(expect, count, display + 1))
         return local.exit(False)
 
     elif not local.result:
-        print('[update]: item [{}] not find, failed\n'.format(expect, local.result))
+        logs('[update]: item [{}] not find, failed\n'.format(expect, local.result))
         return local.exit(False)
 
     else:
-        print('[update]: item [{}], success\n'.format(expect, count, local.result))
+        logs('[update]: item [{}], success\n'.format(expect, count, local.result))
         return True
 
 
@@ -88,9 +88,9 @@ def disable(c, key, data='', file=None, **kwargs):
     # display = '[{sed[rep_prefix]}{key}{sed[sep]}{data}]'.format(key=key, data=data, sed=local.sed_option(**kwargs))
     result = update(c, key, data, file, **kwargs)
     if result:
-        print('[disable]: [{}] change success'.format(local.result))
+        logs('[disable]: [{}] change success'.format(local.result))
     else:
-        print('[disable]: [{}] not change'.format(local.grep_out))
+        logs('[disable]: [{}] not change'.format(local.grep_out))
     return result
 
 
@@ -109,9 +109,9 @@ def enable(c, key, data=None, file=None, **kwargs):
 
     result = update(c, key, data, file, **kwargs)
     if result:
-        print('[enable]: [{}] change success'.format(local.result))
+        logs('[enable]: [{}] change success'.format(local.result))
     else:
-        print('[enable]: [{}] not change'.format(local.grep_out))
+        logs('[enable]: [{}] not change'.format(local.grep_out))
     return result
 
 

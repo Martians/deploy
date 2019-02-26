@@ -52,6 +52,7 @@ def config_hosts():
     fabric_config = Config()
     user, paww = fabric_config.user, fabric_config.connect_kwargs.password
 
+    hosts.clean()
     path = search_config(globing.config.hosts)
     hosts.parse(path, user=user, paww=paww)
 

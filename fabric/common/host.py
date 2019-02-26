@@ -101,6 +101,15 @@ class Hosts:
     size = 0
     total = 0
 
+    def clean(self):
+        self.control = {}
+        self.array = []
+        self.index = {}
+        self.glob = {}
+
+        self.size = 0
+        self.total = 0
+
     def parse(self, config, user=None, paww=None):
         config = load_yaml(config)
         self.parse_host(config)
@@ -193,7 +202,7 @@ class Hosts:
             ip = host.host.split('.')[-1]
             self.add_index(ip, host)
 
-    ########################################################################################################################
+    ####################################################################################################################
     def dump(self, array=True, index=True, other=True):
         """ 用于debug
 
@@ -260,7 +269,7 @@ class Hosts:
         host = self.get(index)
         return host.item(name, sep, defv)
 
-    ########################################################################################################################
+    ####################################################################################################################
     def is_master(self, host):
         return host.index == 0
 
@@ -301,8 +310,8 @@ class Hosts:
 
         import common.execute as execute
         return execute.group(groups, command, **args_insert(kwargs, hide=True))
-    #######################################################################################################################
 
+    ####################################################################################################################
     def one(self, host=False):
         return self.get('control') if host else self.conn('control')
 

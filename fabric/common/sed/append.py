@@ -58,14 +58,14 @@ def do_grep(c, name, command, file, options):
     local.debug_command('do_grep', '{command} {file}'.format(name=name, command=command, file=local.file(file)))
 
     if local.test:
-        # print('''echo '{}' | {}{}'''.format(local.cache, arg(options, 'head', True), command))
+        # logs('''echo '{}' | {}{}'''.format(local.cache, arg(options, 'head', True), command))
         result = c.run('''echo {quote}{cache}{quote} | {head}{command}'''
                        .format(cache=local.cache, head=head, command=command, quote=local.quote(local.cache)), **local.run)
     else:
         if head:
             """ 多行情况：head的末尾包含了一个 |, 需要去掉
             """
-            head = head.split('|')[0] # print('''{} {} | {}'''.format(head, file, command))
+            head = head.split('|')[0] # logs('''{} {} | {}'''.format(head, file, command))
             result = c.run('''{} {} | {}'''.format(head, file, command), **local.run)
         else:
             local.check_param(file)
@@ -95,15 +95,15 @@ def do_sed(c, name, command, file, options):
         local.check_param(file)
         result = c.run('{command} {file}'.format(command=command, file=file), **local.run)
 
-    print('[{name}]: {command} {file}'.format(name=name, command=command, file=local.file(file)))
+    logs('[{name}]: {command} {file}'.format(name=name, command=command, file=local.file(file)))
     if result.failed:
-        print("do sed, but failed, err: [{}]".format(result.stderr.strip('\n')))
+        logs("do sed, but failed, err: [{}]".format(result.stderr.strip('\n')))
         exit(-1)
     return result
 
 
 def dump(c, key, search=None, count=0, file=None):
-    print("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
+    logs("----------- {key}, context: {count}".format(key=search if search else key, count=abs(count)))
     command = '''grep {show}{quote}{search}{quote} '''.format(show=local.show_option(count),
                                                               search=local.grep_fix(search), quote=local.quote(search))
     if local.test:
@@ -115,7 +115,7 @@ def dump(c, key, search=None, count=0, file=None):
 
     result = c.run(command, **local.run)
     if result.failed and len(result.stderr) > 0:
-        print("dump sed output failed, command:\n {}\n {}{}".format(command, result.stdout, result.stderr))
+        logs("dump sed output failed, command:\n {}\n {}{}".format(command, result.stdout, result.stderr))
 
     local.result = result.stdout.strip('\n')
 
@@ -158,7 +158,7 @@ def grep_line(c, data=None, file=None, **kwargs):
 
     result, command = do_grep(c, 'grep_line', command, file, options)
     output = result.stdout.strip()
-    print("[grep_line]: {command} {file}, line: [{index}]".
+    logs("[grep_line]: {command} {file}, line: [{index}]".
           format(command=command, file=local.file(file), index=output.replace('\n', ' ').split(':')[0]))
 
     if len(output):
@@ -190,30 +190,30 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
     """
     index, count = grep_line(c, data, file, **kwargs)
     if count > 1:
-        print("[append]: data [{}] exist multi [{}], failed".format(data, count))
+        logs("[append]: data [{}] exist multi [{}], failed".format(data, count))
         return local.exit(False)
 
     elif index != -1:
         if locate:
             key_line, count = grep_line(c, locate, file, **kwargs)
             if key_line == -1:
-                print("[append]: data [{}] already exist, line: {}, locate [{}] not exist".format(data, index, locate))
+                logs("[append]: data [{}] already exist, line: {}, locate [{}] not exist".format(data, index, locate))
                 return local.exit(False)
             elif count > 1:
-                print("[append]: data [{}] already exist, locate [{}] exist count [{}]".format(data, locate, count))
+                logs("[append]: data [{}] already exist, locate [{}] exist count [{}]".format(data, locate, count))
                 return local.exit(False)
 
             elif key_line + pos == index:
-                print("[append]: data [{}] already exist, match with locate [{}], line: {}".format(data, locate, index))
+                logs("[append]: data [{}] already exist, match with locate [{}], line: {}".format(data, locate, index))
                 return True
 
             elif index == 1 and data.count('\n'):
-                print("[append]: data [{}]\n  --- is multi line, no need check position, data already exist".format(data))
+                logs("[append]: data [{}]\n  --- is multi line, no need check position, data already exist".format(data))
                 return True
             else:
-                print("[append]: data [{}] already exist, but locate [{}] not match, line: {}".format(data, locate, index))
+                logs("[append]: data [{}] already exist, but locate [{}] not match, line: {}".format(data, locate, index))
         else:
-            print("[append]: data [{data}] already exist, locate none, success".format(data=data))
+            logs("[append]: data [{data}] already exist, locate none, success".format(data=data))
             return True
 
     """ 定位到要插入数据的位置
@@ -221,7 +221,7 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
     index, count = grep_line(c, locate, file, **kwargs)
     on_the_end = False
     if count > 1:
-        print("[append]: locate [{}] exist [{}], failed".format(locate, count))
+        logs("[append]: locate [{}] exist [{}], failed".format(locate, count))
         return exit(-1) if local.exit_on_err else False
     elif index == -1:
         index = grep_line(c, None, file)[0]
@@ -235,10 +235,10 @@ def append(c, data, locate=None, file=None, pos=1, **kwargs):
     dump(c, data, locate, pos, file)
 
     if on_the_end:
-        print("[append]: add [{data}] on line {index}, the end of the file, [{locate}] not exist"
+        logs("[append]: add [{data}] on line {index}, the end of the file, [{locate}] not exist"
               .format(data=data, index=index + 1, locate=locate))
     else:
-        print("[append]: add [{data}] on line {index}, {pos} {type} [{locate}]"
+        logs("[append]: add [{data}] on line {index}, {pos} {type} [{locate}]"
               .format(data=data, index=index + 1, pos=abs(pos), type='after' if pos > 0 else 'before', locate=locate))
     return local.exit(result.ok)
 

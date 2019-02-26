@@ -35,6 +35,7 @@ class Local:
         self.multi = 'NNN'
         self.run = {'warn': True, 'hide': True}
 
+        self.mute = False
         self.test = False
         self.exit_on_err = True
         self.conf_path = ''     # 默认配置文件
@@ -47,7 +48,6 @@ class Local:
         self.result = ''    # 测试结果
 
         self.init_option()
-
 
     def test_mode(self):
         self.test = True
@@ -73,12 +73,12 @@ class Local:
         """
         if force or self._debug_output and len(output) > 0:
             if output.count('\n') > 1: line = True
-            print('[{name}]: {line}{output}{seperate}'.format(name=name, output=output, line='\n' if line else '',
+            logs('[{name}]: {line}{output}{seperate}'.format(name=name, output=output, line='\n' if line else '',
                                                               seperate=seperate))
 
     def debug_command(self, name, output):
         if self._debug_command:
-            print("[{}]: {}".format(name, output))
+            logs("[{}]: {}".format(name, output))
 
     ########################################################################################
     def path(self, path):
@@ -175,7 +175,7 @@ class Local:
 
     def check_param(self, file, **kwargs):
         if not file:
-            print("update config, but file not set")
+            logs("update config, but file not set")
             exit(-1)
 
 
@@ -204,6 +204,15 @@ def path(full):
     local.path(full)
 
 
+def mute(set=True):
+    local.mute = set
+
+
+def logs(string, **kwargs):
+    if not local.mute:
+        print(string, **kwargs)
+
+
 if True:
     def test_mode(set):
         if set:
@@ -222,10 +231,10 @@ if True:
 
     def initial(info, cache):
         local.initial(cache)
-        print("\n########################################################################## {}",format(info))
+        logs("\n########################################################################## {}",format(info))
 
     def output(info):
-        print("\n--------------------------------------------------------------------------- {info}:".format(info=info))
+        logs("\n--------------------------------------------------------------------------- {info}:".format(info=info))
 
     def check(v1, v2):
         """ 数据写入到文件后用diff比较
@@ -239,3 +248,4 @@ if True:
         check(v.strip('\n'), local.result.strip('\n'))
 
 local = Local()
+
