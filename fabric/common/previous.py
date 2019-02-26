@@ -20,7 +20,7 @@ def config(c, fabric=False, size=-1):
         if size > hosts.total:
             color('can not set size [{}], larger than host count [{}]'.format(size, hosts.total))
             exit(-1)
-            
+
         import common.sed as sed
         sed.update(c, '    - size:', str(size), file=dst)
 
@@ -47,4 +47,3 @@ def kill(c, name):
     import system
     system.process.kills(name)
 
-config(hosts.one(), size=3)
