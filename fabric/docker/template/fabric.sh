@@ -17,7 +17,9 @@ yum remove ius-release epel-release -y
 ## 修改pip源
 mkdir ~/.pip
 echo "[global]
-index-url=https://pypi.tuna.tsinghua.edu.cn/simple
+# https://blog.csdn.net/testcs_dn/article/details/54374849
+# index-url=https://pypi.tuna.tsinghua.edu.cn/simple
+index-url=https://mirrors.aliyun.com/pypi/simple
 " > ~/.pip/pip.conf
 
 ## 修改locale

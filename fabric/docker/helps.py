@@ -5,7 +5,8 @@ from common import *
 import system
 from docker import network as net
 
-def sshd(c, name, host='127.0.0.1', sshd=False):
+
+def sshd(c, name, host=net.config.local, sshd=False):
     if sshd:
         color('ssh clean cache [client side]:')
         print('''    rm ~/.ssh/known_hosts -f
@@ -44,6 +45,13 @@ def result(c, name, port=False):
         if not color_re(string, '([0-9.].*)/'):
             color("show host address, but not find!")
 
+
+def registry(c, name):
+    print('''registry:
+        http://{host}:5000/v2/_catalog
+    '''.format(host=net.config.local))
+
+    sshd(c, name)
 
 def repo(c):
     print('''repo:

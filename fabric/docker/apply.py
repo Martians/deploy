@@ -93,6 +93,11 @@ def network(c, force=True):
     net.prepare_network(c, force=force)
 
 @task
+def registry(c, type=-1, push=False):
+    start_registry(c, type=type, push=push)
+
+
+@task
 def mariadb(c, type=-1, name='', addr='db', enter=False):
     name = sys._getframe().f_code.co_name   # 这样其他构建server的函数都可以直接复制了
     sshd_server(c, type, name, host=addr, enter=enter)

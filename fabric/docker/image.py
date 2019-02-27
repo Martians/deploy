@@ -81,7 +81,7 @@ def build_images(c, type, image, dockerfile, build='', param='', noisy=True, **k
                        build=args(build, ' --build-arg '), param=args(param, ' --build-arg EXEC=')))
 
 
-def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=False, host='',
+def build_docker(c, type, name, image='', exec='', volume='', param='-it', port='', systemd=False, host='',
                  output='', noisy=True, **kwargs):
     image = args_def(image, name)
     do_output = True
@@ -111,8 +111,8 @@ def build_docker(c, type, name, image='', exec='', volume='', port='', systemd=F
 
         local.docker_count += 1
         color('create docker: [{name}]{base}...'.format(name=name, base=' base on [{}]'.format(image) if name != image else ''))
-        c.run('docker run -itd --name {name} -h {name}{port}{volume}{systemd} {image} {exec}'.
-              format(image=image, name=name, port=args(plist, ' '), volume=args(vlist, ' '),
+        c.run('docker run -d{param} --name {name} -h {name}{port}{volume}{systemd} {image} {exec}'.
+              format(image=image, param=args(param, ' '), name=name, port=args(plist, ' '), volume=args(vlist, ' '),
                      systemd=local.systemd if systemd else '', exec=local.initial if systemd else exec))
 
     elif not stdouted(c, 'docker ps | grep {name}$'.format(name=name)):
@@ -264,6 +264,25 @@ def prepare_images(c, name):
     else:
         print('prepare images, but image [{name}] not exist, valid {valid}'.format(name=name, valid=valid))
         exit(-1)
+
+
+def start_registry(c, type, push=False):
+    """ https://hub.docker.com/_/registry/
+
+        仓库只用于测试，没有使用起来; 可做工作：
+        1. 本地创建的镜像，提交到仓库中
+        2. 本地需要镜像时，优先到本地仓库拉取
+        3. 本地新创建的镜像，可以清理本地仓库中过期的
+    """
+    build_docker(c, type, name='registry', image='registry:2', port=5000, param='--restart always')
+    helps.registry(c, 'registry')
+
+    if push:
+        c.run('''
+        docker pull {name}
+        docker tag {name} {host}:5000/{name}
+        docker push {host}:5000/{name}
+        '''.format(name='centos:7.4.1708', host='localhost'))
 
 
 ########################################################################################################################

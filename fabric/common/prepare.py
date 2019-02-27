@@ -8,6 +8,15 @@ def search_path(pip='pip'):
         pip = sys.argv[1]
         print('use {pip}'.format(pip=pip))
 
+    """ https://blog.csdn.net/testcs_dn/article/details/54374849
+    
+        https://pypi.douban.com/simple
+        https://mirrors.aliyun.com/pypi/simple
+        https://pypi.hustunique.com/simple
+        https://pypi.sdutlinux.org/simple
+        https://pypi.mirrors.ustc.edu.cn/simple
+        https://pypi.tuna.tsinghua.edu.cn/simple
+    """
     os.system('''
     {pip} install --upgrade pip
     {pip} install pyyaml
