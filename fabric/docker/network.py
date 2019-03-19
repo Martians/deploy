@@ -7,6 +7,10 @@ from common import *
 """
 config = parse_config('network.yaml', merge=True, low='config')
 
+def macbook():
+    import platform
+    return platform.system() == 'Darwin'
+
 
 def initial_network(c, local):
     if local.flag.network:
@@ -89,6 +93,3 @@ def address(c, name, host, local):
           .format(name=name, host=host, subnet=config.subnet, device=config.device,
                   bridge=config.bridge, gateway=config.gateway), warn=True, echo=False, hide=True)
     local.flag.host = host
-
-
-

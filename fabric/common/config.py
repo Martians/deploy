@@ -26,7 +26,7 @@ globing = Dict({
 def load_yaml(file):
     import yaml
     with open(file, 'r') as f:
-        return Dict(yaml.load(f))
+        return Dict(yaml.load(f, Loader=yaml.FullLoader))
 
 
 def default_config_path(name, type):
