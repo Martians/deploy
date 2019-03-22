@@ -7,10 +7,6 @@ from common import *
 """
 config = parse_config('network.yaml', merge=True, low='config')
 
-def macbook():
-    import platform
-    return platform.system() == 'Darwin'
-
 
 def initial_network(c, local):
     if local.flag.network:
@@ -82,6 +78,9 @@ def alloc_next(host, inc):
 
 
 def address(c, name, host, local):
+    if macos_show('network ignore in mac os!'):
+        return
+
     initial_network(c, local)
 
     host = alloc(c, host)

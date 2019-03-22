@@ -30,6 +30,7 @@ def config(c, fabric=False, size=-1):
 
     else:
         """ 显示各种配置
+            1. 当前 fab 执行所在目录下所有的配置
         """
         dst = search_config(globing.config.hosts)
         # print('hosts config  ----- [{}]'.format(dst))
@@ -40,6 +41,8 @@ def config(c, fabric=False, size=-1):
         else:
             print('')
 
+        """ 2. fabric 自身的配置
+        """
         if fabric:
             print('fabric config: ')
             print(Config())

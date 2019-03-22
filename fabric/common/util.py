@@ -93,3 +93,21 @@ def stdouted(c, cmd, out=False):
         return stdout
     else:
         return len(stdout) > 0
+
+
+def macos():
+    import platform
+    return platform.system() == 'Darwin'
+
+
+def macos_show(display=''):
+    if macos():
+        if display:
+            print(display)
+        return True
+    else:
+        return False
+
+
+def macos_work(linux='', mac=''):
+    return mac if macos() else linux

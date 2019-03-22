@@ -25,11 +25,19 @@ def result(c, name, port=False):
             1. docker 内部，网卡名称是 eth1
     """
     if port:
-        result = c.run('sudo netstat -antp | grep ":{port}[\t\ ]" --color'
-                       .format(port=port), hide='out', echo=False).stdout.strip()
-        string = '''show host port:
+        if not macos():
+            result = c.run('sudo netstat -antp | grep ":{port}[\t\ ]" --color'
+                           .format(port=port), hide='out', echo=False).stdout.strip()
+            string = '''show host port:
 {result}'''.format(result=result)
-        color_re(string, ':({port})[\t\ ]'.format(port=port))
+            color_re(string, ':({port})[\t\ ]'.format(port=port))
+
+        else:
+            result = c.run('/usr/sbin/netstat -an | grep LISTEN | grep "*.{port}[^0-9]"'
+                           .format(port=port), hide='out', echo=False).stdout.strip()
+            string = '''show host port:
+{result}'''.format(result=result)
+            color_re(string, '\*.({port})[^0-9]'.format(port=port))
 
         print('''\nbrower:
         docker exec -it {name} /bin/bash

@@ -7,6 +7,7 @@ from invoke import task
 from common import *
 import system
 
+
 class LocalConfig:
     def __init__(self):
         self.source = 'https://github.com/Martians/hadoop.git'
@@ -41,7 +42,7 @@ def install(c):
 def configure(c):
     c = hosts.one()
 
-    sed.append(c, '''
+    sed.append(c, '''Ω
     <mirror>
         <id>alimaven</id>
         <name>aliyun maven</name>

@@ -33,13 +33,14 @@ class LocalConfig(LocalBase):
                 2. http server充电当文件服务器，而不仅仅是 yum source，因此其外部路径 /mnt/hgfs/repo 并非是 yum的跟目录
                    yum 的根目录 为 path（/mnt/hgfs/repo） + http.url(common/centos7)
         """
+        repo = '/repo' if macos() else '/mnt/hgfs'
         self.http_port = 80                 # http与主机搭建在一起，这里是指定http服务的 本机映射端口，内部端口不变为 80
-        self.http_path = ('/mnt/hgfs/repo/', '/home/repo')
+        self.http_path = (os.path.join(repo, 'repo'), '/home/repo')
         self.http_url = 'common/centos7'    # 访问的是 ip/url
 
         self.proxy_port = 3142
-        self.proxy_path = ('/mnt/hgfs/proxy', '/home/proxy')
-        self.source = 'http,proxy'
+        self.proxy_path = (os.path.join(repo, 'proxy'), '/home/proxy')
+        self.source = '' if macos() else 'http,proxy'
         self.senums = str_enum('http,proxy,file')
 
         ################################################################################################################

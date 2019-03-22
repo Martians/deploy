@@ -114,6 +114,6 @@ if __name__ == '__main__':
 
     # sshd(c, 1)
     # test(c)
-    # http(c, type=0)
+    http(c, type=0)
     # mariadb(c, 0)
 
