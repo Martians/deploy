@@ -23,7 +23,8 @@ class LocalConfig(LocalBase):
 
         self.systemd = " --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup"
         self.initial = '/usr/sbin/init'
-        self.volume = '{base}:/fabric'.format(base=globing.path)
+        self.basic_volume = '{base}:/fabric'.format(base=globing.path)
+        self.volume = '/Users/darwin/share:/share' if macos() else ''
 
         ################################################################################################################
         """ 是否使用 http、proxy 设置yum源
@@ -95,7 +96,7 @@ def build_docker(c, type, name, image='', exec='', volume='', param='-it', port=
         """ volume: 传入逗号分隔的多个: /abc:/efg,/a:/b ==> -v /abc:/efg -v /a:/b
         """
         vlist = ''
-        volume = sep(volume, local.volume)
+        volume = sep(volume, local.basic_volume)
         if volume:
             for v in volume.split(','):
                 vlist = sep(vlist, '-v {}'.format(v), ' ')

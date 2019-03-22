@@ -60,10 +60,10 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
     helps.proxy(c, name='proxy')
 
 @task
-def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', enter=True):
+def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', volume=local.volume, enter=True):
     """ 基于sshd镜像，启动 sshd docker，默认使用 systemd
     """
-    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, enter=enter)
+    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, volume=volume, ©enter=enter)
 
 @task
 def cluster(c, name='sshd', systemd=True, count=3, addr='h1'):
@@ -112,8 +112,8 @@ if __name__ == '__main__':
     globing.invoke = True
     c = conn(hosts.one())
 
-    # sshd(c, 1)
+    sshd(c, 0)
     # test(c)
-    http(c, type=0)
+    # http(c, type=0)
     # mariadb(c, 0)
 
