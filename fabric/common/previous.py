@@ -27,7 +27,6 @@ def config(c, fabric=False, size=-1):
 
         config_hosts()
 
-
     else:
         """ 显示各种配置
             1. 当前 fab 执行所在目录下所有的配置
@@ -37,6 +36,8 @@ def config(c, fabric=False, size=-1):
 
         lists, config = config_server()
         if len(lists):
+            """ 只是显示第一个配置
+            """
             print('server config ----- [{}]\n'.format(lists[0]))
         else:
             print('')
