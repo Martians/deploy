@@ -26,7 +26,44 @@ globing = Dict({
 def load_yaml(file):
     import yaml
     with open(file, 'r') as f:
-        return Dict(yaml.load(f, Loader=yaml.FullLoader))
+        data = yaml.load(f, Loader=yaml.FullLoader)
+        return Dict(data) if data else Dict()
+
+
+def write_yaml(file, data):
+    import yaml
+    with open(file, 'w') as f:
+        yaml.dump(data.dict(), f, default_flow_style=False)
+
+
+def set_yaml(file, key, value):
+    """ 先将数据都load出来，更新后再dump
+
+        方式1）：从外到内
+            c = data; while(loop k) { c.k = Dict(); c = c.k }
+            失败：无法递归修改 dict 的值，放在dickt中value已经是值了，无法再进行修改
+            考虑转成字符串，然后在eval回来？eval('data.{k} = Dict()'.format(k=k))
+
+        方式2）：从内到外
+    """
+    data = load_yaml(file)
+
+    range = key.split('.')
+    range.reverse()
+    d = value
+    for k in range:
+        d = Dict({k : d})
+
+    data.update(d)
+    write_yaml(file, data)
+
+
+def get_yaml(file, key):
+    c = load_yaml(file)
+    for k in key.split('.'):
+        c = c.get(k)
+        if not c: return None
+    return c
 
 
 def default_config_path(name, type):

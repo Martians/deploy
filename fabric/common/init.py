@@ -59,6 +59,8 @@ def config_hosts():
 
 def config_server(withdraw=True):
     """ 将本地所有的 yaml 配置文件，聚合起来
+
+        不同于 host.yaml、fabric.yaml，这两个文件不进行聚合
     """
     lists, config = parse_traverse('.', withdraw=withdraw)
     server.update(config)
@@ -90,8 +92,8 @@ def base(name):
     # return global_define['source']['path']
 
 
-def conn(c, one=False):
-    if globing.invoke:
+def conn(c=None, one=False, invoke=False):
+    if globing.invoke or invoke:
         from invoke import Context
         c = Context(Config())
         c.host = 'local'

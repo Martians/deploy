@@ -85,7 +85,7 @@ def build_images(c, type, image, dockerfile, build='', param='', noisy=True, **k
 
 def build_docker(c, type, name, image='', exec='', volume='', param='-it', port='', systemd=False, host='',
                  output='', noisy=True, **kwargs):
-    image = args_def(image, name)
+    image = args_default(image, name)
     do_output = True
 
     if type == 0 or type == 1:
@@ -211,8 +211,8 @@ def start_http(c, type, **kwargs):
     """
     start_images(c, type, 'http', port=local.http_port, source='', noisy=False)
 
-    kwargs.path = args_def(kwargs.path, local.http_path[0])
-    kwargs.port = args_def(kwargs.port, local.http_port)
+    kwargs.path = args_default(kwargs.path, local.http_path[0])
+    kwargs.port = args_default(kwargs.port, local.http_port)
     output = 'http: port [{port}], path [{path}]'.format(port=kwargs.port, path=kwargs.path)
 
     volume = '{}:{}'.format(kwargs.path, local.http_path[1])
@@ -230,7 +230,7 @@ def start_proxy(c, type, **kwargs):
     start_images(c, type, 'proxy', source='http', noisy=False)
 
     kwargs.port = local.proxy_port
-    kwargs.path = args_def(kwargs.path, local.proxy_path[0])
+    kwargs.path = args_default(kwargs.path, local.proxy_path[0])
     output = 'proxy: path [{path}]'.format(path=kwargs.path)
 
     volume = '{}:{}'.format(kwargs.path, local.proxy_path[1])

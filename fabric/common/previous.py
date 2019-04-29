@@ -5,7 +5,7 @@ from common.init import *
 from common.show import *
 
 @task
-def config(c, fabric=False, size=-1):
+def xconf(c, fabric=False, size=-1):
     host = globing.config.hosts
 
     if size != -1:
@@ -52,7 +52,24 @@ def config(c, fabric=False, size=-1):
     hosts.print()
 
 @task
-def kill(c, name):
+def xkill(c, name):
     import system
     system.process.kills(name)
 
+
+@task
+def xdata(c, key, value=None, file=globing.user + '/.local.yaml'):
+    if not os.path.exists(file):
+        print(file)
+        os.mknod(file)
+
+    if value:
+        return set_yaml(file, key, value)
+    else:
+        return get_yaml(file, key)
+
+
+if __name__ == '__main__':
+    c = conn(invoke=True)
+    xdata(c, 'a.d', 'b')
+    xdata(c, 'a.d')

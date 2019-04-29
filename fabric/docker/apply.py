@@ -60,10 +60,10 @@ def proxy(c, type=-1, path=local.proxy_path[0]):
     helps.proxy(c, name='proxy')
 
 @task
-def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', volume=local.volume, enter=True):
+def sshd(c, type=-1, name='sshd', systemd=True, addr='sshd', based=local.volume, volume='', enter=True):
     """ 基于sshd镜像，启动 sshd docker，默认使用 systemd
     """
-    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, volume=volume, enter=enter)
+    start_docker(c, type, name, base='sshd', exec='/bin/bash', systemd=systemd, host=addr, volume=sep(based, volume), enter=enter)
 
 @task
 def cluster(c, name='sshd', systemd=True, count=3, addr='h1'):

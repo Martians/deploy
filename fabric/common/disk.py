@@ -2,6 +2,8 @@
 
 
 def file_exist(c, path, name=None, dir=False, echo=True):
+    """ 匹配一个文件，存在多个类似模式的文件时失败
+    """
     return c.run(_file_exist_command(path, name, dir), warn=True, echo=echo).ok
 
 
@@ -14,6 +16,10 @@ def _file_exist_command(path, name=None, dir=False):
     return "[ -{} {} ]".format(flag, path)
 
 
+def file_match(c, path):
+    return c.run('ls {path}'.format(path=path), warn=True, echo=True, hide=True)
+
+
 def _file_result(path, name, result):
     file_list = result.stdout.strip().split('\n')
 
@@ -21,7 +27,7 @@ def _file_result(path, name, result):
         return file_list[0]
 
     elif len(file_list) > 1:
-        print("too much similar item [{}] matched in {}:\n\t {}".format(name, path, file_list))
+        print("warning： too much similar item [{}] matched in {}:\n\t {}".format(name, path, file_list))
         exit(-1)
 
     return None
@@ -37,14 +43,16 @@ def file_actual(c, path, name, dir=False):
     return _file_result(path, name, result)
 
 
-def file_search(c, path, name, suffix=None, dir=False):
-    """ https://linux.cn/article-1672-1.html
+def file_search(c, path, name, suffix=None, dir=False, sudo=True):
+    """ 找到对应后缀的文件，找到的文件必须只有一个
+
+        https://linux.cn/article-1672-1.html
     """
     flag = 'd' if dir else 'f'
     suffix = suffix if suffix else "|"
 
     for s in suffix.split("|"):
-        result = c.run('sudo find {} -follow -type {} -name "*{}*{}"'.format(path, flag, name, s), warn=True)
+        result = c.run('{} find {} -follow -type {} -name "*{}*{}"'.format('sudo' if sudo else '', path, flag, name, s), warn=True)
         item = _file_result(path, name, result)
         if item: return item
     return None

@@ -29,15 +29,23 @@ class Dict(dict):
         curr = merge(self, other)
         self.update(curr)
 
-def merge(a, b):
+    def dict(self):
+        """ 返回原始 dict；类Dict某些地方实现不好，在一些场景下使用失败
+        """
+        return merge('', self, origin=True)
+
+
+def merge(a, b, origin=False):
     if not a:
-        a = Dict()
+        a = dict() if origin else Dict()
+
     for k, v in b.items():
         if isinstance(v, dict):
-            a[k] = merge(a.get(k), v)
+            a[k] = merge(a.get(k), v, origin)
         else:
             a[k] = v
     return a
+
 
 def sep(full, data, sep=','):
     """ 构建full：第一次添加data时，不加sep分隔符
@@ -50,7 +58,7 @@ def sep(full, data, sep=','):
 
 
 def args(name, prefix='', suffix='', ignore=False):
-    """ name 为空时，返回控制
+    """ name 为空时，返回空值
         name 有值时，添加前缀后缀后返回
     """
     if name:
@@ -59,7 +67,7 @@ def args(name, prefix='', suffix='', ignore=False):
         return ''
 
 
-def args_def(name, defaults):
+def args_default(name, defaults):
     """ 参数为空，则返回默认值
     """
     return name if name else defaults
